@@ -1,0 +1,627 @@
+# v0.3.0
+# { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
+import genlayer as gl
+from genlayer import *
+from dataclasses import dataclass
+import hashlib
+import json
+import typing
+
+# ChainReader - reads both sides of a bridge at pinned blocks, from two RPCs
+# per chain, and records what they agreed on. It decides nothing about
+# backing: BackedByRegistry computes every number and every verdict from the
+# readings recorded here.
+#
+# authenticate(kind, source_token, dest_token)
+#   Every validator pins the latest finalized block of Ethereum and of the
+#   destination chain (the leader names the lower of the two RPCs' finalized
+#   blocks; a validator accepts it only if it is final on both of its own RPCs
+#   and not more than LEADER_LAG_S older than its own) and reads the bridge's
+#   OWN mapping there, from both RPCs. The pair is recorded only if the
+#   mapping proves it; otherwise the call is refused. What proves a pair, per
+#   bridge, is in `_auth_*` below and in docs/RULES.md.
+#
+# read_check(registry, check_id, round)
+#   Reads the check request from the registry (a view), then every validator
+#   reads, at the blocks the filer pinned: the block headers, the vault's
+#   balance of the source token, each destination token's totalSupply, every
+#   token's decimals and, for OP Stack tokens, the L1 bridge's per-pair
+#   deposits. Each value from both RPCs, identical or INCONCLUSIVE. A block
+#   above either RPC's finalized block is INCONCLUSIVE. The reading is stored
+#   under (registry, check, round), once.
+#
+# RULES
+#   1. Allowlisted RPCs only, matched exactly (CHAINS). No URL comes from calldata.
+#   2. Validators accept the leader's result only if it is identical to their own.
+#   3. Nothing is written before the last check that can refuse.
+#   4. Records are immutable. No owner, no setter, no payable method.
+
+VERSION = "1.0.0"
+SOURCE_CHAIN = "ethereum"
+
+S_BALANCE = "0x70a08231"
+S_SUPPLY = "0x18160ddd"
+S_DECIMALS = "0x313ce567"
+S_GET_GATEWAY = "0xbda009fe"      # getGateway(address)
+S_CALC_L2 = "0xa7e28d48"          # calculateL2TokenAddress(address)
+S_L1_ESCROW = "0x000cc9e6"        # l1Escrow()
+S_REMOTE_TOKEN = "0xd6c0b2c4"     # remoteToken()
+S_L1_TOKEN = "0xc01e1bd6"         # l1Token()
+S_BRIDGE = "0xe78cea92"           # bridge()
+S_L2_BRIDGE = "0xae1f6aaf"        # l2Bridge()
+S_L2_TOKEN = "0x56eff267"         # l2Token()
+S_ESCROW = "0xe2fdcc17"           # escrow()
+S_L1_DAI_BRIDGE = "0x092d0ce3"    # l1DAITokenBridge()
+S_DEPOSITS = "0x8f601f66"         # deposits(address,address)
+S_ROOT_TO_CHILD = "0xea60c7c4"    # rootToChildToken(address)
+S_TOKEN_TO_TYPE = "0xe43009a6"    # tokenToType(address)
+S_TYPE_TO_PRED = "0xe66f9603"     # typeToPredicate(bytes32)
+S_CHILD_TO_ROOT = "0x6e86b770"    # childToRootToken(address)
+S_TOKEN_REGISTRY = "0x9d23c4c7"   # tokenRegistry()
+S_GET_TOKEN_ID = "0xf1537686"     # getTokenId(address)
+S_GET_LOCAL = "0x589b3c64"        # getLocalAddress(uint32,bytes32)
+S_REMOTES = "0x83bbb806"          # remotes(uint32)
+
+ARB_L1_ROUTER = "0x72ce9c846789fdb6fc1f34ac4ad25dd9ef7031ef"
+ARB_L2_ROUTER = "0x5288c571fd7ad117bea99bf60fe0846c4e84f933"
+OP_L1_BRIDGE = "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"
+BASE_L1_BRIDGE = "0x3154cf16ccdb4c6d922629664174b904d80f2c35"
+L2_STD_BRIDGE = "0x4200000000000000000000000000000000000010"
+OP_DAI_L1_BRIDGE = "0x10e6593cdda8c58a1d0f14c5164b376352a55f2f"
+OP_DAI_L2_BRIDGE = "0x467194771dae2967aef3ecbedd3bf9a310c76c65"
+POL_ROOT_MANAGER = "0xa0c68c638235ee32657e8f720a23cec1bfc77c77"
+POL_CHILD_MANAGER = "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa"
+NOMAD_ETH_ROUTER = "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"
+NOMAD_BEAM_ROUTER = "0xd3dfd3ede74e0dcebc1aa685e151332857efce2d"
+NOMAD_ETH_DOMAIN = 6648936        # "eth"
+
+# kind -> destination chain. The source chain is always Ethereum.
+KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
+         "polygon": "polygon", "nomad": "moonbeam"}
+# kinds whose L1 bridge keeps per-pair deposits and never releases more than
+# them: a destination token's supply is counted as min(totalSupply, deposits)
+DEPOSIT_KINDS = ("optimism", "base")
+MAX_DESTS = 8
+MAX_DECIMALS = 36
+
+# INLINE:common
+# INLINE:rpc
+
+
+# --- pure helpers (no storage, no self) ---------------------------------------
+
+def _pad(a: str) -> str:
+    t = str(a).lower()
+    if t.startswith("0x"):
+        t = t[2:]
+    return ("0" * 64 + t)[-64:]
+
+
+def _word(r: typing.Any) -> int:
+    """First 32-byte word of an ["ok", hex] call result, or -1."""
+    if not isinstance(r, list) or r[0] != "ok" or not isinstance(r[1], str) or len(r[1]) < 66:
+        return -1
+    return int(r[1][2:66], 16)
+
+
+def _addr_w(r: typing.Any) -> str:
+    v = _word(r)
+    if v < 0 or v >> 160 != 0:
+        return ""
+    return "0x" + ("0" * 40 + hex(v)[2:])[-40:]
+
+
+def _nonzero(a: str) -> bool:
+    return a != "" and a != ZERO
+
+
+def _q(chain: str, block: int, items: list) -> list:
+    """eth_call every (to, data) at `block` on both RPCs; identical or Disagree."""
+    return dual_read(chain, [eth_call(it[0], it[1], block) for it in items])
+
+
+class Refuse(Exception):
+    """A deterministic refusal every honest validator reaches too."""
+
+
+def _decimals(r: typing.Any) -> int:
+    d = _word(r)
+    if d < 0 or d > MAX_DECIMALS:
+        raise Refuse("DECIMALS_UNREADABLE")
+    return d
+
+
+def _auth_arbitrum(l1: str, l2: str, be: int, bd: int) -> dict:
+    r = _q(SOURCE_CHAIN, be, [[ARB_L1_ROUTER, S_GET_GATEWAY + _pad(l1)], [ARB_L1_ROUTER, S_CALC_L2 + _pad(l1)],
+                             [l1, S_DECIMALS]])
+    gw = _addr_w(r[0])
+    mapped = _addr_w(r[1])
+    sd = _decimals(r[2])
+    if not _nonzero(gw):
+        raise Refuse("ROUTER_HAS_NO_GATEWAY_FOR_TOKEN")
+    if mapped != l2:
+        raise Refuse("L1_ROUTER_MAPS_TOKEN_TO_" + mapped)
+    e = _q(SOURCE_CHAIN, be, [[gw, S_L1_ESCROW]])
+    esc = _addr_w(e[0])
+    vault = esc if _nonzero(esc) else gw
+    d = _q("arbitrum", bd, [[ARB_L2_ROUTER, S_CALC_L2 + _pad(l1)], [l2, S_DECIMALS]])
+    if _addr_w(d[0]) != l2:
+        raise Refuse("L2_ROUTER_DISAGREES_WITH_L1_ROUTER")
+    dd = _decimals(d[1])
+    proof = ["L1GatewayRouter.getGateway(l1)=" + gw, "L1GatewayRouter.calculateL2TokenAddress(l1)=" + mapped,
+             "L2GatewayRouter.calculateL2TokenAddress(l1)=" + l2,
+             ("gateway.l1Escrow()=" + esc) if _nonzero(esc) else "gateway holds the escrow"]
+    return {"vault": vault, "source_decimals": sd, "dest_decimals": dd, "proof": proof}
+
+
+def _auth_opstack(kind: str, l1: str, l2: str, be: int, bd: int) -> dict:
+    d = _q(kind, bd, [[l2, S_REMOTE_TOKEN], [l2, S_L1_TOKEN], [l2, S_BRIDGE], [l2, S_L2_BRIDGE], [l2, S_DECIMALS]])
+    rt = _addr_w(d[0])
+    if rt == "":
+        rt = _addr_w(d[1])
+    br = _addr_w(d[2])
+    if br == "":
+        br = _addr_w(d[3])
+    if rt != l1:
+        raise Refuse("REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN")
+    if br != L2_STD_BRIDGE:
+        raise Refuse("NOT_MINTED_BY_THE_L2_STANDARD_BRIDGE")
+    dd = _decimals(d[4])
+    vault = OP_L1_BRIDGE if kind == "optimism" else BASE_L1_BRIDGE
+    s = _q(SOURCE_CHAIN, be, [[l1, S_DECIMALS], [vault, S_DEPOSITS + _pad(l1) + _pad(l2)]])
+    sd = _decimals(s[0])
+    dep = _word(s[1])
+    if dep < 0:
+        raise Refuse("L1_BRIDGE_HAS_NO_DEPOSITS_MAPPING")
+    proof = ["l2token.remoteToken()=" + rt, "l2token.bridge()=" + br, "L1StandardBridge=" + vault,
+             "L1StandardBridge.deposits(l1,l2)=" + str(dep)]
+    return {"vault": vault, "source_decimals": sd, "dest_decimals": dd, "proof": proof}
+
+
+def _auth_op_dai(l1: str, l2: str, be: int, bd: int) -> dict:
+    s = _q(SOURCE_CHAIN, be, [[OP_DAI_L1_BRIDGE, S_L1_TOKEN], [OP_DAI_L1_BRIDGE, S_L2_TOKEN],
+                             [OP_DAI_L1_BRIDGE, S_ESCROW], [l1, S_DECIMALS]])
+    d = _q("optimism", bd, [[OP_DAI_L2_BRIDGE, S_L1_TOKEN], [OP_DAI_L2_BRIDGE, S_L2_TOKEN],
+                           [OP_DAI_L2_BRIDGE, S_L1_DAI_BRIDGE], [l2, S_DECIMALS]])
+    esc = _addr_w(s[2])
+    if _addr_w(s[0]) != l1 or _addr_w(d[0]) != l1:
+        raise Refuse("DAI_BRIDGE_L1_TOKEN_MISMATCH")
+    if _addr_w(s[1]) != l2 or _addr_w(d[1]) != l2:
+        raise Refuse("DAI_BRIDGE_L2_TOKEN_MISMATCH")
+    if _addr_w(d[2]) != OP_DAI_L1_BRIDGE:
+        raise Refuse("L2_DAI_BRIDGE_POINTS_ELSEWHERE")
+    if not _nonzero(esc):
+        raise Refuse("DAI_BRIDGE_HAS_NO_ESCROW")
+    proof = ["L1DAITokenBridge.l1Token()=" + l1, "L1DAITokenBridge.l2Token()=" + l2, "L1DAITokenBridge.escrow()=" + esc,
+             "L2DAITokenBridge.l1DAITokenBridge()=" + OP_DAI_L1_BRIDGE]
+    return {"vault": esc, "source_decimals": _decimals(s[3]), "dest_decimals": _decimals(d[3]), "proof": proof}
+
+
+def _auth_polygon(l1: str, l2: str, be: int, bd: int) -> dict:
+    s = _q(SOURCE_CHAIN, be, [[POL_ROOT_MANAGER, S_ROOT_TO_CHILD + _pad(l1)], [POL_ROOT_MANAGER, S_TOKEN_TO_TYPE + _pad(l1)],
+                             [l1, S_DECIMALS]])
+    child = _addr_w(s[0])
+    typ = s[1][1] if isinstance(s[1], list) and s[1][0] == "ok" and isinstance(s[1][1], str) and len(s[1][1]) >= 66 else ""
+    if child != l2:
+        raise Refuse("ROOT_CHAIN_MANAGER_MAPS_TOKEN_TO_" + child)
+    if typ == "" or int(typ[2:66], 16) == 0:
+        raise Refuse("TOKEN_HAS_NO_TYPE")
+    p = _q(SOURCE_CHAIN, be, [[POL_ROOT_MANAGER, S_TYPE_TO_PRED + typ[2:66]]])
+    pred = _addr_w(p[0])
+    if not _nonzero(pred):
+        raise Refuse("TYPE_HAS_NO_PREDICATE")
+    d = _q("polygon", bd, [[POL_CHILD_MANAGER, S_CHILD_TO_ROOT + _pad(l2)], [l2, S_DECIMALS]])
+    if _addr_w(d[0]) != l1:
+        raise Refuse("CHILD_CHAIN_MANAGER_DISAGREES")
+    proof = ["RootChainManager.rootToChildToken(l1)=" + child, "RootChainManager.typeToPredicate(tokenToType(l1))=" + pred,
+             "ChildChainManager.childToRootToken(child)=" + l1]
+    return {"vault": pred, "source_decimals": _decimals(s[2]), "dest_decimals": _decimals(d[1]), "proof": proof}
+
+
+def _auth_nomad(l1: str, l2: str, be: int, bd: int) -> dict:
+    dom = _pad(hex(NOMAD_ETH_DOMAIN))
+    d = _q("moonbeam", bd, [[NOMAD_BEAM_ROUTER, S_TOKEN_REGISTRY], [NOMAD_BEAM_ROUTER, S_REMOTES + dom], [l2, S_DECIMALS]])
+    reg = _addr_w(d[0])
+    remote = _addr_w(d[1])
+    if not _nonzero(reg):
+        raise Refuse("NO_TOKEN_REGISTRY")
+    if remote != NOMAD_ETH_ROUTER:
+        raise Refuse("MOONBEAM_ROUTER_REMOTE_IS_NOT_THE_ETHEREUM_ROUTER")
+    t = _q("moonbeam", bd, [[reg, S_GET_TOKEN_ID + _pad(l2)], [reg, S_GET_LOCAL + dom + _pad(l1)]])
+    tid = t[0][1] if isinstance(t[0], list) and t[0][0] == "ok" and isinstance(t[0][1], str) else ""
+    if len(tid) < 130 or int(tid[2:66], 16) != NOMAD_ETH_DOMAIN or "0x" + tid[-40:] != l1:
+        raise Refuse("TOKEN_REGISTRY_DOES_NOT_MAP_TOKEN_TO_ETHEREUM_SOURCE")
+    if _addr_w(t[1]) != l2:
+        raise Refuse("TOKEN_REGISTRY_LOCAL_ADDRESS_MISMATCH")
+    e = _q(SOURCE_CHAIN, be, [[NOMAD_ETH_ROUTER, S_TOKEN_REGISTRY], [l1, S_DECIMALS]])
+    ereg = _addr_w(e[0])
+    if not _nonzero(ereg):
+        raise Refuse("NO_ETHEREUM_TOKEN_REGISTRY")
+    x = _q(SOURCE_CHAIN, be, [[ereg, S_GET_TOKEN_ID + _pad(l1)]])
+    etid = x[0][1] if isinstance(x[0], list) and x[0][0] == "ok" and isinstance(x[0][1], str) else ""
+    if len(etid) < 130 or int(etid[2:66], 16) != NOMAD_ETH_DOMAIN or "0x" + etid[-40:] != l1:
+        raise Refuse("SOURCE_TOKEN_IS_NOT_LOCAL_ON_ETHEREUM")
+    proof = ["Moonbeam BridgeRouter.tokenRegistry()=" + reg, "Moonbeam BridgeRouter.remotes(eth)=" + remote,
+             "TokenRegistry.getTokenId(rep)=(eth," + l1 + ")", "TokenRegistry.getLocalAddress(eth,l1)=" + l2,
+             "Ethereum TokenRegistry.getTokenId(l1)=(eth,local)"]
+    return {"vault": NOMAD_ETH_ROUTER, "source_decimals": _decimals(e[1]), "dest_decimals": _decimals(d[2]), "proof": proof}
+
+
+def pin_final(chain: str, block: int) -> dict:
+    """Leader (block < 0): the lower of the two RPCs' finalized blocks.
+    Validator: the leader's block, if final on both of its own RPCs and not
+    more than LEADER_LAG_S older than its own finalized block."""
+    try:
+        low = finalized_low(chain)
+    except ReadFailed:
+        return {"refused": "RPC_UNREADABLE"}
+    if low is None:
+        return {"refused": "RPC_WRONG_CHAIN_OR_UNREADABLE"}
+    n = low["number"] if block < 0 else block
+    if n > low["number"]:
+        return {"reject": "BLOCK_NOT_FINALIZED_FOR_VALIDATOR"}
+    try:
+        got = dual_read(chain, [get_block(n)])
+    except ReadFailed:
+        return {"refused": "RPC_UNREADABLE"}
+    except Disagree:
+        return {"refused": "RPC_DISAGREE_ON_PINNED_BLOCK"}
+    blk = got[0]
+    if blk is None or blk["number"] != n:
+        return {"refused": "RPC_UNREADABLE"}
+    if block >= 0 and blk["timestamp"] < low["timestamp"] - LEADER_LAG_S:
+        return {"reject": "LEADER_BLOCK_TOO_OLD"}
+    return {"block": blk}
+
+
+def authenticate_at(p: dict, be: int, bd: int) -> dict:
+    """The whole authentication at pinned blocks (be, bd < 0: leader picks)."""
+    kind = p["kind"]
+    dest = KINDS[kind]
+    pe = pin_final(SOURCE_CHAIN, be)
+    if "block" not in pe:
+        return pe
+    pd = pin_final(dest, bd)
+    if "block" not in pd:
+        return pd
+    ne = pe["block"]["number"]
+    nd = pd["block"]["number"]
+    try:
+        if kind == "arbitrum":
+            a = _auth_arbitrum(p["source_token"], p["dest_token"], ne, nd)
+        elif kind == "optimism" or kind == "base":
+            a = _auth_opstack(kind, p["source_token"], p["dest_token"], ne, nd)
+        elif kind == "op_dai":
+            a = _auth_op_dai(p["source_token"], p["dest_token"], ne, nd)
+        elif kind == "polygon":
+            a = _auth_polygon(p["source_token"], p["dest_token"], ne, nd)
+        else:
+            a = _auth_nomad(p["source_token"], p["dest_token"], ne, nd)
+    except Refuse as e:
+        return {"refused": "NOT_AUTHENTICATED: " + str(e)[:90], "blocks": [pe["block"], pd["block"]]}
+    except ReadFailed:
+        return {"refused": "RPC_UNREADABLE"}
+    except Disagree:
+        return {"refused": "RPC_DISAGREE"}
+    except Exception:
+        return {"refused": "MALFORMED_ANSWER"}
+    a["source_block"] = pe["block"]
+    a["dest_block"] = pd["block"]
+    return a
+
+
+def _req_ok(req: typing.Any) -> str:
+    """Shape check of a registry's check request; "" if usable."""
+    if not isinstance(req, dict) or req.get("ok") is not True:
+        return "NOT_READABLE"
+    if req.get("source_chain") != SOURCE_CHAIN:
+        return "BAD_SOURCE_CHAIN"
+    if _addr(req.get("vault", "")) == "" or _addr(req.get("source_token", "")) == "":
+        return "BAD_ADDRESSES"
+    dests = req.get("dests")
+    blocks = req.get("blocks")
+    if not isinstance(dests, list) or len(dests) < 1 or len(dests) > MAX_DESTS or not isinstance(blocks, dict):
+        return "BAD_DESTS"
+    for d in dests:
+        if not isinstance(d, dict) or d.get("chain") not in CHAINS or _addr(d.get("token", "")) == "":
+            return "BAD_DEST"
+    need = [SOURCE_CHAIN]
+    for d in dests:
+        if d["chain"] not in need:
+            need.append(d["chain"])
+    if sorted(need) != sorted(list(blocks.keys())):
+        return "BLOCKS_DO_NOT_MATCH_CHAINS"
+    for c in blocks:
+        b = _as_int(blocks[c], -1)
+        if b <= 0 or b > 10 ** 12:
+            return "BAD_BLOCK_NUMBER"
+    return ""
+
+
+def read_at(req: dict) -> dict:
+    """Everything a check needs, at the pinned blocks, from both RPCs.
+    Always returns a record; INCONCLUSIVE carries the reason."""
+    blocks = {}
+    for c in req["blocks"]:
+        blocks[c] = _as_int(req["blocks"][c], -1)
+    out = {"status": "INCONCLUSIVE", "reason": "", "blocks": {}, "locked": "", "source_decimals": -1, "dests": []}
+    try:
+        for c in sorted(list(blocks.keys())):
+            low = finalized_low(c)
+            if low is None:
+                out["reason"] = "RPC_UNREADABLE"
+                return out
+            if blocks[c] > low["number"]:
+                out["reason"] = "BLOCK_NOT_FINALIZED:" + c
+                return out
+        # source chain: header, vault balance, decimals, per-pair deposits
+        src = req["source_chain"]
+        be = blocks[src]
+        calls = [get_block(be), eth_call(req["source_token"], S_BALANCE + _pad(req["vault"]), be),
+                 eth_call(req["source_token"], S_DECIMALS, be)]
+        for d in req["dests"]:
+            if d.get("deposits") is True:
+                calls.append(eth_call(req["vault"], S_DEPOSITS + _pad(req["source_token"]) + _pad(d["token"]), be))
+        r = dual_read(src, calls)
+        if r[0] is None or r[0]["number"] != be:
+            out["reason"] = "BLOCK_MISSING:" + src
+            return out
+        out["blocks"][src] = r[0]
+        locked = _word(r[1])
+        sdec = _word(r[2])
+        if locked < 0 or sdec < 0 or sdec > MAX_DECIMALS:
+            out["reason"] = "CALL_FAILED:" + src
+            return out
+        deps = []
+        k = 3
+        for d in req["dests"]:
+            if d.get("deposits") is True:
+                v = _word(r[k])
+                k += 1
+                if v < 0:
+                    out["reason"] = "CALL_FAILED:deposits"
+                    return out
+                deps.append(str(v))
+            else:
+                deps.append("")
+        # destination chains
+        rows = []
+        for c in sorted(list(blocks.keys())):
+            if c == src:
+                continue
+            idx = []
+            calls = [get_block(blocks[c])]
+            for i in range(len(req["dests"])):
+                d = req["dests"][i]
+                if d["chain"] == c:
+                    idx.append(i)
+                    calls.append(eth_call(d["token"], S_SUPPLY, blocks[c]))
+                    calls.append(eth_call(d["token"], S_DECIMALS, blocks[c]))
+            g = dual_read(c, calls)
+            if g[0] is None or g[0]["number"] != blocks[c]:
+                out["reason"] = "BLOCK_MISSING:" + c
+                return out
+            out["blocks"][c] = g[0]
+            for j in range(len(idx)):
+                sup = _word(g[1 + 2 * j])
+                dec = _word(g[2 + 2 * j])
+                if sup < 0 or dec < 0 or dec > MAX_DECIMALS:
+                    out["reason"] = "CALL_FAILED:" + c
+                    return out
+                rows.append([idx[j], {"chain": c, "token": req["dests"][idx[j]]["token"], "supply": str(sup),
+                                      "decimals": dec, "deposits": deps[idx[j]]}])
+        rows = sorted(rows, key=lambda x: x[0])
+        out["dests"] = [x[1] for x in rows]
+        out["locked"] = str(locked)
+        out["source_decimals"] = sdec
+        out["status"] = "OK"
+        return out
+    except ReadFailed:
+        out["reason"] = "RPC_UNREADABLE"
+        out["blocks"] = {}
+        return out
+    except Disagree:
+        out["reason"] = "RPC_DISAGREE"
+        out["blocks"] = {}
+        return out
+    except Exception:
+        out["reason"] = "MALFORMED_ANSWER"
+        out["blocks"] = {}
+        return out
+
+
+# =============================================================================
+# storage
+# =============================================================================
+
+@gl.storage.allow
+@dataclass
+class Auth:
+    auth_id: u64
+    kind: str
+    source_chain: str
+    vault: str
+    source_token: str
+    dest_chain: str
+    dest_token: str
+    source_decimals: u64
+    dest_decimals: u64
+    source_block: u64
+    source_time: u64
+    dest_block: u64
+    dest_time: u64
+    proof_json: str
+    read_at: u64
+    reader: str
+
+
+@gl.storage.allow
+@dataclass
+class Reading:
+    key: str
+    registry: str
+    check_id: u64
+    round: u64
+    request_sha: str
+    status: str
+    reason: str
+    reading_json: str
+    read_at: u64
+    reader: str
+
+
+class ChainReader(gl.contract.Contract):
+    n_auth: u64
+    auths: gl.storage.TreeMap[u64, Auth]
+    readings: gl.storage.TreeMap[str, Reading]
+    n_readings: u64
+
+    def __init__(self) -> None:
+        self.n_auth = u64(0)
+        self.n_readings = u64(0)
+
+    def _now(self) -> int:
+        return _epoch_from_iso(gl.message.raw.get("datetime", ""))
+
+    @gl.public.write
+    def authenticate(self, kind: str, source_token: str, dest_token: str) -> typing.Any:
+        """Prove (kind, source_token, dest_token) is one bridge's pair, from the
+        bridge's own mapping on both chains. Refused if not proved."""
+        now = self._now()
+        if now <= 0:
+            raise gl.vm.UserError("REFUSED: NO_CLOCK")
+        k = str(kind).strip().lower()
+        if k not in KINDS:
+            raise gl.vm.UserError("REFUSED: UNSUPPORTED_BRIDGE_KIND")
+        l1 = _addr(source_token)
+        l2 = _addr(dest_token)
+        if not _nonzero(l1) or not _nonzero(l2):
+            raise gl.vm.UserError("REFUSED: BAD_TOKEN_ADDRESS")
+        p = {"kind": k, "source_token": l1, "dest_token": l2}
+
+        def leader() -> dict:
+            return authenticate_at(p, -1, -1)
+
+        def validator(res: gl.vm.Result) -> bool:
+            if not isinstance(res, gl.vm.Return):
+                return False
+            got = res.calldata
+            if not isinstance(got, dict):
+                return False
+            if "source_block" in got:
+                mine = authenticate_at(p, int(got["source_block"]["number"]), int(got["dest_block"]["number"]))
+            elif "blocks" in got and isinstance(got["blocks"], list) and len(got["blocks"]) == 2:
+                mine = authenticate_at(p, int(got["blocks"][0]["number"]), int(got["blocks"][1]["number"]))
+            else:
+                mine = authenticate_at(p, -1, -1)
+                if "refused" in got and "refused" in mine:
+                    return True
+            return _canon(mine) == _canon(got)
+
+        a = gl.vm.run_nondet(leader, validator)
+        if not isinstance(a, dict):
+            raise gl.vm.UserError("REFUSED: UNREADABLE")
+        if "refused" in a:
+            raise gl.vm.UserError("REFUSED: " + str(a["refused"])[:120])
+        if "reject" in a:
+            raise gl.vm.UserError("REFUSED: " + str(a["reject"])[:120])
+        # --- writes
+        aid = int(self.n_auth) + 1
+        self.auths[u64(aid)] = Auth(
+            auth_id=u64(aid), kind=k, source_chain=SOURCE_CHAIN, vault=a["vault"], source_token=l1,
+            dest_chain=KINDS[k], dest_token=l2, source_decimals=u64(int(a["source_decimals"])),
+            dest_decimals=u64(int(a["dest_decimals"])), source_block=u64(int(a["source_block"]["number"])),
+            source_time=u64(int(a["source_block"]["timestamp"])), dest_block=u64(int(a["dest_block"]["number"])),
+            dest_time=u64(int(a["dest_block"]["timestamp"])), proof_json=_canon(a["proof"]), read_at=u64(now),
+            reader=gl.message.sender_address.as_hex.lower())
+        self.n_auth = u64(aid)
+        return {"auth_id": aid, "vault": a["vault"], "source_decimals": int(a["source_decimals"]),
+                "dest_decimals": int(a["dest_decimals"])}
+
+    @gl.public.write
+    def read_check(self, registry: str, check_id: int, round_no: int) -> typing.Any:
+        """Read one check of `registry` at its pinned blocks. Anyone may call."""
+        now = self._now()
+        if now <= 0:
+            raise gl.vm.UserError("REFUSED: NO_CLOCK")
+        reg = _addr(registry)
+        cid = _as_int(check_id, -1)
+        rnd = _as_int(round_no, -1)
+        if reg == "" or cid <= 0 or rnd < 1 or rnd > 2:
+            raise gl.vm.UserError("REFUSED: BAD_ARGUMENTS")
+        key = reg + "|" + str(cid) + "|" + str(rnd)
+        if self.readings.get(key) is not None:
+            raise gl.vm.UserError("REFUSED: ALREADY_READ")
+        try:
+            req = gl.contract.get_at(Address(reg)).view().get_check_request(cid)
+        except Exception:
+            raise gl.vm.UserError("REFUSED: REGISTRY_UNREADABLE")
+        if isinstance(req, str):
+            try:
+                req = json.loads(req)
+            except Exception:
+                raise gl.vm.UserError("REFUSED: REQUEST_UNREADABLE")
+        bad = _req_ok(req)
+        if bad != "":
+            raise gl.vm.UserError("REFUSED: REQUEST_" + bad)
+        if _as_int(req.get("round"), -1) != rnd or _as_int(req.get("check_id"), -1) != cid:
+            raise gl.vm.UserError("REFUSED: NOT_THIS_ROUND")
+        frozen = json.loads(_canon(req))
+
+        def leader() -> dict:
+            return read_at(frozen)
+
+        def validator(res: gl.vm.Result) -> bool:
+            if not isinstance(res, gl.vm.Return):
+                return False
+            return _canon(read_at(frozen)) == _canon(res.calldata)
+
+        r = gl.vm.run_nondet(leader, validator)
+        if not isinstance(r, dict) or r.get("status") not in ("OK", "INCONCLUSIVE"):
+            raise gl.vm.UserError("REFUSED: UNREADABLE")
+        if rnd >= 2 and r["status"] == "INCONCLUSIVE" and str(r.get("reason", "")) == "RPC_UNREADABLE":
+            # a contest re-read is not settled by an outage; retry until the contest times out
+            raise gl.vm.UserError("RETRY: RPC_UNREADABLE")
+        # --- writes
+        self.readings[key] = Reading(key=key, registry=reg, check_id=u64(cid), round=u64(rnd),
+                                     request_sha=_sha(_canon(frozen)), status=r["status"], reason=str(r["reason"]),
+                                     reading_json=_canon(r), read_at=u64(now),
+                                     reader=gl.message.sender_address.as_hex.lower())
+        self.n_readings = u64(int(self.n_readings) + 1)
+        return {"key": key, "status": r["status"], "reason": r["reason"]}
+
+    # --- views (storage only) -------------------------------------------------
+
+    def _auth_view(self, a: Auth) -> dict:
+        return {"auth_id": int(a.auth_id), "kind": a.kind, "source_chain": a.source_chain, "vault": a.vault,
+                "source_token": a.source_token, "dest_chain": a.dest_chain, "dest_token": a.dest_token,
+                "source_decimals": int(a.source_decimals), "dest_decimals": int(a.dest_decimals),
+                "source_block": int(a.source_block), "source_time": int(a.source_time),
+                "dest_block": int(a.dest_block), "dest_time": int(a.dest_time),
+                "proof": json.loads(a.proof_json), "read_at": int(a.read_at), "reader": a.reader}
+
+    @gl.public.view
+    def get_auth(self, auth_id: int) -> typing.Any:
+        a = self.auths.get(u64(max(_as_int(auth_id, 0), 0)))
+        if a is None:
+            return {"found": False}
+        out = self._auth_view(a)
+        out["found"] = True
+        return out
+
+    @gl.public.view
+    def get_reading(self, registry: str, check_id: int, round_no: int) -> typing.Any:
+        key = _addr(registry) + "|" + str(_as_int(check_id, -1)) + "|" + str(_as_int(round_no, -1))
+        r = self.readings.get(key)
+        if r is None:
+            return {"found": False}
+        return {"found": True, "key": r.key, "registry": r.registry, "check_id": int(r.check_id),
+                "round": int(r.round), "request_sha": r.request_sha, "status": r.status, "reason": r.reason,
+                "reading": json.loads(r.reading_json), "read_at": int(r.read_at), "reader": r.reader}
+
+    @gl.public.view
+    def get_config(self) -> typing.Any:
+        return {"version": VERSION, "contract": "ChainReader", "source_chain": SOURCE_CHAIN,
+                "chains": {k: {"chain_id": CHAINS[k][0], "rpcs": list(CHAINS[k][1])} for k in CHAINS},
+                "kinds": KINDS, "deposit_kinds": list(DEPOSIT_KINDS), "leader_lag_s": LEADER_LAG_S,
+                "auths": int(self.n_auth), "readings": int(self.n_readings)}
