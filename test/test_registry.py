@@ -560,25 +560,24 @@ class Monitor(Base):
         c = self.s.check(r["check_id"])
         self.assertEqual((c["purpose"], c["stake"], c["bond_id"]), ("MONITOR", "0", 0))
 
-    def free_pair_fast(self, pid, bl):
-        """Supersede the open monitor with a challenge that fails its pins at
-        once, so the pair is free again within seconds."""
-        bid = self.s.bond(pid, GEN, sender=OPERATOR)["bond_id"]
-        bad = dict(bl)
-        st = self.s.net.ts("ethereum", bl["ethereum"])
-        bad["arbitrum"] = self.s.net.block_at("arbitrum", st - 900)
-        self.s.w.advance(1)
-        cid = self.s.challenge(bid, bad)["check_id"]
+    def ruled_inconclusive(self, pid, bl, sender=PATROL):
+        """A monitoring check that is RULED (data INCONCLUSIVE: the RPCs
+        disagree) closes at once and counts against the rate limit."""
+        url = CR.CHAINS["arbitrum"][1][1]
+        stub.WEB.tamper[url] = lambda req, ans: dict(ans, result=F.w(1)) if req["method"] == "eth_call" else ans
+        cid = self.s.monitor(pid, bl, sender=sender)["check_id"]
         self.provisional(cid)
+        del stub.WEB.tamper[url]
         self.assertEqual(self.s.check(cid)["status"], "INCONCLUSIVE")
+        return cid
 
     def test_rate_limit_exact(self):
         pid = self.s.pair()
         self.s.after_bond()
         bl = self.s.blocks(pid)
-        self.s.monitor(pid, bl)
+        self.ruled_inconclusive(pid, bl)
         t0 = self.s.view(self.s.reg, "get_pair", pid)["last_monitor_at"]
-        self.free_pair_fast(pid, bl)
+        self.assertEqual(t0, self.s.w.now())
         self.s.w.set_time(t0 + MON - 1)
         self.refuses("monitor", pid, json.dumps(bl), why="RATE_LIMITED_UNTIL_" + str(t0 + MON), sender=PATROL)
         self.s.w.set_time(t0 + MON)
@@ -588,9 +587,19 @@ class Monitor(Base):
         pid = self.s.pair()
         self.s.after_bond()
         bl = self.s.blocks(pid)
-        self.s.monitor(pid, bl, sender=PATROL)
-        self.free_pair_fast(pid, bl)
+        self.ruled_inconclusive(pid, bl, sender=PATROL)
         self.refuses("monitor", pid, json.dumps(bl), why="RATE_LIMITED_UNTIL_", sender=STRANGER)
+
+    def test_junk_pins_do_not_use_up_the_rate_limit(self):
+        pid = self.s.pair()
+        self.s.after_bond()
+        bl = self.s.blocks(pid)
+        junk = dict(bl, arbitrum=self.s.net.block_at("arbitrum", self.s.net.ts("ethereum", bl["ethereum"]) - 900))
+        cid = self.s.monitor(pid, junk, sender=STRANGER)["check_id"]
+        self.provisional(cid)
+        self.assertEqual(self.s.check(cid)["status"], "INCONCLUSIVE")
+        self.assertEqual(self.s.view(self.s.reg, "get_pair", pid)["last_monitor_at"], 0)
+        self.assertTrue(self.s.monitor(pid, bl, sender=PATROL)["ok"])
 
     def test_monitor_after_timeout(self):
         pid = self.s.pair()
@@ -1054,9 +1063,9 @@ class Gate(Base):
 
     def test_gate_constructor_bounds(self):
         with self.assertRaises(Exception):
-            self.s.w.deploy("CollateralGate", self.s.reg, 59)
+            self.s.w.deploy("CollateralGate", self.s.reg, 59, 0)
         with self.assertRaises(Exception):
-            self.s.w.deploy("CollateralGate", "nope", 600)
+            self.s.w.deploy("CollateralGate", "nope", 600, 0)
 
 
 class Conservation(Base):

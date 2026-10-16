@@ -389,6 +389,7 @@ class _Web:
         self.validator_hook = None
         self.leader_hook = None
         self.tamper = {}        # rpc url -> fn(request, answer) -> answer (one RPC lying or broken)
+        self.caps = {}          # rpc url -> largest batch that endpoint accepts (overrides the chain's)
 
     def get(self, url):
         self.log.append(url)
@@ -416,7 +417,7 @@ def _web_request(url, method="GET", body=None, headers=None, **_k):
         return _Response(404, "no such rpc")
     req = json.loads(body)
     if isinstance(req, list):
-        if len(req) > ch.batch_cap:
+        if len(req) > WEB.caps.get(url, ch.batch_cap):
             return _Response(413, json.dumps({"error": "batch too large"}))
         return _Response(200, json.dumps([_tampered(url, r, ch.answer(r)) for r in req]))
     return _Response(200, json.dumps(_tampered(url, req, ch.answer(req))))

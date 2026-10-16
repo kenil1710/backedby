@@ -74,6 +74,18 @@ POL_CHILD_MANAGER = "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa"
 NOMAD_ETH_ROUTER = "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"
 NOMAD_BEAM_ROUTER = "0xd3dfd3ede74e0dcebc1aa685e151332857efce2d"
 NOMAD_ETH_DOMAIN = 6648936        # "eth"
+POL_ERC20_TYPE = "0x8ae85d849167ff996c04040c44924fd364217285e4cad818292c7ac37c0a345b"   # keccak256("ERC20")
+# Arbitrum gateways that ESCROW the L1 token (measured: each holds >= the L2
+# supply, docs/FEASIBILITY.md). A gateway that mints on L1 instead of
+# releasing from escrow would read as under-backed when it is not, so any
+# other gateway is refused.
+ARB_ESCROW_GATEWAYS = {
+    "0xa3a7b6f88361f48403514059f1f16c8e78d60eec": "L1ERC20Gateway (standard)",
+    "0xd3b5b60020504bc3489d6949d545893982ba3011": "L1DaiGateway",
+    "0xcee284f754e854890e311e3280b767f80797180d": "L1USDCGateway",
+    "0x0f25c1dc2a9922304f2eac71dca9b07e310e8e5a": "Lido wstETH L1 gateway",
+}
+MAX_ANCHORS = 32
 
 # kind -> destination chain. The source chain is always Ethereum.
 KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
@@ -412,6 +424,17 @@ def _nonzero(a: str) -> bool:
     return a != "" and a != ZERO
 
 
+def _w32(r: typing.Any) -> str:
+    """The first 32-byte word of a call result as 0x + 64 hex, or ""."""
+    if not isinstance(r, list) or r[0] != "ok" or not isinstance(r[1], str) or len(r[1]) < 66:
+        return ""
+    return r[1][0:66]
+
+
+def _aw(a: str) -> str:
+    return "0x" + _pad(a)
+
+
 def _q(chain: str, block: int, items: list) -> list:
     """eth_call every (to, data) at `block` on both RPCs; identical or Disagree."""
     return dual_read(chain, [eth_call(it[0], it[1], block) for it in items])
@@ -438,6 +461,8 @@ def _auth_arbitrum(l1: str, l2: str, be: int, bd: int) -> dict:
         raise Refuse("ROUTER_HAS_NO_GATEWAY_FOR_TOKEN")
     if mapped != l2:
         raise Refuse("L1_ROUTER_MAPS_TOKEN_TO_" + mapped)
+    if gw not in ARB_ESCROW_GATEWAYS:
+        raise Refuse("GATEWAY_" + gw + "_IS_NOT_AN_ESCROW_GATEWAY")
     e = _q(SOURCE_CHAIN, be, [[gw, S_L1_ESCROW]])
     esc = _addr_w(e[0])
     vault = esc if _nonzero(esc) else gw
@@ -447,18 +472,28 @@ def _auth_arbitrum(l1: str, l2: str, be: int, bd: int) -> dict:
     dd = _decimals(d[1])
     proof = ["L1GatewayRouter.getGateway(l1)=" + gw, "L1GatewayRouter.calculateL2TokenAddress(l1)=" + mapped,
              "L2GatewayRouter.calculateL2TokenAddress(l1)=" + l2,
-             ("gateway.l1Escrow()=" + esc) if _nonzero(esc) else "gateway holds the escrow"]
-    return {"vault": vault, "source_decimals": sd, "dest_decimals": dd, "proof": proof}
+             ("gateway.l1Escrow()=" + esc) if _nonzero(esc) else "gateway holds the escrow",
+             "gateway is " + ARB_ESCROW_GATEWAYS[gw]]
+    anchors = [[SOURCE_CHAIN, ARB_L1_ROUTER, S_GET_GATEWAY + _pad(l1), _aw(gw)],
+               [SOURCE_CHAIN, ARB_L1_ROUTER, S_CALC_L2 + _pad(l1), _aw(l2)],
+               ["arbitrum", ARB_L2_ROUTER, S_CALC_L2 + _pad(l1), _aw(l2)]]
+    if _nonzero(esc):
+        anchors.append([SOURCE_CHAIN, gw, S_L1_ESCROW, _aw(esc)])
+    return {"vault": vault, "source_decimals": sd, "dest_decimals": dd, "proof": proof, "anchors": anchors}
 
 
 def _auth_opstack(kind: str, l1: str, l2: str, be: int, bd: int) -> dict:
     d = _q(kind, bd, [[l2, S_REMOTE_TOKEN], [l2, S_L1_TOKEN], [l2, S_BRIDGE], [l2, S_L2_BRIDGE], [l2, S_DECIMALS]])
     rt = _addr_w(d[0])
+    rsel = S_REMOTE_TOKEN
     if rt == "":
         rt = _addr_w(d[1])
+        rsel = S_L1_TOKEN
     br = _addr_w(d[2])
+    bsel = S_BRIDGE
     if br == "":
         br = _addr_w(d[3])
+        bsel = S_L2_BRIDGE
     if rt != l1:
         raise Refuse("REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN")
     if br != L2_STD_BRIDGE:
@@ -472,7 +507,8 @@ def _auth_opstack(kind: str, l1: str, l2: str, be: int, bd: int) -> dict:
         raise Refuse("L1_BRIDGE_HAS_NO_DEPOSITS_MAPPING")
     proof = ["l2token.remoteToken()=" + rt, "l2token.bridge()=" + br, "L1StandardBridge=" + vault,
              "L1StandardBridge.deposits(l1,l2)=" + str(dep)]
-    return {"vault": vault, "source_decimals": sd, "dest_decimals": dd, "proof": proof}
+    anchors = [[kind, l2, rsel, _aw(l1)], [kind, l2, bsel, _aw(L2_STD_BRIDGE)]]
+    return {"vault": vault, "source_decimals": sd, "dest_decimals": dd, "proof": proof, "anchors": anchors}
 
 
 def _auth_op_dai(l1: str, l2: str, be: int, bd: int) -> dict:
@@ -491,7 +527,10 @@ def _auth_op_dai(l1: str, l2: str, be: int, bd: int) -> dict:
         raise Refuse("DAI_BRIDGE_HAS_NO_ESCROW")
     proof = ["L1DAITokenBridge.l1Token()=" + l1, "L1DAITokenBridge.l2Token()=" + l2, "L1DAITokenBridge.escrow()=" + esc,
              "L2DAITokenBridge.l1DAITokenBridge()=" + OP_DAI_L1_BRIDGE]
-    return {"vault": esc, "source_decimals": _decimals(s[3]), "dest_decimals": _decimals(d[3]), "proof": proof}
+    anchors = [[SOURCE_CHAIN, OP_DAI_L1_BRIDGE, S_L1_TOKEN, _aw(l1)], [SOURCE_CHAIN, OP_DAI_L1_BRIDGE, S_L2_TOKEN, _aw(l2)],
+               [SOURCE_CHAIN, OP_DAI_L1_BRIDGE, S_ESCROW, _aw(esc)], ["optimism", OP_DAI_L2_BRIDGE, S_L2_TOKEN, _aw(l2)]]
+    return {"vault": esc, "source_decimals": _decimals(s[3]), "dest_decimals": _decimals(d[3]), "proof": proof,
+            "anchors": anchors}
 
 
 def _auth_polygon(l1: str, l2: str, be: int, bd: int) -> dict:
@@ -503,6 +542,8 @@ def _auth_polygon(l1: str, l2: str, be: int, bd: int) -> dict:
         raise Refuse("ROOT_CHAIN_MANAGER_MAPS_TOKEN_TO_" + child)
     if typ == "" or int(typ[2:66], 16) == 0:
         raise Refuse("TOKEN_HAS_NO_TYPE")
+    if typ[0:66].lower() != POL_ERC20_TYPE:
+        raise Refuse("TOKEN_TYPE_IS_NOT_ERC20_ESCROW")
     p = _q(SOURCE_CHAIN, be, [[POL_ROOT_MANAGER, S_TYPE_TO_PRED + typ[2:66]]])
     pred = _addr_w(p[0])
     if not _nonzero(pred):
@@ -512,7 +553,12 @@ def _auth_polygon(l1: str, l2: str, be: int, bd: int) -> dict:
         raise Refuse("CHILD_CHAIN_MANAGER_DISAGREES")
     proof = ["RootChainManager.rootToChildToken(l1)=" + child, "RootChainManager.typeToPredicate(tokenToType(l1))=" + pred,
              "ChildChainManager.childToRootToken(child)=" + l1]
-    return {"vault": pred, "source_decimals": _decimals(s[2]), "dest_decimals": _decimals(d[1]), "proof": proof}
+    anchors = [[SOURCE_CHAIN, POL_ROOT_MANAGER, S_ROOT_TO_CHILD + _pad(l1), _aw(l2)],
+               [SOURCE_CHAIN, POL_ROOT_MANAGER, S_TOKEN_TO_TYPE + _pad(l1), POL_ERC20_TYPE],
+               [SOURCE_CHAIN, POL_ROOT_MANAGER, S_TYPE_TO_PRED + POL_ERC20_TYPE[2:], _aw(pred)],
+               ["polygon", POL_CHILD_MANAGER, S_CHILD_TO_ROOT + _pad(l2), _aw(l1)]]
+    return {"vault": pred, "source_decimals": _decimals(s[2]), "dest_decimals": _decimals(d[1]), "proof": proof,
+            "anchors": anchors}
 
 
 def _auth_nomad(l1: str, l2: str, be: int, bd: int) -> dict:
@@ -541,7 +587,11 @@ def _auth_nomad(l1: str, l2: str, be: int, bd: int) -> dict:
     proof = ["Moonbeam BridgeRouter.tokenRegistry()=" + reg, "Moonbeam BridgeRouter.remotes(eth)=" + remote,
              "TokenRegistry.getTokenId(rep)=(eth," + l1 + ")", "TokenRegistry.getLocalAddress(eth,l1)=" + l2,
              "Ethereum TokenRegistry.getTokenId(l1)=(eth,local)"]
-    return {"vault": NOMAD_ETH_ROUTER, "source_decimals": _decimals(e[1]), "dest_decimals": _decimals(d[2]), "proof": proof}
+    anchors = [["moonbeam", NOMAD_BEAM_ROUTER, S_TOKEN_REGISTRY, _aw(reg)],
+               ["moonbeam", NOMAD_BEAM_ROUTER, S_REMOTES + dom, _aw(NOMAD_ETH_ROUTER)],
+               ["moonbeam", reg, S_GET_LOCAL + dom + _pad(l1), _aw(l2)]]
+    return {"vault": NOMAD_ETH_ROUTER, "source_decimals": _decimals(e[1]), "dest_decimals": _decimals(d[2]), "proof": proof,
+            "anchors": anchors}
 
 
 def pin_final(chain: str, block: int) -> dict:
@@ -632,6 +682,14 @@ def _req_ok(req: typing.Any) -> str:
         b = _as_int(blocks[c], -1)
         if b <= 0 or b > 10 ** 12:
             return "BAD_BLOCK_NUMBER"
+    anchors = req.get("anchors", [])
+    if not isinstance(anchors, list) or len(anchors) > MAX_ANCHORS:
+        return "BAD_ANCHORS"
+    for a in anchors:
+        if not isinstance(a, list) or len(a) != 3 or a[0] not in blocks or _addr(a[1]) == "":
+            return "BAD_ANCHOR"
+        if not isinstance(a[2], str) or not a[2].startswith("0x") or len(a[2]) > 202 or not _is_hex(a[2][2:]):
+            return "BAD_ANCHOR_DATA"
     return ""
 
 
@@ -643,8 +701,10 @@ def read_at(req: dict) -> dict:
     blocks = {}
     for c in req["blocks"]:
         blocks[c] = _as_int(req["blocks"][c], -1)
-    out = {"status": "INCONCLUSIVE", "reason": "", "blocks": {}, "locked": "", "source_decimals": -1, "dests": []}
+    out = {"status": "INCONCLUSIVE", "reason": "", "blocks": {}, "locked": "", "source_decimals": -1, "dests": [],
+           "anchors": []}
     names = sorted(list(blocks.keys()))
+    anchors = req.get("anchors", [])
     # phase 1: finality and the pinned headers, every chain
     try:
         for c in names:
@@ -681,7 +741,17 @@ def read_at(req: dict) -> dict:
         for d in req["dests"]:
             if d.get("deposits") is True:
                 calls.append(eth_call(req["vault"], S_DEPOSITS + _pad(req["source_token"]) + _pad(d["token"]), be))
+        n_src = len(calls)
+        for a in anchors:
+            if a[0] == src:
+                calls.append(eth_call(a[1], a[2], be))
         r = dual_read(src, calls)
+        got = {}
+        k = n_src
+        for i in range(len(anchors)):
+            if anchors[i][0] == src:
+                got[i] = _w32(r[k])
+                k += 1
         locked = _word(r[0])
         sdec = _word(r[1])
         if locked < 0 or sdec < 0 or sdec > MAX_DECIMALS:
@@ -711,7 +781,16 @@ def read_at(req: dict) -> dict:
                     idx.append(i)
                     calls.append(eth_call(d["token"], S_SUPPLY, blocks[c]))
                     calls.append(eth_call(d["token"], S_DECIMALS, blocks[c]))
-            g = dual_read(c, calls)
+            n_c = len(calls)
+            for i in range(len(anchors)):
+                if anchors[i][0] == c:
+                    calls.append(eth_call(anchors[i][1], anchors[i][2], blocks[c]))
+            g = dual_read(c, calls) if len(calls) > 0 else []
+            k = n_c
+            for i in range(len(anchors)):
+                if anchors[i][0] == c:
+                    got[i] = _w32(g[k])
+                    k += 1
             for j in range(len(idx)):
                 sup = _word(g[2 * j])
                 dec = _word(g[2 * j + 1])
@@ -722,6 +801,7 @@ def read_at(req: dict) -> dict:
                                       "decimals": dec, "deposits": deps[idx[j]]}])
         rows = sorted(rows, key=lambda x: x[0])
         out["dests"] = [x[1] for x in rows]
+        out["anchors"] = [got.get(i, "") for i in range(len(anchors))]
         out["locked"] = str(locked)
         out["source_decimals"] = sdec
         out["status"] = "OK"
@@ -758,6 +838,7 @@ class Auth:
     dest_block: u64
     dest_time: u64
     proof_json: str
+    anchors_json: str
     read_at: u64
     reader: str
 
@@ -839,7 +920,8 @@ class ChainReader(gl.contract.Contract):
             dest_chain=KINDS[k], dest_token=l2, source_decimals=u64(int(a["source_decimals"])),
             dest_decimals=u64(int(a["dest_decimals"])), source_block=u64(int(a["source_block"]["number"])),
             source_time=u64(int(a["source_block"]["timestamp"])), dest_block=u64(int(a["dest_block"]["number"])),
-            dest_time=u64(int(a["dest_block"]["timestamp"])), proof_json=_canon(a["proof"]), read_at=u64(now),
+            dest_time=u64(int(a["dest_block"]["timestamp"])), proof_json=_canon(a["proof"]),
+            anchors_json=_canon(a["anchors"]), read_at=u64(now),
             reader=gl.message.sender_address.as_hex.lower())
         self.n_auth = u64(aid)
         return {"auth_id": aid, "vault": a["vault"], "source_decimals": int(a["source_decimals"]),
@@ -905,7 +987,8 @@ class ChainReader(gl.contract.Contract):
                 "source_decimals": int(a.source_decimals), "dest_decimals": int(a.dest_decimals),
                 "source_block": int(a.source_block), "source_time": int(a.source_time),
                 "dest_block": int(a.dest_block), "dest_time": int(a.dest_time),
-                "proof": json.loads(a.proof_json), "read_at": int(a.read_at), "reader": a.reader}
+                "proof": json.loads(a.proof_json), "anchors": json.loads(a.anchors_json), "read_at": int(a.read_at),
+                "reader": a.reader}
 
     @gl.public.view
     def get_auth(self, auth_id: int) -> typing.Any:
@@ -931,4 +1014,5 @@ class ChainReader(gl.contract.Contract):
         return {"version": VERSION, "contract": "ChainReader", "source_chain": SOURCE_CHAIN,
                 "chains": {k: {"chain_id": CHAINS[k][0], "rpcs": list(CHAINS[k][1])} for k in CHAINS},
                 "kinds": KINDS, "deposit_kinds": list(DEPOSIT_KINDS), "leader_lag_s": LEADER_LAG_S,
+                "arbitrum_escrow_gateways": ARB_ESCROW_GATEWAYS, "polygon_erc20_type": POL_ERC20_TYPE,
                 "auths": int(self.n_auth), "readings": int(self.n_readings)}

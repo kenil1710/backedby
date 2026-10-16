@@ -37,8 +37,8 @@ WBTC = addr(0xb7c)
 DAI = addr(0xda1)
 LINK = addr(0x11c)
 # vaults / gateways
-ARB_GW = addr(0xa9)
-ARB_DAI_GW = addr(0xaa)
+ARB_GW = "0xa3a7b6f88361f48403514059f1f16c8e78d60eec"      # the standard (escrow) gateway
+ARB_DAI_GW = "0xd3b5b60020504bc3489d6949d545893982ba3011"  # L1DaiGateway
 ARB_DAI_ESCROW = addr(0xab)
 POL_PRED = addr(0x9e)
 OP_DAI_ESCROW = addr(0xde)
@@ -247,13 +247,13 @@ class Net:
 class Setup:
     """A wired deployment on a fresh world with every bridge kind mapped."""
 
-    def __init__(self, mode="DEMO", max_age=3600):
+    def __init__(self, mode="DEMO", max_age=3600, max_tol=50):
         self.w = world.new_world(now_iso=NOW_ISO)
         self.net = Net(self.w)
         n = self.net
         self.reader = self.w.deploy("ChainReader", sender=DEPLOYER)
         self.reg = self.w.deploy("BackedByRegistry", mode, self.reader, sender=DEPLOYER)
-        self.gate = self.w.deploy("CollateralGate", self.reg, max_age, sender=DEPLOYER)
+        self.gate = self.w.deploy("CollateralGate", self.reg, max_age, max_tol, sender=DEPLOYER)
         self.mode = mode
         # tokens
         n.token("ethereum", USDC, 6)

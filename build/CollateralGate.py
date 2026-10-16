@@ -11,7 +11,9 @@ import typing
 # accept this bridged token as collateral right now?
 #
 # is_backed(pair, now) is true only if the pair's latest ruling is FINAL and
-# BACKED, and its pinned Ethereum block is no older than max_age_s. The demo
+# BACKED, its pinned Ethereum block is no older than max_age_s, no ruling
+# inside max_age_s said anything else, and the pair's frozen tolerance is
+# within max_tolerance_bps. The demo
 # borrow() asks it and records the answer either way: it refuses
 # UNDER_BACKED, INCONCLUSIVE, stale, and never-checked pairs, with the reason.
 # No value is held or moved. No owner, no setter.
@@ -144,7 +146,7 @@ def iso_minute(epoch: int) -> str:
 # ==== end shared ====
 
 
-def gate_answer(latest: typing.Any, now: int, max_age: int) -> dict:
+def gate_answer(latest: typing.Any, now: int, max_age: int, max_tol: int) -> dict:
     """The whole rule, pure. latest: BackedByRegistry.get_latest(pair)."""
     if not isinstance(latest, dict):
         return {"backed": False, "reason": "REGISTRY_UNREADABLE"}
@@ -171,6 +173,14 @@ def gate_answer(latest: typing.Any, now: int, max_age: int) -> dict:
     if out["age_s"] < 0:
         out["reason"] = "RULING_FROM_THE_FUTURE"
         return out
+    bad = int(latest.get("last_bad_time", 0))
+    if bad > 0 and now - bad <= max_age:
+        out["reason"] = "A_RULING_" + str(now - bad) + "S_AGO_WAS_NOT_BACKED"
+        return out
+    tol = int(latest.get("tolerance_bps", 0))
+    if tol > max_tol:
+        out["reason"] = "TOLERANCE_" + str(tol) + "BPS_OVER_" + str(max_tol) + "BPS"
+        return out
     out["backed"] = True
     out["reason"] = "BACKED"
     return out
@@ -193,20 +203,25 @@ class Attempt:
 class CollateralGate(gl.contract.Contract):
     registry: Address
     max_age_s: u64
+    max_tolerance_bps: u64
     n: u64
     allowed_n: u64
     refused_n: u64
     attempts: gl.storage.TreeMap[u64, Attempt]
 
-    def __init__(self, registry: str, max_age_s: int) -> None:
+    def __init__(self, registry: str, max_age_s: int, max_tolerance_bps: int) -> None:
         r = _addr(registry)
         if r == "":
             raise gl.vm.UserError("registry must be a 0x address")
         m = _as_int(max_age_s, -1)
         if m < 60 or m > 30 * 86400:
             raise gl.vm.UserError("max_age_s must be 60..2592000")
+        t = _as_int(max_tolerance_bps, -1)
+        if t < 0 or t > 1000:
+            raise gl.vm.UserError("max_tolerance_bps must be 0..1000")
         self.registry = Address(r)
         self.max_age_s = u64(m)
+        self.max_tolerance_bps = u64(t)
         self.n = u64(0)
         self.allowed_n = u64(0)
         self.refused_n = u64(0)
@@ -221,8 +236,10 @@ class CollateralGate(gl.contract.Contract):
     @gl.public.view
     def is_backed(self, pair_id: int, now: int) -> typing.Any:
         """`now`: the caller's clock (views have none). borrow() uses the transaction's."""
-        out = gate_answer(self._latest(max(_as_int(pair_id, 0), 0)), _as_int(now, 0), int(self.max_age_s))
+        out = gate_answer(self._latest(max(_as_int(pair_id, 0), 0)), _as_int(now, 0), int(self.max_age_s),
+                          int(self.max_tolerance_bps))
         out["max_age_s"] = int(self.max_age_s)
+        out["max_tolerance_bps"] = int(self.max_tolerance_bps)
         return out
 
     @gl.public.write
@@ -231,7 +248,7 @@ class CollateralGate(gl.contract.Contract):
         Recorded either way; nothing is lent."""
         now = _epoch_from_iso(gl.message.raw.get("datetime", ""))
         pid = max(_as_int(pair_id, 0), 0)
-        ans = gate_answer(self._latest(pid), now, int(self.max_age_s))
+        ans = gate_answer(self._latest(pid), now, int(self.max_age_s), int(self.max_tolerance_bps))
         amt = _as_int(amount, -1)
         if amt <= 0 or amt > 10 ** 30:
             ans = {"backed": False, "reason": "BAD_AMOUNT", "check_id": 0}
@@ -270,4 +287,4 @@ class CollateralGate(gl.contract.Contract):
     @gl.public.view
     def get_config(self) -> typing.Any:
         return {"version": VERSION, "contract": "CollateralGate", "registry": self.registry.as_hex.lower(),
-                "max_age_s": int(self.max_age_s)}
+                "max_age_s": int(self.max_age_s), "max_tolerance_bps": int(self.max_tolerance_bps)}

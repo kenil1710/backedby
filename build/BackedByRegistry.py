@@ -80,8 +80,9 @@ MAX_PAGE = 50
 
 # the inconclusive reasons that say something about the pair itself (and so
 # become its latest ruling); the rest are about the filing or the transport
-DATA_REASONS = ("RPC_DISAGREE", "CALL_FAILED", "MALFORMED_ANSWER", "DECIMALS_MISMATCH", "CONTEST_DISAGREES",
-                "CONTEST_REREAD_INCONCLUSIVE")
+DATA_REASONS = ("RPC_DISAGREE", "CALL_FAILED", "MALFORMED_ANSWER", "DECIMALS_MISMATCH", "MAPPING_CHANGED",
+                "CONTEST_DISAGREES", "CONTEST_REREAD_INCONCLUSIVE")
+MAX_ANCHORS = 32
 
 HOWS = ("WINDOW_PASSED", "CONTEST_UPHELD_RULING", "CONTEST_DISAGREES", "CONTEST_REREAD_INCONCLUSIVE",
         "TIMEOUT_UNREAD", "TIMEOUT_CONTEST_UNREAD", "SUPERSEDED", "READ_DATA", "READ_PIN", "READ_TRANSPORT")
@@ -304,6 +305,17 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
             out["reason"] = "SOURCE_BLOCK_AFTER_THE_BOND_STOPPED"
             out["cls"] = "PIN"
             return out
+    exp = terms.get("anchors") or []
+    got = reading.get("anchors") or []
+    if len(got) != len(exp):
+        out["reason"] = "MALFORMED_ANSWER"
+        out["cls"] = "DATA"
+        return out
+    for i in range(len(exp)):
+        if str(got[i]).lower() != str(exp[i][3]).lower():
+            out["reason"] = "MAPPING_CHANGED:" + str(exp[i][0]) + ":" + str(exp[i][1]) + ":" + str(exp[i][2])[0:10]
+            out["cls"] = "DATA"
+            return out
     dests = reading.get("dests") or []
     tdests = terms["dests"]
     if len(dests) != len(tdests):
@@ -402,11 +414,13 @@ class Pair:
     max_gap_s: u64
     label: str
     dests_json: str
+    anchors_json: str
     registered_by: str
     registered_at: u64
     open_check: u64
     latest_check: u64
     latest_time: u64
+    last_bad_time: u64
     last_monitor_at: u64
     checks_csv: str
     bonds_csv: str
@@ -574,6 +588,8 @@ class BackedByRegistry(gl.contract.Contract):
             return "AUTH_" + str(aid) + "_WRONG_DEST_CHAIN"
         if _addr(a.get("vault", "")) == "" or _addr(a.get("source_token", "")) == "" or _addr(a.get("dest_token", "")) == "":
             return "AUTH_" + str(aid) + "_MALFORMED"
+        if not isinstance(a.get("anchors"), list) or len(a["anchors"]) < 1:
+            return "AUTH_" + str(aid) + "_HAS_NO_ANCHORS"
         return a
 
     def _request(self, c: Check, rnd: int) -> dict:
@@ -586,7 +602,7 @@ class BackedByRegistry(gl.contract.Contract):
     def _terms(self, p: Pair, c: Check) -> dict:
         req = json.loads(c.request_json)
         return {"source_decimals": int(p.source_decimals), "tolerance_bps": int(p.tolerance_bps),
-                "max_gap_s": int(p.max_gap_s), "dests": req["terms_dests"]}
+                "max_gap_s": int(p.max_gap_s), "dests": req["terms_dests"], "anchors": req["terms_anchors"]}
 
     def _cover(self, c: Check) -> typing.Any:
         if c.purpose != P_CHALLENGE:
@@ -596,10 +612,12 @@ class BackedByRegistry(gl.contract.Contract):
 
     def _new_check(self, p: Pair, purpose: str, bond_id: int, stake: int, blocks: dict, now: int) -> int:
         dests = self._dests(p)
+        anchors = json.loads(p.anchors_json)
         req = {"source_chain": SOURCE_CHAIN, "vault": p.vault, "source_token": p.source_token,
                "dests": [{"chain": d["chain"], "token": d["token"], "deposits": p.kind in DEPOSIT_KINDS} for d in dests],
-               "blocks": blocks,
-               "terms_dests": [{"chain": d["chain"], "token": d["token"], "decimals": int(d["decimals"])} for d in dests]}
+               "blocks": blocks, "anchors": [[a[0], a[1], a[2]] for a in anchors],
+               "terms_dests": [{"chain": d["chain"], "token": d["token"], "decimals": int(d["decimals"])} for d in dests],
+               "terms_anchors": anchors}
         cid = int(self.n_checks) + 1
         self.checks[u64(cid)] = Check(
             check_id=u64(cid), pair_id=p.pair_id, purpose=purpose, bond_id=u64(bond_id), filer=self._sender(),
@@ -633,6 +651,8 @@ class BackedByRegistry(gl.contract.Contract):
         if update_latest and st > 0 and (st > int(p.latest_time) or (st == int(p.latest_time) and int(c.check_id) > int(p.latest_check))):
             p.latest_check = c.check_id
             p.latest_time = u64(st)
+        if update_latest and st > int(p.last_bad_time) and verdict != V_BACKED:
+            p.last_bad_time = u64(st)
         self._bump("status:" + status)
         self._bump("verdict:" + verdict)
         self._bump("how:" + how)
@@ -744,12 +764,19 @@ class BackedByRegistry(gl.contract.Contract):
             seen.append(dk)
             auths.append(a)
         f = auths[0]
-        key = SOURCE_CHAIN + "|" + f["vault"] + "|" + f["source_token"]
+        key = SOURCE_CHAIN + "|" + f["vault"] + "|" + f["source_token"] + "|" + str(tol)
         if int(self.pair_by_key.get(key, u64(0))) != 0:
             raise gl.vm.UserError("REFUSED: PAIR_EXISTS_AS_" + str(int(self.pair_by_key.get(key, u64(0)))) + "_ADD_A_DESTINATION_INSTEAD")
         for dk in seen:
-            if int(self.dest_owner.get(dk, u64(0))) != 0:
-                raise gl.vm.UserError("REFUSED: DESTINATION_ALREADY_IN_PAIR_" + str(int(self.dest_owner.get(dk, u64(0)))))
+            if int(self.dest_owner.get(str(tol) + "|" + dk, u64(0))) != 0:
+                raise gl.vm.UserError("REFUSED: DESTINATION_ALREADY_IN_PAIR_" + str(int(self.dest_owner.get(str(tol) + "|" + dk, u64(0)))))
+        anchors = []
+        for a in auths:
+            for an in a["anchors"]:
+                if an not in anchors:
+                    anchors.append(an)
+        if len(anchors) > MAX_ANCHORS:
+            raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
         dests = [{"chain": a["dest_chain"], "token": a["dest_token"], "decimals": int(a["dest_decimals"]),
                   "auth_id": int(a["auth_id"]), "added_by": self._sender(), "added_at": now} for a in auths]
         # --- writes
@@ -758,11 +785,12 @@ class BackedByRegistry(gl.contract.Contract):
             pair_id=u64(pid), key=key, kind=f["kind"], source_chain=SOURCE_CHAIN, vault=f["vault"],
             source_token=f["source_token"], source_decimals=u64(int(f["source_decimals"])), tolerance_bps=u64(tol),
             max_gap_s=u64(KIND_MAX_GAP_S.get(f["kind"], MAX_GAP_S)), label=clean_label(label),
-            dests_json=_canon(dests), registered_by=self._sender(), registered_at=u64(now), open_check=u64(0),
-            latest_check=u64(0), latest_time=u64(0), last_monitor_at=u64(0), checks_csv="", bonds_csv="")
+            dests_json=_canon(dests), anchors_json=_canon(anchors), registered_by=self._sender(), registered_at=u64(now),
+            open_check=u64(0), latest_check=u64(0), latest_time=u64(0), last_bad_time=u64(0), last_monitor_at=u64(0),
+            checks_csv="", bonds_csv="")
         self.pair_by_key[key] = u64(pid)
         for dk in seen:
-            self.dest_owner[dk] = u64(pid)
+            self.dest_owner[str(tol) + "|" + dk] = u64(pid)
         self.n_pairs = u64(pid)
         self._bump("pairs")
         return {"ok": True, "pair_id": pid, "destinations": len(dests)}
@@ -783,16 +811,23 @@ class BackedByRegistry(gl.contract.Contract):
         if a["kind"] != p.kind or a["vault"] != p.vault or a["source_token"] != p.source_token \
                 or int(a["source_decimals"]) != int(p.source_decimals):
             raise gl.vm.UserError("REFUSED: AUTH_IS_FOR_ANOTHER_PAIR")
-        dk = a["dest_chain"] + "|" + a["dest_token"]
+        dk = str(int(p.tolerance_bps)) + "|" + a["dest_chain"] + "|" + a["dest_token"]
         if int(self.dest_owner.get(dk, u64(0))) != 0:
             raise gl.vm.UserError("REFUSED: DESTINATION_ALREADY_IN_PAIR_" + str(int(self.dest_owner.get(dk, u64(0)))))
         dests = self._dests(p)
         if len(dests) >= MAX_DESTS:
             raise gl.vm.UserError("REFUSED: PAIR_HAS_" + str(MAX_DESTS) + "_DESTINATIONS")
+        anchors = json.loads(p.anchors_json)
+        for an in a["anchors"]:
+            if an not in anchors:
+                anchors.append(an)
+        if len(anchors) > MAX_ANCHORS:
+            raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
         dests.append({"chain": a["dest_chain"], "token": a["dest_token"], "decimals": int(a["dest_decimals"]),
                       "auth_id": int(a["auth_id"]), "added_by": self._sender(), "added_at": now})
         # --- writes
         p.dests_json = _canon(dests)
+        p.anchors_json = _canon(anchors)
         self.dest_owner[dk] = p.pair_id
         self._bump("destinations_added")
         return {"ok": True, "pair_id": int(p.pair_id), "destinations": len(dests)}
@@ -934,8 +969,9 @@ class BackedByRegistry(gl.contract.Contract):
 
     @gl.public.write
     def monitor(self, pair_id: int, blocks: str) -> typing.Any:
-        """A monitoring check: no stake, no bond, at most one per pair per
-        monitor interval, and only while no other check is open on the pair."""
+        """A monitoring check: no stake, no bond, only while no other check is
+        open on the pair, and at most one RULED monitoring check per pair per
+        monitor interval."""
         now = self._now()
         if now <= 0:
             raise gl.vm.UserError("REFUSED: NO_CLOCK")
@@ -950,7 +986,6 @@ class BackedByRegistry(gl.contract.Contract):
         if isinstance(bl, str):
             raise gl.vm.UserError("REFUSED: " + bl)
         # --- writes
-        p.last_monitor_at = u64(now)
         cid = self._new_check(p, P_MONITOR, 0, 0, bl, now)
         return {"ok": True, "check_id": cid}
 
@@ -991,6 +1026,10 @@ class BackedByRegistry(gl.contract.Contract):
             c.ruling1_json = _canon(out)
             c.ruled_at = u64(now)
             c.source_time = u64(int(out["source_time"]))
+            if c.purpose == P_MONITOR and (out["cls"] == "RULING" or out["cls"] == "DATA"):
+                # the rate limit counts monitoring checks that said something about the pair,
+                # so filings with junk pins cannot use it up
+                p.last_monitor_at = u64(now)
             if out["verdict"] == V_INC:
                 pay = self._refund_all(c, p, out["reason"], "READ_" + out["cls"], now, out["cls"] == "DATA")
                 return {"ok": True, "check_id": int(c.check_id), "status": ST_INC, "reason": out["reason"], "payouts": pay}
@@ -1112,7 +1151,8 @@ class BackedByRegistry(gl.contract.Contract):
         return {"pair_id": int(p.pair_id), "key": p.key, "kind": p.kind, "source_chain": p.source_chain,
                 "vault": p.vault, "source_token": p.source_token, "source_decimals": int(p.source_decimals),
                 "tolerance_bps": int(p.tolerance_bps), "max_gap_s": int(p.max_gap_s), "label": p.label,
-                "dests": self._dests(p), "registered_by": p.registered_by, "registered_at": int(p.registered_at),
+                "dests": self._dests(p), "anchors": json.loads(p.anchors_json), "registered_by": p.registered_by,
+                "registered_at": int(p.registered_at), "last_bad_time": int(p.last_bad_time),
                 "open_check": int(p.open_check), "latest_check": int(p.latest_check), "latest_time": int(p.latest_time),
                 "last_monitor_at": int(p.last_monitor_at),
                 "checks": [int(x) for x in p.checks_csv.split(",")] if p.checks_csv != "" else [],
@@ -1175,12 +1215,13 @@ class BackedByRegistry(gl.contract.Contract):
             return {"found": False, "pair": False}
         lc = int(p.latest_check)
         if lc == 0:
-            return {"found": False, "pair": True}
+            return {"found": False, "pair": True, "tolerance_bps": int(p.tolerance_bps),
+                    "last_bad_time": int(p.last_bad_time)}
         c = self.checks[u64(lc)]
         r = json.loads(c.ruling1_json) if c.ruling1_json != "" else {}
         return {"found": True, "pair": True, "check_id": lc, "verdict": c.verdict, "status": c.status,
                 "source_time": int(c.source_time), "final_at": int(c.final_at), "ratio_bps": r.get("ratio_bps", -1),
-                "reason": c.reason}
+                "reason": c.reason, "tolerance_bps": int(p.tolerance_bps), "last_bad_time": int(p.last_bad_time)}
 
     @gl.public.view
     def get_bond(self, bond_id: int) -> typing.Any:

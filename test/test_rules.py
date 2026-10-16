@@ -316,39 +316,39 @@ class Gate(unittest.TestCase):
         return d
 
     def test_backed_fresh(self):
-        self.assertTrue(GT.gate_answer(self.latest(), 1500, 3600)["backed"])
+        self.assertTrue(GT.gate_answer(self.latest(), 1500, 3600, 50)["backed"])
 
     def test_age_exactly_max(self):
-        self.assertTrue(GT.gate_answer(self.latest(), 4600, 3600)["backed"])
+        self.assertTrue(GT.gate_answer(self.latest(), 4600, 3600, 50)["backed"])
 
     def test_age_one_over(self):
-        o = GT.gate_answer(self.latest(), 4601, 3600)
+        o = GT.gate_answer(self.latest(), 4601, 3600, 50)
         self.assertEqual((o["backed"], o["reason"]), (False, "STALE_3601S_OVER_3600S"))
 
     def test_under(self):
-        self.assertEqual(GT.gate_answer(self.latest(verdict="UNDER_BACKED"), 1500, 3600)["reason"], "UNDER_BACKED")
+        self.assertEqual(GT.gate_answer(self.latest(verdict="UNDER_BACKED"), 1500, 3600, 50)["reason"], "UNDER_BACKED")
 
     def test_inconclusive(self):
-        o = GT.gate_answer(self.latest(verdict="INCONCLUSIVE", status="INCONCLUSIVE"), 1500, 3600)
+        o = GT.gate_answer(self.latest(verdict="INCONCLUSIVE", status="INCONCLUSIVE"), 1500, 3600, 50)
         self.assertEqual(o["reason"], "INCONCLUSIVE")
 
     def test_never_checked(self):
-        self.assertEqual(GT.gate_answer({"found": False, "pair": True}, 1, 60)["reason"], "NEVER_CHECKED")
+        self.assertEqual(GT.gate_answer({"found": False, "pair": True}, 1, 60, 50)["reason"], "NEVER_CHECKED")
 
     def test_no_pair(self):
-        self.assertEqual(GT.gate_answer({"found": False, "pair": False}, 1, 60)["reason"], "NO_SUCH_PAIR")
+        self.assertEqual(GT.gate_answer({"found": False, "pair": False}, 1, 60, 50)["reason"], "NO_SUCH_PAIR")
 
     def test_unreadable(self):
-        self.assertEqual(GT.gate_answer(None, 1, 60)["reason"], "REGISTRY_UNREADABLE")
+        self.assertEqual(GT.gate_answer(None, 1, 60, 50)["reason"], "REGISTRY_UNREADABLE")
 
     def test_future(self):
-        self.assertEqual(GT.gate_answer(self.latest(source_time=2000), 1500, 3600)["reason"], "RULING_FROM_THE_FUTURE")
+        self.assertEqual(GT.gate_answer(self.latest(source_time=2000), 1500, 3600, 50)["reason"], "RULING_FROM_THE_FUTURE")
 
     def test_not_final(self):
-        self.assertEqual(GT.gate_answer(self.latest(status="PROVISIONAL"), 1500, 3600)["reason"], "LATEST_RULING_NOT_FINAL")
+        self.assertEqual(GT.gate_answer(self.latest(status="PROVISIONAL"), 1500, 3600, 50)["reason"], "LATEST_RULING_NOT_FINAL")
 
     def test_no_clock(self):
-        self.assertFalse(GT.gate_answer(self.latest(), 0, 3600)["backed"])
+        self.assertFalse(GT.gate_answer(self.latest(), 0, 3600, 50)["backed"])
 
 
 def _sweep():
