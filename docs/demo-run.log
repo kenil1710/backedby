@@ -4,3 +4,55 @@ config: window 90s, read timeout 300s, unbond delay 120s, min bond 5000000000000
 
 ## 1. Register four real pairs (authenticated by each bridge's own mapping)  (2026-10-16T21:58:13.851Z)
   authenticate(["arbitrum","0x514910771af9ca656af840dff83e8264ecf986ca","0xf97f4df75117a78c1a5a0dbb814af92458539fb4"]) -> ok ACCEPTED 25s tx 0xda34c12e494645fbb2c913e976f50ca0b44e04c754ff1c1a6c619a0691f5092a {"auth_id":4,"dest_decimals":18,"source_decimals":18,"vault":"0xa3a7b6f88361f48403514059f1f16c8e78d60eec"}
+  register_pair(["4",0,"LINK on Arbitrum (demo)"]) -> ok ACCEPTED 14s tx 0x4c1260cd07fc0c79068b28961d29e1e281edf6a396cbe8a692550080627a0083 {"destinations":1,"ok":true,"pair_id":1}
+   -> pair 1: LINK on Arbitrum (demo)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> FAILED ACCEPTED 11s tx 0xbed41c5124d75bb9def570c5e1ddbc4f1bbe1f940caf9a12eab0c14206d6ace2 revert: REFUSED: RPC_UNREADABLE
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for register_pair (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  register_pair(["0",0,"USDT on Polygon (demo)"]) -> FAILED ACCEPTED 14s tx 0x82a0c27a065588c3c5c48d6e09787b3ebca8c74752c77136254af522267f40fc revert: REFUSED: AUTH_IDS_MUST_BE_POSITIVE_INTEGERS
+   -> pair 0: USDT on Polygon (demo)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["nomad","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x8f552a71efe5eefc207bf75485b356a0b3f01ec9"]) -> FAILED ACCEPTED 12s tx 0x227ce0e0e6eb34f37e05ac5df779bd032e0cc2c5b0d1483d5864f32b768b8ed0 revert: REFUSED: RPC_UNREADABLE
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for register_pair (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  register_pair(["0",0,"madUSDC on Moonbeam (demo)"]) -> FAILED ACCEPTED 11s tx 0x507bc341c28a998c01dded7d0d84f5add72402f949e042d86b3c2461c658dbd2 revert: REFUSED: AUTH_IDS_MUST_BE_POSITIVE_INTEGERS
+   -> pair 0: madUSDC on Moonbeam (demo)
+GenLayer RPC error (eth_getTransactionByHash): Could not reach the GenLayer RPC at https://studio-dev.genlayer.com/api.
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x7f5c764cbc14f9669b88837ca1490cca17c31607"]) -> FAILED ACCEPTED 29s tx 0xff798fa6f9f3f283fdfd6d510f0569ca7bbe6b8e97e638b9fa794267c92dba0d revert: REFUSED: RPC_UNREADABLE
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for register_pair (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  register_pair(["0",0,"USDC.e on OP Mainnet (demo)"]) -> FAILED ACCEPTED 11s tx 0xdb54884b81398d007f03db3e35484f2496f449ef46326aee8b849308127d24da revert: REFUSED: AUTH_IDS_MUST_BE_POSITIVE_INTEGERS
+   -> pair 0: USDC.e on OP Mainnet (demo)
+
+## 2. A fake pair is refused: Circle's native USDC on OP passed off as the bridge's token  (2026-10-16T22:00:40.986Z)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x0b2c639c533813f4aa9d7837caf62653d097ff85"]) -> FAILED ACCEPTED 19s tx 0xacfacafd295de8b72c2f4b58ed5b6c6a46603ebce91f6090e0c227cbb9ecb3bf revert: REFUSED: NOT_AUTHENTICATED: REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN
+
+## 3. Anyone adds a destination the pair is missing (a second Standard Bridge USDC on OP), with the same proof  (2026-10-16T22:01:00.624Z)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)

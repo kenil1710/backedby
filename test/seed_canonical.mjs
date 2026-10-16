@@ -37,7 +37,11 @@ if (process.argv[1].endsWith("seed_canonical.mjs")) {
   const save = () => writeFileSync(path, JSON.stringify(st, null, 2) + "\n");
   const a = actor({ role: "seeder", registry: "BackedByRegistry", log: (m) => console.log(m) });
   console.log(`\n=== seed run ${new Date().toISOString()}`);
-  for (const [kind, sym, l2, label] of SEEDS) {
+  for (let pass = 1; pass <= 4; pass++) {
+  const todo = SEEDS.filter(([, , , label]) => !["PROVISIONAL", "FINAL", "CONTESTED"].includes(st.seeds[label]?.status));
+  if (todo.length === 0) break;
+  console.log(`\n--- pass ${pass}: ${todo.length} to do`);
+  for (const [kind, sym, l2, label] of todo) {
     const k = label;
     const s = (st.seeds[k] ??= { kind, sym, l1: L1[sym], l2, label });
     console.log(`\n== ${label}`);
@@ -66,5 +70,6 @@ if (process.argv[1].endsWith("seed_canonical.mjs")) {
     save();
     console.log(`RESULT ${label}: check ${s.check_id} ${c.status} ${c.verdict1 || c.verdict} ratio_bps ${c.ruling1?.ratio_bps} ${c.reason || ""}`);
     if (c.status === "INCONCLUSIVE") { delete s.check_id; save(); }
+  }
   }
 }

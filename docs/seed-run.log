@@ -21,3 +21,74 @@ RESULT WBTC on Arbitrum: check 2 PROVISIONAL BACKED ratio_bps 10080
   authenticate(["arbitrum","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> ok ACCEPTED 17s tx 0x7b0b0cc931fc1bdb71f614b10c5f98c85b542326373e4b3d9a306ace8d30c759 {"auth_id":3,"dest_decimals":18,"source_decimals":18,"vault":"0xa10c7ce4b876998858b1a9e12b10092229539400"}
   register_pair(["3",0,"DAI on Arbitrum"]) -> ok ACCEPTED 13s tx 0xb7a247fbe430b4406b1334fc239c27d89c0059920b3c4d5a2d653a7297d7cc6e {"destinations":1,"ok":true,"pair_id":3}
   monitor([3,"{\"ethereum\":26207840,\"arbitrum\":515496520}"]) -> ok ACCEPTED 20s tx 0x49bb0cd1a7d05092bdfeadd0bd3c98bc6cb7bdb6978daacd9084e2a60af5f4fc {"check_id":3,"ok":true}
+  read_check(["0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD",3,1]) -> ok ACCEPTED 17s tx 0x986e0254373fe9c9485469dcc8d7206cc0cf1df5b91898017dd691bca298e55b {"key":"0xb136aab44b83e3408ef1a421801271dba8ff1ded|3|1","reason":"RPC_UNREADABLE","status":"INCONCLUSIVE"}
+  rule([3]) -> ok ACCEPTED 15s tx 0x3d4112a3e3882b5f3468024d9fa252ae21088dc065392bbb42a000145ac54924 {"check_id":3,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"0"},"reason":"RPC_UNREADABLE","status":"INCONCLUSIVE"}
+RESULT DAI on Arbitrum: check 3 INCONCLUSIVE INCONCLUSIVE ratio_bps -1 RPC_UNREADABLE
+
+== wstETH on Arbitrum
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["arbitrum","0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0","0x5979d7b546e38e414f7e9822514be443a4800529"]) -> FAILED ACCEPTED 14s tx 0xb9fb8be572400f7cb255ca9e847415c2bf8398e852a63409040887125a5575c3 revert: REFUSED: RPC_UNREADABLE
+  auth failed, skipping for now
+
+== USDC.e on OP Mainnet
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+GenLayer RPC error (eth_sendRawTransaction): NonceTooLow(expected=21,actual=20)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x7f5c764cbc14f9669b88837ca1490cca17c31607"]) -> FAILED UNSETTLED 5s tx null revert: submit failed — Invalid parameters were provided to the RPC method.
+Double check you have provided the correct parameters.
+
+Details: NonceTooLow(expected=21,actual=20)
+Version: viem@2.57.7
+  auth failed, skipping for now
+
+== WBTC on OP Mainnet
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["optimism","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x68f180fcce6836688e9084f035309e29bf0a2095"]) -> FAILED ACCEPTED 13s tx 0x2146d1ef25434b132737a727ff2e4d1747ace14c0168c51993ba6212e0f6673c revert: REFUSED: RPC_UNREADABLE
+  auth failed, skipping for now
+
+== DAI on OP Mainnet
+  authenticate(["op_dai","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> ok ACCEPTED 27s tx 0xb4a780ff1057111a0e9545566471e6e6587caac1ebf8c8d8e32168771b311e7e {"auth_id":5,"dest_decimals":18,"source_decimals":18,"vault":"0x467194771dae2967aef3ecbedd3bf9a310c76c65"}
+  register_pair(["5",0,"DAI on OP Mainnet"]) -> ok ACCEPTED 12s tx 0x4dfaa67a4610920f0233205d1af4f3ea6703cc7c6406379a8f7db488029e70f2 {"destinations":1,"ok":true,"pair_id":4}
+GenLayer RPC error (eth_sendRawTransaction): NonceTooLow(expected=28,actual=27)
+  monitor([4,"{\"ethereum\":26207840,\"optimism\":158293963}"]) -> FAILED UNSETTLED 7s tx null revert: submit failed — Invalid parameters were provided to the RPC method.
+Double check you have provided the correct parameters.
+
+Details: NonceTooLow(expected=28,actual=27)
+Version: viem@2.57.7
+  monitor failed
+
+== USDbC on Base
+  authenticate(["base","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca"]) -> FAILED ACCEPTED 21s tx 0x7c44dffe803902ddf05fd6ed512bfc7bca898adf0f4c2fbee0177883fa533dbc revert: REFUSED: RPC_UNREADABLE
+  auth failed, skipping for now
+
+== cbETH on Base
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["base","0xbe9895146f7af43049ca1c1ae358b0541ea49704","0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22"]) -> FAILED ACCEPTED 23s tx 0x09706bc0757c27d2d454c7e5e968a5b70f30ead6a10703e0afe8d4cd86c90827 revert: REFUSED: RPC_UNREADABLE
+  auth failed, skipping for now
+
+== USDC.e on Polygon
+  authenticate(["polygon","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x2791bca1f2de4661ed88a30c99a7a9449aa84174"]) -> ok ACCEPTED 19s tx 0x0656f89e9e1c22fdbf9f509d1740c4a58efdb28a4a875ef1d64c9cd3c65a1af2 {"auth_id":6,"dest_decimals":6,"source_decimals":6,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["6",0,"USDC.e on Polygon"]) -> ok ACCEPTED 14s tx 0x0a253496926bc9a7a91b052343dc4300189ef7c5d70012d8e4630f413a04528f {"destinations":1,"ok":true,"pair_id":5}
+  monitor([5,"{\"ethereum\":26207887,\"polygon\":95654615}"]) -> ok ACCEPTED 21s tx 0xcbe75b56d603b78b74e1cb8fea02cff52e4b2ff75fefa6a46b2963482ccba1c6 {"check_id":4,"ok":true}
+  read_check(["0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD",4,1]) -> ok ACCEPTED 17s tx 0x729478ecec41155b5e2771adc49d7bd4f35ce35cf3ae9d365f17cf110838b1df {"key":"0xb136aab44b83e3408ef1a421801271dba8ff1ded|4|1","reason":"","status":"OK"}
+  rule([4]) -> ok ACCEPTED 13s tx 0xba381981a2d7e6a229deb822b3d7cb1e192f48d1c05f46d2c08db10a7c80174a {"check_id":4,"contestable_until":1792209788,"ok":true,"ratio_bps":10005,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT USDC.e on Polygon: check 4 PROVISIONAL BACKED ratio_bps 10005 
+
+== WBTC on Polygon
+  authenticate(["polygon","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6"]) -> ok ACCEPTED 16s tx 0x28efd4ff13b6f3fe1d81ec839b4debd742f0eecd26535006086986ef3b8b3f89 {"auth_id":7,"dest_decimals":8,"source_decimals":8,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["7",0,"WBTC on Polygon"]) -> ok ACCEPTED 15s tx 0xecea036a8aa1fb4ed980dd6fb426b9c51af25c9d569c03b27c2040679d2b9a2e {"destinations":1,"ok":true,"pair_id":6}

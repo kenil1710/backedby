@@ -56,12 +56,97 @@
       "auth_tx": "0x7b0b0cc931fc1bdb71f614b10c5f98c85b542326373e4b3d9a306ace8d30c759",
       "pair_id": 3,
       "register_tx": "0xb7a247fbe430b4406b1334fc239c27d89c0059920b3c4d5a2d653a7297d7cc6e",
-      "check_id": 3,
       "blocks": {
         "ethereum": 26207840,
         "arbitrum": 515496520
       },
-      "monitor_tx": "0x49bb0cd1a7d05092bdfeadd0bd3c98bc6cb7bdb6978daacd9084e2a60af5f4fc"
+      "monitor_tx": "0x49bb0cd1a7d05092bdfeadd0bd3c98bc6cb7bdb6978daacd9084e2a60af5f4fc",
+      "read_tx": "0x986e0254373fe9c9485469dcc8d7206cc0cf1df5b91898017dd691bca298e55b",
+      "status": "INCONCLUSIVE",
+      "verdict1": "",
+      "ratio_bps": -1,
+      "contest_deadline": 0,
+      "reason": "RPC_UNREADABLE"
+    },
+    "wstETH on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "wstETH",
+      "l1": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+      "l2": "0x5979d7b546e38e414f7e9822514be443a4800529",
+      "label": "wstETH on Arbitrum"
+    },
+    "USDC.e on OP Mainnet": {
+      "kind": "optimism",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+      "label": "USDC.e on OP Mainnet"
+    },
+    "WBTC on OP Mainnet": {
+      "kind": "optimism",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+      "label": "WBTC on OP Mainnet"
+    },
+    "DAI on OP Mainnet": {
+      "kind": "op_dai",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+      "label": "DAI on OP Mainnet",
+      "auth_id": 5,
+      "auth_tx": "0xb4a780ff1057111a0e9545566471e6e6587caac1ebf8c8d8e32168771b311e7e",
+      "pair_id": 4,
+      "register_tx": "0x4dfaa67a4610920f0233205d1af4f3ea6703cc7c6406379a8f7db488029e70f2"
+    },
+    "USDbC on Base": {
+      "kind": "base",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca",
+      "label": "USDbC on Base"
+    },
+    "cbETH on Base": {
+      "kind": "base",
+      "sym": "cbETH",
+      "l1": "0xbe9895146f7af43049ca1c1ae358b0541ea49704",
+      "l2": "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22",
+      "label": "cbETH on Base"
+    },
+    "USDC.e on Polygon": {
+      "kind": "polygon",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "label": "USDC.e on Polygon",
+      "auth_id": 6,
+      "auth_tx": "0x0656f89e9e1c22fdbf9f509d1740c4a58efdb28a4a875ef1d64c9cd3c65a1af2",
+      "pair_id": 5,
+      "register_tx": "0x0a253496926bc9a7a91b052343dc4300189ef7c5d70012d8e4630f413a04528f",
+      "check_id": 4,
+      "blocks": {
+        "ethereum": 26207887,
+        "polygon": 95654615
+      },
+      "monitor_tx": "0xcbe75b56d603b78b74e1cb8fea02cff52e4b2ff75fefa6a46b2963482ccba1c6",
+      "read_tx": "0x729478ecec41155b5e2771adc49d7bd4f35ce35cf3ae9d365f17cf110838b1df",
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10005,
+      "contest_deadline": 1792209788,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "WBTC on Polygon": {
+      "kind": "polygon",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "label": "WBTC on Polygon",
+      "auth_id": 7,
+      "auth_tx": "0x28efd4ff13b6f3fe1d81ec839b4debd742f0eecd26535006086986ef3b8b3f89",
+      "pair_id": 6,
+      "register_tx": "0xecea036a8aa1fb4ed980dd6fb426b9c51af25c9d569c03b27c2040679d2b9a2e"
     }
   }
 }

@@ -39,8 +39,13 @@ for (const [key, kind, sym, l2, label] of [
   ["nomad", "nomad", "USDC", "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9", "madUSDC on Moonbeam (demo)"],
   ["op", "optimism", "USDC", "0x7f5c764cbc14f9669b88837ca1490cca17c31607", "USDC.e on OP Mainnet (demo)"],
 ]) {
-  const au = await seeder.authenticate(kind, L1[sym], l2);
-  const r = await seeder.register([au.auth_id], 0, label);
+  const have = (await seeder.rv("get_pairs", [0, 50])).pairs.find((p) => p.label === label);
+  if (have) { P[key] = have.pair_id; log(`   -> pair ${have.pair_id}: ${label} (registered in an earlier pass)`); continue; }
+  let r = { pair_id: 0 };
+  for (let i = 0; i < 4 && !r.pair_id; i++) {
+    const au = await seeder.authenticate(kind, L1[sym], l2);
+    if (au.auth_id) r = await seeder.register([au.auth_id], 0, label);
+  }
   P[key] = r.pair_id;
   log(`   -> pair ${r.pair_id}: ${label}`);
 }
@@ -50,7 +55,8 @@ await seeder.authenticate("optimism", L1.USDC, "0x0b2c639c533813f4aa9d7837caf626
 
 step("3. Anyone adds a destination the pair is missing (a second Standard Bridge USDC on OP), with the same proof");
 const extra = "0x130c1dcc9fd997fa02f555dad54edaf553f2555a";
-const ax = await ct.authenticate("optimism", L1.USDC, extra);
+let ax = { auth_id: 0 };
+for (let i = 0; i < 4 && !ax.auth_id; i++) ax = await ct.authenticate("optimism", L1.USDC, extra);
 await ct.send("reg", "add_destination", [P.op, ax.auth_id]);
 log(`   -> pair ${P.op} destinations: ${(await ct.rv("get_pair", [P.op])).dests.map((d) => d.token + "/" + d.decimals).join(", ")}`);
 log("   adding the same destination again is refused:");
