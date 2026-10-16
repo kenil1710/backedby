@@ -3,6 +3,7 @@
 import genlayer as gl
 from genlayer import *
 from dataclasses import dataclass
+import hashlib
 import json
 import typing
 

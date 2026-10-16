@@ -620,14 +620,15 @@ class BackedByRegistry(gl.contract.Contract):
             dk = a["dest_chain"] + "|" + a["dest_token"]
             if dk in seen:
                 raise gl.vm.UserError("REFUSED: DUPLICATE_DESTINATION")
-            if int(self.dest_owner.get(dk, u64(0))) != 0:
-                raise gl.vm.UserError("REFUSED: DESTINATION_ALREADY_IN_PAIR_" + str(int(self.dest_owner.get(dk, u64(0)))))
             seen.append(dk)
             auths.append(a)
         f = auths[0]
         key = SOURCE_CHAIN + "|" + f["vault"] + "|" + f["source_token"]
         if int(self.pair_by_key.get(key, u64(0))) != 0:
             raise gl.vm.UserError("REFUSED: PAIR_EXISTS_AS_" + str(int(self.pair_by_key.get(key, u64(0)))) + "_ADD_A_DESTINATION_INSTEAD")
+        for dk in seen:
+            if int(self.dest_owner.get(dk, u64(0))) != 0:
+                raise gl.vm.UserError("REFUSED: DESTINATION_ALREADY_IN_PAIR_" + str(int(self.dest_owner.get(dk, u64(0)))))
         dests = [{"chain": a["dest_chain"], "token": a["dest_token"], "decimals": int(a["dest_decimals"]),
                   "auth_id": int(a["auth_id"]), "added_by": self._sender(), "added_at": now} for a in auths]
         # --- writes
@@ -952,25 +953,22 @@ class BackedByRegistry(gl.contract.Contract):
         c = self.checks.get(u64(max(_as_int(check_id, 0), 0)))
         if c is None:
             raise gl.vm.UserError("REFUSED: NO_SUCH_CHECK")
-        me = gl.message.contract_address.as_hex.lower()
+        if c.status != ST_OPEN and c.status != ST_CONT:
+            raise gl.vm.UserError("REFUSED: NOTHING_TO_EXPIRE_IN_" + c.status)
+        rnd = 1 if c.status == ST_OPEN else 2
+        deadline = int(c.read_deadline) if rnd == 1 else int(c.contest_read_deadline)
+        if now < deadline:
+            raise gl.vm.UserError(("REFUSED: READ_DEADLINE_AT_" if rnd == 1 else "REFUSED: REREAD_DEADLINE_AT_") + str(deadline))
+        r = self._ext("get_reading", [gl.message.contract_address.as_hex.lower(), int(c.check_id), rnd])
+        if isinstance(r, dict) and r.get("found") is True:
+            raise gl.vm.UserError("REFUSED: A_READING_EXISTS_CALL_RULE")
         p = self.pairs[c.pair_id]
-        if c.status == ST_OPEN:
-            if now < int(c.read_deadline):
-                raise gl.vm.UserError("REFUSED: READ_DEADLINE_AT_" + str(int(c.read_deadline)))
-            r = self._ext("get_reading", [me, int(c.check_id), 1])
-            if isinstance(r, dict) and r.get("found") is True:
-                raise gl.vm.UserError("REFUSED: A_READING_EXISTS_CALL_RULE")
+        # --- writes
+        if rnd == 1:
             pay = self._refund_all(c, p, "NO_READING_BEFORE_DEADLINE", "TIMEOUT_UNREAD", now, False)
             return {"ok": True, "check_id": int(c.check_id), "status": ST_INC, "payouts": pay}
-        if c.status == ST_CONT:
-            if now < int(c.contest_read_deadline):
-                raise gl.vm.UserError("REFUSED: REREAD_DEADLINE_AT_" + str(int(c.contest_read_deadline)))
-            r = self._ext("get_reading", [me, int(c.check_id), 2])
-            if isinstance(r, dict) and r.get("found") is True:
-                raise gl.vm.UserError("REFUSED: A_READING_EXISTS_CALL_RULE")
-            pay = self._settle(c, p, c.verdict1, now, "TIMEOUT_CONTEST_UNREAD", json.loads(c.ruling1_json)["reason"], "")
-            return {"ok": True, "check_id": int(c.check_id), "status": ST_FINAL, "verdict": c.verdict1, "payouts": pay}
-        raise gl.vm.UserError("REFUSED: NOTHING_TO_EXPIRE_IN_" + c.status)
+        pay = self._settle(c, p, c.verdict1, now, "TIMEOUT_CONTEST_UNREAD", json.loads(c.ruling1_json)["reason"], "")
+        return {"ok": True, "check_id": int(c.check_id), "status": ST_FINAL, "verdict": c.verdict1, "payouts": pay}
 
     @gl.public.write
     def claim(self) -> typing.Any:

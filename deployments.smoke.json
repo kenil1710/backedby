@@ -5,16 +5,16 @@
   "explorer": "https://explorer-studio-dev.genlayer.com/",
   "contracts": {
     "ChainReader": {
-      "address": "0x147a98A729410C1620D2F5572887E434d44d9826",
-      "deploy_tx": "0xcec0733fc2b88f129b4713e4a2ba0640eb16fa08332a3a9e23cdf7aa63617a06",
+      "address": "0x24d103571a6430a578756746F5dF63195Efb00d4",
+      "deploy_tx": "0x11783538a0f760e2862a37ac91251aca8c98fe3dbd393aec2e459cb56cc21f45",
       "file": "build/ChainReader.py",
       "source": "contracts/ChainReader.py",
-      "commit": "55270d38e8cf1c8efeeb682b6b85e86b8f6fb785",
-      "bytes": 37805,
-      "sha256": "fe4bb649a16a2862783273e80766943f19b345eb5356fb4804666666fed91cb5",
+      "commit": "629e3116cbc43344b861ef9ab3dacb3ed8672fd9",
+      "bytes": 37809,
+      "sha256": "462a846667b994135ec273370a4b55c4040c47de9f0fbf8641c561897e363e32",
       "constructor_args": [],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
-      "deployed_at": "2026-10-16T21:08:03.785Z"
+      "deployed_at": "2026-10-16T21:16:06.584Z"
     },
     "BackedByRegistryDemo": {
       "address": "0xBc0e9bf54cB0CFc2FBBcf212cb63Ee1628bF49C0",
@@ -48,5 +48,22 @@
       "deployed_at": "2026-10-16T21:08:22.989Z",
       "mode": "DEMO"
     }
-  }
+  },
+  "superseded": [
+    {
+      "name": "ChainReader",
+      "address": "0x147a98A729410C1620D2F5572887E434d44d9826",
+      "deploy_tx": "0xcec0733fc2b88f129b4713e4a2ba0640eb16fa08332a3a9e23cdf7aa63617a06",
+      "file": "build/ChainReader.py",
+      "source": "contracts/ChainReader.py",
+      "commit": "55270d38e8cf1c8efeeb682b6b85e86b8f6fb785",
+      "bytes": 37805,
+      "sha256": "fe4bb649a16a2862783273e80766943f19b345eb5356fb4804666666fed91cb5",
+      "constructor_args": [],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-16T21:08:03.785Z",
+      "superseded_by": "0x24d103571a6430a578756746F5dF63195Efb00d4",
+      "why": "redeployed"
+    }
+  ]
 }

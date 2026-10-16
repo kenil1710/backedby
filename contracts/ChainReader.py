@@ -340,13 +340,17 @@ def _req_ok(req: typing.Any) -> str:
 
 def read_at(req: dict) -> dict:
     """Everything a check needs, at the pinned blocks, from both RPCs.
-    Always returns a record; INCONCLUSIVE carries the reason."""
+    Always returns a record; INCONCLUSIVE carries the reason. Block headers
+    are read first and kept when a later read fails, so an INCONCLUSIVE that
+    is about the pair still says WHEN it was observed."""
     blocks = {}
     for c in req["blocks"]:
         blocks[c] = _as_int(req["blocks"][c], -1)
     out = {"status": "INCONCLUSIVE", "reason": "", "blocks": {}, "locked": "", "source_decimals": -1, "dests": []}
+    names = sorted(list(blocks.keys()))
+    # phase 1: finality and the pinned headers, every chain
     try:
-        for c in sorted(list(blocks.keys())):
+        for c in names:
             low = finalized_low(c)
             if low is None:
                 out["reason"] = "RPC_UNREADABLE"
@@ -354,26 +358,40 @@ def read_at(req: dict) -> dict:
             if blocks[c] > low["number"]:
                 out["reason"] = "BLOCK_NOT_FINALIZED:" + c
                 return out
-        # source chain: header, vault balance, decimals, per-pair deposits
+        heads = {}
+        for c in names:
+            h = dual_read(c, [get_block(blocks[c])])[0]
+            if h is None or h["number"] != blocks[c]:
+                out["reason"] = "BLOCK_MISSING:" + c
+                return out
+            heads[c] = h
+    except ReadFailed:
+        out["reason"] = "RPC_UNREADABLE"
+        return out
+    except Disagree:
+        out["reason"] = "RPC_DISAGREE"
+        return out
+    except Exception:
+        out["reason"] = "MALFORMED_ANSWER"
+        return out
+    out["blocks"] = heads
+    # phase 2: balances, supplies, decimals, deposits at those blocks
+    try:
         src = req["source_chain"]
         be = blocks[src]
-        calls = [get_block(be), eth_call(req["source_token"], S_BALANCE + _pad(req["vault"]), be),
+        calls = [eth_call(req["source_token"], S_BALANCE + _pad(req["vault"]), be),
                  eth_call(req["source_token"], S_DECIMALS, be)]
         for d in req["dests"]:
             if d.get("deposits") is True:
                 calls.append(eth_call(req["vault"], S_DEPOSITS + _pad(req["source_token"]) + _pad(d["token"]), be))
         r = dual_read(src, calls)
-        if r[0] is None or r[0]["number"] != be:
-            out["reason"] = "BLOCK_MISSING:" + src
-            return out
-        out["blocks"][src] = r[0]
-        locked = _word(r[1])
-        sdec = _word(r[2])
+        locked = _word(r[0])
+        sdec = _word(r[1])
         if locked < 0 or sdec < 0 or sdec > MAX_DECIMALS:
             out["reason"] = "CALL_FAILED:" + src
             return out
         deps = []
-        k = 3
+        k = 2
         for d in req["dests"]:
             if d.get("deposits") is True:
                 v = _word(r[k])
@@ -384,13 +402,12 @@ def read_at(req: dict) -> dict:
                 deps.append(str(v))
             else:
                 deps.append("")
-        # destination chains
         rows = []
-        for c in sorted(list(blocks.keys())):
+        for c in names:
             if c == src:
                 continue
             idx = []
-            calls = [get_block(blocks[c])]
+            calls = []
             for i in range(len(req["dests"])):
                 d = req["dests"][i]
                 if d["chain"] == c:
@@ -398,13 +415,9 @@ def read_at(req: dict) -> dict:
                     calls.append(eth_call(d["token"], S_SUPPLY, blocks[c]))
                     calls.append(eth_call(d["token"], S_DECIMALS, blocks[c]))
             g = dual_read(c, calls)
-            if g[0] is None or g[0]["number"] != blocks[c]:
-                out["reason"] = "BLOCK_MISSING:" + c
-                return out
-            out["blocks"][c] = g[0]
             for j in range(len(idx)):
-                sup = _word(g[1 + 2 * j])
-                dec = _word(g[2 + 2 * j])
+                sup = _word(g[2 * j])
+                dec = _word(g[2 * j + 1])
                 if sup < 0 or dec < 0 or dec > MAX_DECIMALS:
                     out["reason"] = "CALL_FAILED:" + c
                     return out
@@ -418,15 +431,12 @@ def read_at(req: dict) -> dict:
         return out
     except ReadFailed:
         out["reason"] = "RPC_UNREADABLE"
-        out["blocks"] = {}
         return out
     except Disagree:
         out["reason"] = "RPC_DISAGREE"
-        out["blocks"] = {}
         return out
     except Exception:
         out["reason"] = "MALFORMED_ANSWER"
-        out["blocks"] = {}
         return out
 
 

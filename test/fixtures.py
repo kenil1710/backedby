@@ -285,7 +285,7 @@ class Setup:
         n.balance("ethereum", USDC, ARB_GW, 1_000_000 * 10 ** 6)
         n.balance("ethereum", WBTC, ARB_GW, 100 * 10 ** 8)
         n.balance("ethereum", DAI, ARB_DAI_ESCROW, 5_000 * GEN)
-        n.balance("ethereum", USDC, CR.OP_L1_BRIDGE, 500_000 * 10 ** 6)
+        n.balance("ethereum", USDC, CR.OP_L1_BRIDGE, 500_000 * 10 ** 6 + 1)   # + the 1 wei deposited for OP_FAKE
         n.deposits(CR.OP_L1_BRIDGE, USDC, OP_USDC, 500_000 * 10 ** 6)
         n.deposits(CR.OP_L1_BRIDGE, USDC, OP_FAKE, 1)
         n.balance("ethereum", DAI, OP_DAI_ESCROW, 1_000 * GEN)
