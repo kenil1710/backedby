@@ -99,7 +99,7 @@ UNDER_BACKED, and the contract will say so; the README explains why that is the 
 
 ## Decision
 
-Feasible: ${ok.length} readable pairs (need 10+), ${under.length} real UNDER_BACKED (need 1+). Continue with all five bridge
+Feasible: ${ok.length} readable pairs (need 10+), ${under.length} real UNDER_BACKED (need 1+). Continue with all six bridge
 kinds; seed the canonical registry with a mix of BACKED pairs and every UNDER_BACKED one.
 `;
 writeFileSync(new URL("../docs/FEASIBILITY.md", import.meta.url), md);

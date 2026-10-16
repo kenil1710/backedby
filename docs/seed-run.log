@@ -129,3 +129,5 @@ GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
 GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
 <h"... is not valid JSON
   … read_check attempt 4 hit transient RPC noise, waiting 16s
+  read_check(["0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD",5,1]) -> FAILED UNSETTLED 124s tx null revert: submit failed — Transaction reverted: EVM tx 0x6e668609d41d4c7af2391c53b4b0a25b5399cc3929639c4ad66c1d03e3e52492. FeeValueMustBeNonZero(1)
+  ... read attempt 1 did not record, retrying in 20s

@@ -129,5 +129,5 @@ UNDER_BACKED, and the contract will say so; the README explains why that is the 
 
 ## Decision
 
-Feasible: 36 readable pairs (need 10+), 6 real UNDER_BACKED (need 1+). Continue with all five bridge
+Feasible: 36 readable pairs (need 10+), 6 real UNDER_BACKED (need 1+). Continue with all six bridge
 kinds; seed the canonical registry with a mix of BACKED pairs and every UNDER_BACKED one.
