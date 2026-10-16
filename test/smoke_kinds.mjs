@@ -2,6 +2,7 @@
 // (authenticate -> register -> monitor at fresh pins -> read -> rule).
 import { actor } from "../tools/lib/flow.mjs";
 const a = actor({ set: "smoke", role: "probe", registry: "BackedByRegistryDemo" });
+const ONLY = process.argv.find((x) => x.startsWith("--only="))?.slice(7);
 const K = [
   ["arbitrum", "0x514910771af9ca656af840dff83e8264ecf986ca", "0xf97f4df75117a78c1a5a0dbb814af92458539fb4"],
   ["optimism", "0x514910771af9ca656af840dff83e8264ecf986ca", "0x350a791bfc2c21f9ed5d10980dad2e2638ffa7f6"],
@@ -10,7 +11,7 @@ const K = [
   ["polygon", "0xdac17f958d2ee523a2206206994597c13d831ec7", "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"],
   ["nomad", "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9"],
 ];
-for (const [kind, l1, l2] of K) {
+for (const [kind, l1, l2] of K.filter((k) => !ONLY || ONLY.split(",").includes(k[0]))) {
   console.log(`\n== ${kind}`);
   const au = await a.authenticate(kind, l1, l2);
   if (!au.auth_id) continue;

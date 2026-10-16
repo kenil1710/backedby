@@ -30,7 +30,7 @@ Both RPCs agreed on every value of every authenticated pair: ${ok.every((r) => r
 |---|---|---|---|
 ${Object.entries(CHAINS).map(([c, v]) => `| ${c} | ${v.rpcs[0]} | ${v.rpcs[1]} | both serve state 72 h+ back |`).join("\n")}
 
-Probed and rejected (no archive state, key required, batch refused, or down): publicnode (archive needs a token),
+Probed and rejected (no archive state, key required, batch refused, or down): mainnet.base.org (answers from a laptop but\nnot from GenVM validators on Studio Dev; replaced by base-pokt.nodies.app), publicnode (archive needs a token),
 arb1.arbitrum.io (state pruned after ~6 h, too short for a 6 h contest window), arbitrum.drpc.org, 1rpc.io,
 polygon-rpc.com, llamarpc, cloudflare-eth, blastapi (shut down), ankr (key), blockpi (key), omniatech (down),
 moonbeam.unitedbloc / rpc.api.moonbeam.network (unreachable). dRPC's free tier caps a JSON-RPC batch at 3 calls;
