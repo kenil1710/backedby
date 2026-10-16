@@ -16,3 +16,5 @@ docs/demo/raw/
 scratch/
 test/.patrol_secret
 docs/demo/.work-*/
+frontend/.next/
+frontend/node_modules/

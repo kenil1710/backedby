@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* BackedBy - graphite and steel. One dark theme by design: the board is read
+   like an instrument panel. Signal colours carry meaning and nothing else. */
+@theme {
+  --color-ground: #1b1e23;      /* page */
+  --color-plate: #22262c;       /* raised surfaces */
+  --color-plate-2: #2a2f36;     /* hover / inset */
+  --color-seam: #363c45;        /* rules and borders */
+  --color-ink: #e3e7ec;
+  --color-ink-2: #a3acb7;
+  --color-ink-3: #6f7883;
+  --color-steel: #7fa3c7;       /* the bridge: links, focus, structure */
+  --color-steel-deep: #3f5e7d;
+  --color-backed: #4cc38a;
+  --color-under: #ef5b52;
+  --color-inconc: #e9ad3c;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, monospace;
+}
+
+:root { color-scheme: dark; }
+html { background: var(--color-ground); }
+body { background: var(--color-ground); color: var(--color-ink); font-family: var(--font-sans); font-feature-settings: "ss01"; }
+::selection { background: var(--color-steel-deep); color: #fff; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--color-steel); outline-offset: 2px; border-radius: 3px; }
+
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.wide { font-stretch: 112%; }
+.narrow { font-stretch: 88%; }
+
+/* the span: deck fill grows to the ratio once, on first paint */
+@keyframes deck { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.deck-fill { transform-origin: left center; animation: deck 900ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.live { animation: pulse 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .deck-fill, .live { animation: none; } }
+
+/* hatched ground under a missing / unknown span */
+.hatch { background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(127,163,199,.12) 6px 7px); }
