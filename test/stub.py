@@ -388,6 +388,7 @@ class _Web:
         self.rpc_status = {}    # rpc url -> forced HTTP status
         self.validator_hook = None
         self.leader_hook = None
+        self.tamper = {}        # rpc url -> fn(request, answer) -> answer (one RPC lying or broken)
 
     def get(self, url):
         self.log.append(url)
@@ -417,8 +418,13 @@ def _web_request(url, method="GET", body=None, headers=None, **_k):
     if isinstance(req, list):
         if len(req) > ch.batch_cap:
             return _Response(413, json.dumps({"error": "batch too large"}))
-        return _Response(200, json.dumps([ch.answer(r) for r in req]))
-    return _Response(200, json.dumps(ch.answer(req)))
+        return _Response(200, json.dumps([_tampered(url, r, ch.answer(r)) for r in req]))
+    return _Response(200, json.dumps(_tampered(url, req, ch.answer(req))))
+
+
+def _tampered(url, req, ans):
+    fn = WEB.tamper.get(url)
+    return fn(req, ans) if fn is not None else ans
 
 
 def _web_get(url, **_k):

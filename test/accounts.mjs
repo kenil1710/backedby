@@ -3,13 +3,13 @@
  * Existing roles are preserved unless --force is passed. Keys never leave this
  * file; scripts load them and print addresses only.
  *
- *   deployer   deploys both contracts
- *   filer      files canonical seeds
- *   filer2     a second filer (duplicate / recheck paths)
- *   demo       drives the demo deployment
- *   dao        demo DAO controller (demo seam)
- *   appellant  a second party for appeals
- *   patrol     the patrol bot signer
+ *   deployer   deploys every contract (and is the registries' treasury)
+ *   operator   bonds pairs (seeds and demo)
+ *   challenger challenges bonds
+ *   contester  contests rulings
+ *   patrol     the patrol bot signer (monitoring checks, reads, finalize)
+ *   seeder     authenticates and registers the canonical pairs
+ *   borrower   CollateralGate demo borrower
  *   probe      throwaway GenVM probes
  */
 import { createAccount } from "genlayer-js";
@@ -18,7 +18,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 const target = new URL("./.accounts.json", import.meta.url);
 const force = process.argv.includes("--force");
-const ROLES = ["deployer", "filer", "filer2", "demo", "dao", "appellant", "patrol", "probe"];
+const ROLES = ["deployer", "operator", "challenger", "contester", "patrol", "seeder", "borrower", "probe"];
 const existing = existsSync(target) && !force ? JSON.parse(readFileSync(target, "utf8")) : {};
 const out = {};
 for (const role of ROLES) {
@@ -27,4 +27,4 @@ for (const role of ROLES) {
   out[role] = { key, address: createAccount(key).address };
 }
 writeFileSync(target, JSON.stringify(out, null, 2) + "\n", { mode: 0o600 });
-for (const role of ROLES) console.log(`  ${role.padEnd(9)} ${out[role].address}`);
+for (const role of ROLES) console.log(`  ${role.padEnd(10)} ${out[role].address}`);
