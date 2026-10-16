@@ -11,8 +11,8 @@
  *   ChainReader                                   (shared by both registries)
  *   BackedByRegistry      CANONICAL  (6 h contest window)
  *   BackedByRegistryDemo  DEMO       (90 s contest window, short timeouts)
- *   CollateralGate        on CANONICAL, max age 24 h
- *   CollateralGateDemo    on DEMO, max age 30 min
+ *   CollateralGate        on CANONICAL, max age 24 h, max tolerance 50 bps
+ *   CollateralGateDemo    on DEMO, max age 30 min, max tolerance 50 bps
  *
  * --set=smoke writes to deployments.smoke.json instead (throwaway probes).
  */
@@ -71,6 +71,6 @@ const cr = await one("ChainReader", "ChainReader", []);
 if (only === "reader") process.exit(0);
 const rc = set === "smoke" ? null : await one("BackedByRegistry", "BackedByRegistry", ["CANONICAL", cr], { mode: "CANONICAL" });
 const rd = await one("BackedByRegistryDemo", "BackedByRegistry", ["DEMO", cr], { mode: "DEMO" });
-if (rc) await one("CollateralGate", "CollateralGate", [rc, 86400], { mode: "CANONICAL" });
-await one("CollateralGateDemo", "CollateralGate", [rd, 1800], { mode: "DEMO" });
+if (rc) await one("CollateralGate", "CollateralGate", [rc, 86400, 50], { mode: "CANONICAL" });
+await one("CollateralGateDemo", "CollateralGate", [rd, 1800, 50], { mode: "DEMO" });
 console.log(`\nwrote ${path.pathname}`);
