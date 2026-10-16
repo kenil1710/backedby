@@ -95,7 +95,7 @@ CHAINS = {
     "ethereum": (1, ("https://eth-pokt.nodies.app", "https://rpc.mevblocker.io")),
     "arbitrum": (42161, ("https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co")),
     "optimism": (10, ("https://mainnet.optimism.io", "https://optimism.drpc.org")),
-    "base": (8453, ("https://mainnet.base.org", "https://base.drpc.org")),
+    "base": (8453, ("https://base-pokt.nodies.app", "https://base.drpc.org")),
     "polygon": (137, ("https://polygon.drpc.org", "https://polygon.gateway.tenderly.co")),
     "moonbeam": (1284, ("https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public")),
 }

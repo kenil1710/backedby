@@ -1,0 +1,52 @@
+{
+  "network": "studiodev",
+  "chain_id": 61997,
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "explorer": "https://explorer-studio-dev.genlayer.com/",
+  "contracts": {
+    "ChainReader": {
+      "address": "0x147a98A729410C1620D2F5572887E434d44d9826",
+      "deploy_tx": "0xcec0733fc2b88f129b4713e4a2ba0640eb16fa08332a3a9e23cdf7aa63617a06",
+      "file": "build/ChainReader.py",
+      "source": "contracts/ChainReader.py",
+      "commit": "55270d38e8cf1c8efeeb682b6b85e86b8f6fb785",
+      "bytes": 37805,
+      "sha256": "fe4bb649a16a2862783273e80766943f19b345eb5356fb4804666666fed91cb5",
+      "constructor_args": [],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-16T21:08:03.785Z"
+    },
+    "BackedByRegistryDemo": {
+      "address": "0xBc0e9bf54cB0CFc2FBBcf212cb63Ee1628bF49C0",
+      "deploy_tx": "0xf830a09ae3ace483db007a818024b130fefd10f9849934081edcf123dc6fe9ad",
+      "file": "build/BackedByRegistry.py",
+      "source": "contracts/BackedByRegistry.py",
+      "commit": "55270d38e8cf1c8efeeb682b6b85e86b8f6fb785",
+      "bytes": 56635,
+      "sha256": "9248db4b61dde92779823117f3592715643c14e508d553e88deaaf57915d8171",
+      "constructor_args": [
+        "DEMO",
+        "0x147a98A729410C1620D2F5572887E434d44d9826"
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-16T21:08:14.021Z",
+      "mode": "DEMO"
+    },
+    "CollateralGateDemo": {
+      "address": "0x7632AE9CC5323534BdcB6779Cf2A31CE7f8e1749",
+      "deploy_tx": "0x808fdf51d70f4ccc5222491f18d3ef021698976edfe97ea09e7f431878b2d5c6",
+      "file": "build/CollateralGate.py",
+      "source": "contracts/CollateralGate.py",
+      "commit": "55270d38e8cf1c8efeeb682b6b85e86b8f6fb785",
+      "bytes": 10313,
+      "sha256": "d93fb476743d19fe83a4368e9d7d3f4d2cc7dc1955a51c05f528477ae5d0621c",
+      "constructor_args": [
+        "0xBc0e9bf54cB0CFc2FBBcf212cb63Ee1628bF49C0",
+        1800
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-16T21:08:22.989Z",
+      "mode": "DEMO"
+    }
+  }
+}
