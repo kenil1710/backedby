@@ -57,23 +57,26 @@
       "pair_id": 3,
       "register_tx": "0xb7a247fbe430b4406b1334fc239c27d89c0059920b3c4d5a2d653a7297d7cc6e",
       "blocks": {
-        "ethereum": 26207840,
-        "arbitrum": 515496520
+        "ethereum": 26208029,
+        "arbitrum": 515504272
       },
-      "monitor_tx": "0x49bb0cd1a7d05092bdfeadd0bd3c98bc6cb7bdb6978daacd9084e2a60af5f4fc",
-      "read_tx": "0x986e0254373fe9c9485469dcc8d7206cc0cf1df5b91898017dd691bca298e55b",
-      "status": "INCONCLUSIVE",
-      "verdict1": "",
-      "ratio_bps": -1,
-      "contest_deadline": 0,
-      "reason": "RPC_UNREADABLE"
+      "monitor_tx": "0x70b6cd2c8c3c8bf9b0ce01f8ab3f8930b080edd8bf7bd3550dacb0296cbc9302",
+      "read_tx": "0x545c989b77d2bd2d48777f829b671cc2d39464cfd626d4c967ee7fae651d4ede",
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10002,
+      "contest_deadline": 1792211927,
+      "reason": "LOCKED_COVERS_SUPPLY",
+      "check_id": 13
     },
     "wstETH on Arbitrum": {
       "kind": "arbitrum",
       "sym": "wstETH",
       "l1": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
       "l2": "0x5979d7b546e38e414f7e9822514be443a4800529",
-      "label": "wstETH on Arbitrum"
+      "label": "wstETH on Arbitrum",
+      "auth_id": 18,
+      "auth_tx": "0x32fd40220d85e0c02526eb60d4afc8978504e4ccb394dc3d0ef93d2fa99a8962"
     },
     "USDC.e on OP Mainnet": {
       "kind": "optimism",
@@ -98,14 +101,42 @@
       "auth_id": 5,
       "auth_tx": "0xb4a780ff1057111a0e9545566471e6e6587caac1ebf8c8d8e32168771b311e7e",
       "pair_id": 4,
-      "register_tx": "0x4dfaa67a4610920f0233205d1af4f3ea6703cc7c6406379a8f7db488029e70f2"
+      "register_tx": "0x4dfaa67a4610920f0233205d1af4f3ea6703cc7c6406379a8f7db488029e70f2",
+      "check_id": 14,
+      "blocks": {
+        "ethereum": 26208036,
+        "optimism": 158295139
+      },
+      "monitor_tx": "0x11a69cf2f53db6ba0e46090f3206606e5e871980482614f85bed4b771058361e",
+      "read_tx": "0xbaccb521cb522ba5a9ec35fd57f46d7b980b98b98ce3b7475e6f1395d39082f0",
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 14653,
+      "contest_deadline": 1792212047,
+      "reason": "LOCKED_COVERS_SUPPLY"
     },
     "USDbC on Base": {
       "kind": "base",
       "sym": "USDC",
       "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "l2": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca",
-      "label": "USDbC on Base"
+      "label": "USDbC on Base",
+      "auth_id": 16,
+      "auth_tx": "0xb86eb3abd3cbac7c7cb1d90497d12110d6ec11b1ffcdf1730da6d8a3bdacf564",
+      "pair_id": 15,
+      "register_tx": "0x1b039aec309712044dc9c3b44d233d7929d53f9f38f7ec297f6e08026e09dce7",
+      "check_id": 15,
+      "blocks": {
+        "ethereum": 26208045,
+        "base": 52699908
+      },
+      "monitor_tx": "0x48742b8e4d7c3f036695648c14189ed71802e8536230b4605b368f3d47e462ac",
+      "read_tx": "0x506da4173696125312ab5a0c974dc3735053da01320f2b3dc271022ea7bfe726",
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 11961,
+      "contest_deadline": 1792212147,
+      "reason": "LOCKED_COVERS_SUPPLY"
     },
     "cbETH on Base": {
       "kind": "base",
@@ -152,7 +183,174 @@
         "ethereum": 26207887,
         "polygon": 95654615
       },
-      "monitor_tx": "0x3238db50e7e50f06d8372c33f80402d08d7683f5b3bd8e1f41291e404ee5b7db"
+      "monitor_tx": "0x3238db50e7e50f06d8372c33f80402d08d7683f5b3bd8e1f41291e404ee5b7db",
+      "read_tx": "0x3f3ecc6240171f8b1efb5621cd8083bf3ea6b656bf1b078ad0ea741638b55305",
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10002,
+      "contest_deadline": 1792210038,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "DAI on Polygon": {
+      "kind": "polygon",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "label": "DAI on Polygon",
+      "auth_id": 8,
+      "auth_tx": "0x3600f8f91c2db0e061cc4655952fe474da2c31f26bf1b42a65eedbbd779a0c3d",
+      "pair_id": 7,
+      "register_tx": "0x1d7fd5209b891fd4e523fcd48b86695cbb2d3d20164d73048348d4255aceffc8",
+      "check_id": 6,
+      "blocks": {
+        "ethereum": 26207887,
+        "polygon": 95654615
+      },
+      "monitor_tx": "0xf2bd217f4dd12f230cb2bde3582e8ab33ed785231391798f080ca8ab69c11024",
+      "read_tx": "0xe7dfe24099d294b81b127f7f9275c86b228631c54526ae1060b3f440919f9c24",
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10006,
+      "contest_deadline": 1792210139,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "USDT on Polygon": {
+      "kind": "polygon",
+      "sym": "USDT",
+      "l1": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "l2": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "label": "USDT on Polygon",
+      "auth_id": 9,
+      "auth_tx": "0x82f10b2cf91d0371cee8f29101119b29df77b19c2fefca27b0421be4700eb287",
+      "pair_id": 8,
+      "register_tx": "0xd270db0ce672596608181299b312811dde3543ee6a405cbd16d8d321c2d91721",
+      "check_id": 7,
+      "blocks": {
+        "ethereum": 26207919,
+        "polygon": 95654871
+      },
+      "monitor_tx": "0x87c503da9aaf0cabd88d07aa1c592f7c8174246c45f5062af191321ad39cac1b",
+      "read_tx": "0xdabcac63fd99278b6bfb9587616c83db23aa48f0d7ad47085f02eb08c3cc3e63",
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 64,
+      "contest_deadline": 1792210250,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madUSDC on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9",
+      "label": "madUSDC on Moonbeam (Nomad)",
+      "auth_id": 10,
+      "auth_tx": "0x5d3523221b3634a492ac8ce874280088b49606b6866c81b92bd3853eea9bf6d7",
+      "pair_id": 9,
+      "register_tx": "0x32ad4b4588534dfc5205fc0da8b83f8579c23988d0bfcb3911c02265fb76bf15",
+      "check_id": 8,
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "monitor_tx": "0x967f3e3aae0a41e6fa5f32b46a7dc22a2eab50015e6aa9df335dd5d709fc4ca7",
+      "read_tx": "0xeb6e20f7e68d9c24470a8da2b10ab3a3839fcb093620e811fc2198227ff60d7c",
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 17,
+      "contest_deadline": 1792210411,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madWETH on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "WETH",
+      "l1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "l2": "0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7",
+      "label": "madWETH on Moonbeam (Nomad)",
+      "auth_id": 11,
+      "auth_tx": "0xc13f73a5b3d6510f49d21e4f6dcfc17c3cc9f4fbd47541d6811b048bc99c7c0c",
+      "pair_id": 10,
+      "register_tx": "0xa60ce7ea31cf80d84bd76037c2007919fa59a105a7891cc84fac4ab5e2b31230",
+      "check_id": 9,
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "monitor_tx": "0x271f7db593a2b098b648788d5be6da3f9d658244b56c956fb1092c24278dfe3c",
+      "read_tx": "0x10e33e28ea7a50c55050017eccd218d0c1af80680efb763e63eed43ea923d293",
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 8,
+      "contest_deadline": 1792210578,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madWBTC on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0",
+      "label": "madWBTC on Moonbeam (Nomad)",
+      "auth_id": 12,
+      "auth_tx": "0x91e1340c8a7f828c05dca97bac9d45a520264e699bef06eafc2b09dcb2dd7bd5",
+      "pair_id": 11,
+      "register_tx": "0xcfffd99e3a0375355106c13606e6687853968154c3fa8c46f844bf00f84befcb",
+      "check_id": 10,
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "monitor_tx": "0x563ce86c7a94e42d953efe7bc75355e8dc66dbcfb9a07507fe34f2a6f3348b51",
+      "read_tx": "0x5e6329b802ee6e13e44769d9b4a5ce63f0ee458a4367c8cbb0fa0beb4ac60501",
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 0,
+      "contest_deadline": 1792210708,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madUSDT on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "USDT",
+      "l1": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "l2": "0x8e70cd5b4ff3f62659049e74b6649c6603a0e594",
+      "label": "madUSDT on Moonbeam (Nomad)",
+      "auth_id": 13,
+      "auth_tx": "0xaa395bc8c96d84803e49c2cca8db8922d0cbe0f43cfd4abde80cce3224c9136f",
+      "pair_id": 12,
+      "register_tx": "0xeb347086677d0c7153539abb429452d3c636a22daebb35e410424a69b73d1feb",
+      "check_id": 11,
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "monitor_tx": "0x03030b6af4505176ffcaaa967b720288b3b0003d16b10d44fe1e06f26f8d8116",
+      "read_tx": "0x4016b6c1c68bb8b7f81007a2e250ffd631a7759a707edb516670518fe91018e4",
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 0,
+      "contest_deadline": 1792210829,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madDAI on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0xc234a67a4f840e61ade794be47de455361b52413",
+      "label": "madDAI on Moonbeam (Nomad)",
+      "auth_id": 14,
+      "auth_tx": "0x6b09caa6c90f3bbb26c77d425c63d7b26161c3531175b24b7c024af6bf53e3e2",
+      "pair_id": 13,
+      "register_tx": "0x291eb29c60b2487d98cb344dab66dc6cacdf07a7d55e56346d06f29f08fe88f3",
+      "check_id": 12,
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "monitor_tx": "0x43fb81d665d2e6d347f1d187898016c7929612ff23d8d8a6fcab07e22296bff0",
+      "read_tx": "0xa3a747d6abf034491ad289d5ea79120894748cde079afe3dedf40a706b6ecffb",
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 0,
+      "contest_deadline": 1792210959,
+      "reason": "LOCKED_BELOW_SUPPLY"
     }
   }
 }

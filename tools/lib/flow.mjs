@@ -29,8 +29,37 @@ export function actor({ set = "final", role, registry = "BackedByRegistry", log 
     return { ...out, ret };
   }
 
+  /** Public RPCs answer Studio's shared egress with 429s in bursts. A transport
+   *  failure (REFUSED: RPC_UNREADABLE, or a reading recorded INCONCLUSIVE ·
+   *  RPC_UNREADABLE) is waited out and tried again; nothing else is retried. */
+  async function patiently(label, attempt, isTransport, tries = 6) {
+    let last;
+    for (let i = 1; i <= tries; i++) {
+      last = await attempt();
+      if (!isTransport(last)) return last;
+      const wait = 45 + 30 * i;
+      log(`  ... ${label}: RPC throttled from GenVM (attempt ${i}), retrying in ${wait}s`);
+      await sleep(wait * 1000);
+    }
+    return last;
+  }
+
   return {
-    regAddr, rv, cv, send,
+    regAddr, rv, cv, send, patiently,
+    async authenticateP(kind, l1, l2) {
+      return patiently(`authenticate ${kind}`, () => this.authenticate(kind, l1, l2),
+        (o) => !o.auth_id && /RPC_UNREADABLE|RPC_DISAGREE|UNSETTLED|submit failed/.test(String(o.revertReason)));
+    },
+    /** file (a function returning {check_id}) -> read -> rule, refiling while the read is transport-inconclusive */
+    async fileReadRule(label, file) {
+      return patiently(label, async () => {
+        const f = await file();
+        if (!f.check_id) return { check: null, filed: f };
+        await this.read(f.check_id);
+        const c = await this.rule(f.check_id);
+        return { check: c, filed: f };
+      }, (r) => r.check && r.check.status === "INCONCLUSIVE" && r.check.reason === "RPC_UNREADABLE");
+    },
     async authenticate(kind, l1, l2) {
       const before = (await cv("get_config")).auths;
       const o = await send("reader", "authenticate", [kind, l1, l2]);

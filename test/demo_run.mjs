@@ -42,8 +42,8 @@ for (const [key, kind, sym, l2, label] of [
   const have = (await seeder.rv("get_pairs", [0, 50])).pairs.find((p) => p.label === label);
   if (have) { P[key] = have.pair_id; log(`   -> pair ${have.pair_id}: ${label} (registered in an earlier pass)`); continue; }
   let r = { pair_id: 0 };
-  for (let i = 0; i < 4 && !r.pair_id; i++) {
-    const au = await seeder.authenticate(kind, L1[sym], l2);
+  for (let i = 0; i < 3 && !r.pair_id; i++) {
+    const au = await seeder.authenticateP(kind, L1[sym], l2);
     if (au.auth_id) r = await seeder.register([au.auth_id], 0, label);
   }
   P[key] = r.pair_id;
@@ -55,12 +55,11 @@ await seeder.authenticate("optimism", L1.USDC, "0x0b2c639c533813f4aa9d7837caf626
 
 step("3. Anyone adds a destination the pair is missing (a second Standard Bridge USDC on OP), with the same proof");
 const extra = "0x130c1dcc9fd997fa02f555dad54edaf553f2555a";
-let ax = { auth_id: 0 };
-for (let i = 0; i < 4 && !ax.auth_id; i++) ax = await ct.authenticate("optimism", L1.USDC, extra);
+const ax = await ct.authenticateP("optimism", L1.USDC, extra);
 await ct.send("reg", "add_destination", [P.op, ax.auth_id]);
 log(`   -> pair ${P.op} destinations: ${(await ct.rv("get_pair", [P.op])).dests.map((d) => d.token + "/" + d.decimals).join(", ")}`);
 log("   adding the same destination again is refused:");
-const ax2 = await ct.authenticate("optimism", L1.USDC, extra);
+const ax2 = await ct.authenticateP("optimism", L1.USDC, extra);
 await ct.send("reg", "add_destination", [P.op, ax2.auth_id]);
 
 step("4. The operator bonds two pairs");
@@ -71,10 +70,11 @@ const bondStart = Math.floor(Date.now() / 1000);
 
 step("5. INCONCLUSIVE: a challenge pinned before the bond started is refunded");
 {
-  const pins = await ch.pins(P.arb, 90);          // these blocks are ~20 min old: before the bond
-  const c = await ch.challenge(bA.bond_id, pins.blocks, MIN_STAKE);
-  await pt.read(c.check_id);
-  show(await pt.rule(c.check_id));
+  const r = await pt.fileReadRule("challenge before bond", async () => {
+    const pins = await ch.pins(P.arb, 90);          // these blocks are ~20 min old: before the bond
+    return ch.challenge(bA.bond_id, pins.blocks, MIN_STAKE);
+  });
+  show(r.check);
 }
 
 step("6. Waiting until finalized blocks exist after the bond started (Ethereum finality is ~15-20 min)");
@@ -88,38 +88,45 @@ for (;;) {
 step("7. Challenge -> BACKED, contested, re-read, upheld: the stakes go into the bond");
 let cA;
 {
-  const pins = await ch.pins(P.arb, 0);
-  const c = await ch.challenge(bA.bond_id, pins.blocks, MIN_STAKE);
-  cA = c.check_id;
-  await pt.read(cA);
-  show(await pt.rule(cA));
+  const r = await pt.fileReadRule("challenge (backed)", async () => {
+    const pins = await ch.pins(P.arb, 0);
+    return ch.challenge(bA.bond_id, pins.blocks, MIN_STAKE);
+  });
+  cA = r.check.check_id;
+  show(r.check);
   const k = await ct.contest(cA, MIN_STAKE);
   show(k.check);
-  await pt.read(cA, 2);
+  for (let i = 0; i < 6; i++) {
+    const rd = await pt.read(cA, 2);
+    if (rd.reading?.found) break;
+    log("   ... re-read throttled, waiting 90s"); await sleep(90_000);
+  }
   show(await pt.rule(cA));
   log(`   bond ${bA.bond_id}: ${JSON.stringify(await op.rv("get_bond", [bA.bond_id]))}`);
 }
 
 step("8. Challenge -> UNDER_BACKED (Polygon USDT, live), window passes, finalize: bond slashed, bounty paid");
 {
-  const pins = await ch.pins(P.pol, 0);
-  const c = await ch.challenge(bB.bond_id, pins.blocks, MIN_STAKE);
-  await pt.read(c.check_id);
-  const r = await pt.rule(c.check_id);
+  const rr = await pt.fileReadRule("challenge (under)", async () => {
+    const pins = await ch.pins(P.pol, 0);
+    return ch.challenge(bB.bond_id, pins.blocks, MIN_STAKE);
+  });
+  const r = rr.check;
   show(r);
   await waitUntil(r.contest_deadline, "contest window");
-  show(await pt.finalize(c.check_id));
-  log(`   payouts ${JSON.stringify((await pt.check(c.check_id)).payouts)}`);
+  show(await pt.finalize(r.check_id));
+  log(`   payouts ${JSON.stringify((await pt.check(r.check_id)).payouts)}`);
   log(`   bond ${bB.bond_id}: ${JSON.stringify(await op.rv("get_bond", [bB.bond_id]))}`);
 }
 
 step("9. Monitoring INCONCLUSIVE: pins that break the 10-minute gap rule");
 {
-  const pins = await pt.pins(P.op, 0);
-  const bad = { ...pins.blocks, optimism: pins.blocks.optimism - 400 };   // 800 s before the Ethereum block
-  const c = await pt.monitor(P.op, bad);
-  await pt.read(c.check_id);
-  show(await pt.rule(c.check_id));
+  const r = await pt.fileReadRule("monitor with bad pins", async () => {
+    const pins = await pt.pins(P.op, 0);
+    const bad = { ...pins.blocks, optimism: pins.blocks.optimism - 400 };   // 800 s before the Ethereum block
+    return pt.monitor(P.op, bad);
+  });
+  show(r.check);
 }
 
 step("10. Timeout: a monitoring check nobody reads expires INCONCLUSIVE");
@@ -134,12 +141,13 @@ step("10. Timeout: a monitoring check nobody reads expires INCONCLUSIVE");
 step("11. Monitoring FINAL on three pairs (the gate needs final rulings)");
 const finals = [];
 for (const key of ["nomad", "op", "arb"]) {
-  const pins = await pt.pins(P[key], key === "nomad" ? 0 : 30);
-  const c = await pt.monitor(P[key], pins.blocks);
-  await pt.read(c.check_id);
-  const r = await pt.rule(c.check_id);
+  const rr = await pt.fileReadRule(`monitor ${key}`, async () => {
+    const pins = await pt.pins(P[key], key === "nomad" ? 0 : 30);
+    return pt.monitor(P[key], pins.blocks);
+  });
+  const r = rr.check;
   show(r);
-  finals.push([c.check_id, r.contest_deadline]);
+  if (r.status === "PROVISIONAL") finals.push([r.check_id, r.contest_deadline]);
 }
 for (const [cid, dl] of finals) { await waitUntil(dl, `window of check ${cid}`); show(await pt.finalize(cid)); }
 
