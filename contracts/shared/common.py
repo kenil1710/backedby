@@ -17,7 +17,7 @@ CHAINS = {
 # refuses a batch of more than 3).
 RPC_BATCH = {"https://optimism.drpc.org": 3, "https://base.drpc.org": 3, "https://polygon.drpc.org": 3,
              "https://moonbeam.drpc.org": 3}
-RPC_TRIES = 3
+RPC_TRIES = 4
 LEADER_LAG_S = 1800       # a leader-named block may be this much older than a validator's own finalized block
 ZERO = "0x" + "0" * 40
 

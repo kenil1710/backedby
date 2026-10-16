@@ -115,7 +115,7 @@ CHAINS = {
 # refuses a batch of more than 3).
 RPC_BATCH = {"https://optimism.drpc.org": 3, "https://base.drpc.org": 3, "https://polygon.drpc.org": 3,
              "https://moonbeam.drpc.org": 3}
-RPC_TRIES = 3
+RPC_TRIES = 4
 LEADER_LAG_S = 1800       # a leader-named block may be this much older than a validator's own finalized block
 ZERO = "0x" + "0" * 40
 
@@ -284,7 +284,11 @@ def parse_batch(doc: typing.Any, n: int) -> list:
 
 
 def rpc_send(url: str, calls: list) -> list:
-    """One endpoint, every call, in chunks of the endpoint's batch size."""
+    """One endpoint, every call, in chunks of the endpoint's batch size. A
+    chunk is retried (up to RPC_TRIES) on a transport failure, a 429 or 5xx,
+    and on an answer that is not a usable JSON-RPC batch - free tiers answer
+    a burst with HTTP 200 and a JSON-RPC error. An EVM revert is an answer,
+    not a failure, and is never retried."""
     if not rpc_url_allowed(url):
         raise ReadFailed("rpc not allowed")
     cap = RPC_BATCH.get(url, 10)
@@ -294,30 +298,31 @@ def rpc_send(url: str, calls: list) -> list:
         chunk = calls[i:i + cap]
         body = json.dumps([{"jsonrpc": "2.0", "id": j, "method": chunk[j][0], "params": chunk[j][1]}
                            for j in range(len(chunk))])
-        res = None
+        got = None
         why = ""
         for _ in range(RPC_TRIES):
             try:
                 res = gl.nondet.web.request(url, method="POST", body=body,
                                             headers={"Content-Type": "application/json"})
             except Exception:
-                res = None
                 why = "transport"
                 continue
             st = _status(res)
-            if st == 200:
+            if st != 200:
+                why = "http " + str(st)
+                if st != 429 and st < 500:
+                    break
+                continue
+            try:
+                got = parse_batch(json.loads(_raw(res).decode("utf-8", errors="replace")), len(chunk))
                 break
-            why = "http " + str(st)
-            res = None
-            if st != 429 and st < 500:
-                break
-        if res is None:
+            except ReadFailed as e:
+                why = str(e)
+            except Exception:
+                why = "json"
+        if got is None:
             raise ReadFailed(why)
-        try:
-            doc = json.loads(_raw(res).decode("utf-8", errors="replace"))
-        except Exception:
-            raise ReadFailed("json")
-        out = out + parse_batch(doc, len(chunk))
+        out = out + got
         i += cap
     return out
 

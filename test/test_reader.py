@@ -373,6 +373,46 @@ class Read(Base):
         self.s.net.mc["arbitrum"].fail = lambda m, p: {"code": -32000, "message": "missing trie node"} if m == "eth_call" else None
         self.assertEqual(self.s.read(cid)["reason"], "RPC_UNREADABLE")
 
+    def test_transient_jsonrpc_error_is_retried(self):
+        pid, cid, blocks = self.pair_check()
+        n = {"left": 2}
+
+        def burst(m, p):
+            if m == "eth_call" and n["left"] > 0:
+                n["left"] -= 1
+                return {"code": -32005, "message": "Too many requests"}
+            return None
+        self.s.net.mc["arbitrum"].fail = burst
+        self.assertEqual(self.s.read(cid)["status"], "OK")
+
+    def test_http_429_then_ok_is_retried(self):
+        pid, cid, blocks = self.pair_check()
+        url = CR.CHAINS["arbitrum"][1][1]
+        n = {"left": 1}
+        orig = stub._web_request
+
+        def flaky(u, **k):
+            if u == url and n["left"] > 0:
+                n["left"] -= 1
+                return stub._Response(429, "{}")
+            return orig(u, **k)
+        CR.gl.nondet.web.request = flaky
+        try:
+            self.assertEqual(self.s.read(cid)["status"], "OK")
+        finally:
+            CR.gl.nondet.web.request = orig
+
+    def test_revert_is_not_retried(self):
+        pid, cid, blocks = self.pair_check()
+        calls = {"n": 0}
+
+        def rev(d, b):
+            calls["n"] += 1
+            return F.REVERT
+        self.s.net.fn("ethereum", USDC, CR.S_BALANCE, rev)
+        self.s.read(cid)
+        self.assertLessEqual(calls["n"], 4)   # leader + validator, each RPC once
+
     def test_balance_reverts_call_failed(self):
         pid, cid, blocks = self.pair_check()
         self.s.net.fn("ethereum", USDC, CR.S_BALANCE, lambda d, b: F.REVERT)
