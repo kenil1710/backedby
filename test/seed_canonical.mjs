@@ -1,9 +1,11 @@
 /**
- * Seeds the CANONICAL registry with real authenticated pairs from
+ * Seeds the CANONICAL registry with 15 real authenticated pairs from
  * docs/FEASIBILITY.md: authenticate -> register -> monitoring check at freshly
  * pinned blocks -> read -> rule. Each ruling is then contestable for 6 h;
  * test/seed_finalize.mjs finalizes them after. Resumable: progress is kept
  * in docs/seed-canonical.json and every step is checked against contract state.
+ * (USDC.e and WBTC on OP Mainnet and cbETH on Base were dropped from the list
+ * after their authentications were throttled four passes in a row; see seed-run.log.)
  *   node test/seed_canonical.mjs >> docs/seed-run.log
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -15,11 +17,8 @@ export const SEEDS = [
   ["arbitrum", "WBTC", "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f", "WBTC on Arbitrum"],
   ["arbitrum", "DAI", "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1", "DAI on Arbitrum"],
   ["arbitrum", "wstETH", "0x5979d7b546e38e414f7e9822514be443a4800529", "wstETH on Arbitrum"],
-  ["optimism", "USDC", "0x7f5c764cbc14f9669b88837ca1490cca17c31607", "USDC.e on OP Mainnet"],
-  ["optimism", "WBTC", "0x68f180fcce6836688e9084f035309e29bf0a2095", "WBTC on OP Mainnet"],
   ["op_dai", "DAI", "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1", "DAI on OP Mainnet"],
   ["base", "USDC", "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca", "USDbC on Base"],
-  ["base", "cbETH", "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22", "cbETH on Base"],
   ["polygon", "USDC", "0x2791bca1f2de4661ed88a30c99a7a9449aa84174", "USDC.e on Polygon"],
   ["polygon", "WBTC", "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6", "WBTC on Polygon"],
   ["polygon", "DAI", "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063", "DAI on Polygon"],

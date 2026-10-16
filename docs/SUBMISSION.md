@@ -8,7 +8,7 @@ BackedBy checks whether bridged tokens are actually backed: vault balance vs min
 
 ## Description (807 / 1000)
 
-BackedBy compares what a bridge holds in its Ethereum vault with the supply it minted on Arbitrum, OP, Base, Polygon or Moonbeam. A pair exists only if the bridge's own on-chain mapping proves it. Each check pins one finalized block per chain. Validators independently read both chains at the pinned blocks, from two RPCs per chain, and must agree; any disagreement or error is INCONCLUSIVE and refunds every stake. Code computes every number and the verdict (BACKED if locked covers supply, else UNDER_BACKED); the model never decides, no model is called at all. Operators bond that a pair stays backed, anyone challenges with a stake, rulings are contestable for 6 h, and CollateralGate lets a lender refuse unbacked tokens. Seeded with 18 real pairs; it flags the 5 drained Nomad tokens and Polygon USDT.
+BackedBy compares what a bridge holds in its Ethereum vault with the supply it minted on Arbitrum, OP, Base, Polygon or Moonbeam. A pair exists only if the bridge's own on-chain mapping proves it. Each check pins one finalized block per chain. Validators independently read both chains at the pinned blocks, from two RPCs per chain, and must agree; any disagreement or error is INCONCLUSIVE and refunds every stake. Code computes every number and the verdict (BACKED if locked covers supply, else UNDER_BACKED); the model never decides, no model is called at all. Operators bond that a pair stays backed, anyone challenges with a stake, rulings are contestable for 6 h, and CollateralGate lets a lender refuse unbacked tokens. Seeded with 15 real pairs; it flags the 5 drained Nomad tokens and Polygon USDT.
 
 ## Review verification (336 / 500)
 

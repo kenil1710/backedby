@@ -56,3 +56,64 @@ GenLayer RPC error (sim_estimateTransactionFees): execution failed
 Double check you have provided the correct parameters.
 
 Details: exec)
+
+# Demo run 2026-10-16T22:48:17.633Z on 0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6 (commit e915d21e8a25e35c06baa614b5f234ccaf74b826)
+config: window 90s, read timeout 300s, unbond delay 120s, min bond 50000000000000000, min stake 10000000000000000
+
+## 1. Register four real pairs (authenticated by each bridge's own mapping)  (2026-10-16T22:48:17.635Z)
+   -> pair 1: LINK on Arbitrum (demo) (registered in an earlier pass)
+  authenticate(["polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 22s tx 0xc0787af4fc7afc31b6b4698471f17eb56171f2885a928f240f7e3fcdfcc6a327 {"auth_id":19,"dest_decimals":6,"source_decimals":6,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["19",0,"USDT on Polygon (demo)"]) -> ok ACCEPTED 22s tx 0x224ec6daa0e14f6c55537912bd0eb5467be074d7f4c4a9c03000802f2f22eff8 {"destinations":1,"ok":true,"pair_id":2}
+   -> pair 2: USDT on Polygon (demo)
+  authenticate(["nomad","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x8f552a71efe5eefc207bf75485b356a0b3f01ec9"]) -> ok ACCEPTED 26s tx 0x3cff93715d8c66a4d49d37e8ab13f202b83fa3b7c91b43e777b1daf710b5b918 {"auth_id":20,"dest_decimals":6,"source_decimals":6,"vault":"0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"}
+  register_pair(["20",0,"madUSDC on Moonbeam (demo)"]) -> ok ACCEPTED 13s tx 0x50c00f66f20277ce67b10b376b7b7a0290bb06d692fc20e8ec90dd723246cc32 {"destinations":1,"ok":true,"pair_id":3}
+   -> pair 3: madUSDC on Moonbeam (demo)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x7f5c764cbc14f9669b88837ca1490cca17c31607"]) -> FAILED ACCEPTED 29s tx 0xcda1ff9478c27c0a2914cbf8de10f00961b7cc76ae065488fa9d172d1f479fe6 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate optimism: RPC throttled from GenVM (attempt 1), retrying in 75s
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x7f5c764cbc14f9669b88837ca1490cca17c31607"]) -> ok ACCEPTED 15s tx 0x1c4f0fd070f30d6d013a82f9965e581a041bd392513596f71c66cb7f65606cc8 {"auth_id":21,"dest_decimals":6,"source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+  register_pair(["21",0,"USDC.e on OP Mainnet (demo)"]) -> ok ACCEPTED 13s tx 0x9d96e780df1ee47e96ed50ffc1b05f0664be385020bf84b89ac1c309a7cbf287 {"destinations":1,"ok":true,"pair_id":4}
+   -> pair 4: USDC.e on OP Mainnet (demo)
+
+## 2. A fake pair is refused: Circle's native USDC on OP passed off as the bridge's token  (2026-10-16T22:52:10.439Z)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x0b2c639c533813f4aa9d7837caf62653d097ff85"]) -> FAILED ACCEPTED 20s tx 0xd74bba3c61cfa1125702e3f9773b45e937bbc3f4bd324f478f111c8e9c643047 revert: REFUSED: RPC_UNREADABLE
+
+## 3. Anyone adds a destination the pair is missing (a second Standard Bridge USDC on OP), with the same proof  (2026-10-16T22:52:31.226Z)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x130c1dcc9fd997fa02f555dad54edaf553f2555a"]) -> FAILED ACCEPTED 13s tx 0x2e0a59671270a6fef5f2d1c9f74fef96e3899eed5ac35a42926dc8bb81ef1563 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate optimism: RPC throttled from GenVM (attempt 1), retrying in 75s
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x130c1dcc9fd997fa02f555dad54edaf553f2555a"]) -> ok ACCEPTED 22s tx 0x3573ce00b1f1bcfd99564d83becde2771bb6207ae8e4d27efe29c7a0513dcdd1 {"auth_id":22,"dest_decimals":18,"source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+  add_destination([4,22]) -> ok ACCEPTED 13s tx 0xd21444bb98be7de940cb6927dd202bbed54a46b9adfea51e92b65bb1731664e3 {"destinations":2,"ok":true,"pair_id":4}
+   -> pair 4 destinations: 0x7f5c764cbc14f9669b88837ca1490cca17c31607/6, 0x130c1dcc9fd997fa02f555dad54edaf553f2555a/18
+   adding the same destination again is refused:
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x130c1dcc9fd997fa02f555dad54edaf553f2555a"]) -> FAILED ACCEPTED 22s tx 0xa61a7ca5b3d239107eaf6bf4822e683ba0499cdc5b6c40cd15f045a17882793d revert: REFUSED: RPC_UNREADABLE
+  ... authenticate optimism: RPC throttled from GenVM (attempt 1), retrying in 75s
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x130c1dcc9fd997fa02f555dad54edaf553f2555a"]) -> ok ACCEPTED 21s tx 0xe61b45a1191b60e0bc40dbc7873de793ec6612e2025f615c0c3afd8f6123cb04 {"auth_id":23,"dest_decimals":18,"source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for add_destination (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  add_destination([4,23]) -> FAILED ACCEPTED 12s tx 0x2cab55ae556072dd36c6a2cbdb1d18d1196a2d92c84007e64fbafc35f190f165 revert: REFUSED: DESTINATION_ALREADY_IN_PAIR_4
+
+## 4. The operator bonds two pairs  (2026-10-16T22:56:49.577Z)
+  bond([1]) value=50000000000000000 -> ok ACCEPTED 12s tx 0x0ea0906bb69398118745b47585b9bf62552c558032ad94c6289bfc6cfec9bfc7 {"amount":"50000000000000000","bond_id":1,"ok":true,"since":1792191413}
+  bond([2]) value=50000000000000000 -> ok ACCEPTED 11s tx 0x2879345c69eb03c1ef5b3099c9e2e597163f1eeead7d3af09634986332b9223d {"amount":"50000000000000000","bond_id":2,"ok":true,"since":1792191426}
+   -> bond 1 on pair 1, bond 2 on pair 2
+
+## 5. INCONCLUSIVE: a challenge pinned before the bond started is refunded  (2026-10-16T22:57:14.868Z)
+  challenge([1,"{\"ethereum\":26208129,\"arbitrum\":515508382}"]) value=10000000000000000 -> ok ACCEPTED 13s tx 0x86d78718c35ac75aee3230900ccb3d1286167b74f46beccd53eef8e28720ee4d {"check_id":1,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",1,1]) -> ok ACCEPTED 15s tx 0x986307e8e15ece5cc7e54096f531259e80ca19ace6c709b5b280aad5521fb1dc {"key":"0xca8b9d4e3fa93a7a012306fa443d71e9e42a45b6|1|1","reason":"","status":"OK"}
+  rule([1]) -> ok ACCEPTED 14s tx 0xc959afd8633f9d6d7fd7f7ad3a66796a3985ca9d972ff33a43f647faa7354735 {"check_id":1,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"10000000000000000"},"reason":"SOURCE_BLOCK_BEFORE_THE_BOND_STARTED","status":"INCONCLUSIVE"}
+   -> check 1: INCONCLUSIVE INCONCLUSIVE ratio_bps -1 SOURCE_BLOCK_BEFORE_THE_BOND_STARTED READ_PIN
+
+## 6. Waiting until finalized blocks exist after the bond started (Ethereum finality is ~15-20 min)  (2026-10-16T22:58:11.472Z)
+   ... finalized Ethereum block is at 2026-10-16T22:37:47.000Z, bond started 2026-10-16T22:57:14.000Z

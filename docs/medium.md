@@ -74,7 +74,7 @@ contract checks the order, the gap, and that both blocks are finalized.
 
 ## What it found
 
-I seeded the registry with 18 real pairs across Arbitrum, OP Mainnet, Base, Polygon and Nomad. Most are fine:
+I seeded the registry with 15 real pairs across Arbitrum, OP Mainnet, Base, Polygon and Nomad. Most are fine:
 Arbitrum's USDC gateway sits around 103%, the OP DAI bridge around 147%. Six are not:
 
 - The five Nomad tokens on Moonbeam, between 0% and 0.2% backed. (Moonbeam itself hasn't produced a block since
