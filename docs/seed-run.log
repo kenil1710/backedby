@@ -12,3 +12,12 @@ RESULT USDC.e on Arbitrum: check 1 PROVISIONAL BACKED ratio_bps 10286
 == WBTC on Arbitrum
   authenticate(["arbitrum","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"]) -> ok ACCEPTED 17s tx 0x16091b6299b396032cb1db0949ef498ca59774783ce0742c2716c3f08f64e4ff {"auth_id":2,"dest_decimals":8,"source_decimals":8,"vault":"0xa3a7b6f88361f48403514059f1f16c8e78d60eec"}
   register_pair(["2",0,"WBTC on Arbitrum"]) -> ok ACCEPTED 13s tx 0x8f07bbacacbbff0e0b52de74304f07d8043fca55d9731202094f28b28a25cd47 {"destinations":1,"ok":true,"pair_id":2}
+  monitor([2,"{\"ethereum\":26207840,\"arbitrum\":515496520}"]) -> ok ACCEPTED 21s tx 0x0fdcad5e9c63098f9af20ead5d5e61343a8ef900fe33913dd66adf6c85ff7fdc {"check_id":2,"ok":true}
+  read_check(["0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD",2,1]) -> ok ACCEPTED 20s tx 0x3330ad6766982f502e3b23abbdc136753eb6fc95f997eae4325b09000c9d07b0 {"key":"0xb136aab44b83e3408ef1a421801271dba8ff1ded|2|1","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 12s tx 0xf5054292702879615974bc84a2ec08482a4edc965b6357bccb3b1e114db3df94 {"check_id":2,"contestable_until":1792209442,"ok":true,"ratio_bps":10080,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT WBTC on Arbitrum: check 2 PROVISIONAL BACKED ratio_bps 10080 
+
+== DAI on Arbitrum
+  authenticate(["arbitrum","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> ok ACCEPTED 17s tx 0x7b0b0cc931fc1bdb71f614b10c5f98c85b542326373e4b3d9a306ace8d30c759 {"auth_id":3,"dest_decimals":18,"source_decimals":18,"vault":"0xa10c7ce4b876998858b1a9e12b10092229539400"}
+  register_pair(["3",0,"DAI on Arbitrum"]) -> ok ACCEPTED 13s tx 0xb7a247fbe430b4406b1334fc239c27d89c0059920b3c4d5a2d653a7297d7cc6e {"destinations":1,"ok":true,"pair_id":3}
+  monitor([3,"{\"ethereum\":26207840,\"arbitrum\":515496520}"]) -> ok ACCEPTED 20s tx 0x49bb0cd1a7d05092bdfeadd0bd3c98bc6cb7bdb6978daacd9084e2a60af5f4fc {"check_id":3,"ok":true}

@@ -362,7 +362,14 @@ export const gen = (wei) => (Number(wei ?? 0n) / 1e18).toFixed(6);
 
 /** Every role in .accounts.json, keyed by name. */
 export function accounts() {
-  return JSON.parse(readFileSync(new URL("./.accounts.json", import.meta.url), "utf8"));
+  // CI (the patrol workflow) has no accounts file; it passes one role's key as BACKEDBY_<ROLE>_KEY.
+  const out = {};
+  try { Object.assign(out, JSON.parse(readFileSync(new URL("./.accounts.json", import.meta.url), "utf8"))); } catch { /* no file */ }
+  for (const [k, v] of Object.entries(process.env)) {
+    const m = k.match(/^BACKEDBY_([A-Z]+)_KEY$/);
+    if (m && v) out[m[1].toLowerCase()] = { key: v };
+  }
+  return out;
 }
 
 /** Builds the read/wallet client pair plus a settle-aware, fee-estimating `send`. */

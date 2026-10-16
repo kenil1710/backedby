@@ -1,0 +1,6 @@
+
+# Demo run 2026-10-16T21:58:13.850Z on 0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6 (commit e915d21e8a25e35c06baa614b5f234ccaf74b826)
+config: window 90s, read timeout 300s, unbond delay 120s, min bond 50000000000000000, min stake 10000000000000000
+
+## 1. Register four real pairs (authenticated by each bridge's own mapping)  (2026-10-16T21:58:13.851Z)
+  authenticate(["arbitrum","0x514910771af9ca656af840dff83e8264ecf986ca","0xf97f4df75117a78c1a5a0dbb814af92458539fb4"]) -> ok ACCEPTED 25s tx 0xda34c12e494645fbb2c913e976f50ca0b44e04c754ff1c1a6c619a0691f5092a {"auth_id":4,"dest_decimals":18,"source_decimals":18,"vault":"0xa3a7b6f88361f48403514059f1f16c8e78d60eec"}
