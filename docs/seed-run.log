@@ -92,3 +92,40 @@ RESULT USDC.e on Polygon: check 4 PROVISIONAL BACKED ratio_bps 10005
 == WBTC on Polygon
   authenticate(["polygon","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6"]) -> ok ACCEPTED 16s tx 0x28efd4ff13b6f3fe1d81ec839b4debd742f0eecd26535006086986ef3b8b3f89 {"auth_id":7,"dest_decimals":8,"source_decimals":8,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
   register_pair(["7",0,"WBTC on Polygon"]) -> ok ACCEPTED 15s tx 0xecea036a8aa1fb4ed980dd6fb426b9c51af25c9d569c03b27c2040679d2b9a2e {"destinations":1,"ok":true,"pair_id":6}
+  monitor([6,"{\"ethereum\":26207887,\"polygon\":95654615}"]) -> ok ACCEPTED 17s tx 0x3238db50e7e50f06d8372c33f80402d08d7683f5b3bd8e1f41291e404ee5b7db {"check_id":5,"ok":true}
+GenLayer RPC error (sim_estimateTransactionFees): Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+  … read_check fee attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … read_check fee attempt 2 hit transient RPC noise, waiting 4s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … write fee simulation failed for read_check (An unknown RPC error occurred.
+
+Details: Unexpected token '<', "<html>
+<h"... is not valid JSON
+Ver)
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … read_check fee attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … read_check fee attempt 2 hit transient RPC noise, waiting 4s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … fee estimate unavailable (An unknown RPC error occurred.
+
+Details: Unexpected token '<', "<html>
+<h"... i), using node default
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … read_check attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … read_check attempt 2 hit transient RPC noise, waiting 8s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … read_check attempt 3 hit transient RPC noise, waiting 12s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … read_check attempt 4 hit transient RPC noise, waiting 16s

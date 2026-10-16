@@ -66,18 +66,16 @@ export function relativeTime(epochSeconds: number | undefined): string {
 }
 
 export function absoluteTime(epochSeconds: number | undefined): string {
-  if (!epochSeconds) return "—";
-  return new Date(epochSeconds * 1000).toLocaleString(undefined, {
-    dateStyle: "medium", timeStyle: "short",
-  });
+  if (!epochSeconds) return "-";
+  return new Date(epochSeconds * 1000).toISOString().slice(0, 19).replace("T", " ") + " UTC";
 }
 
 export function durationText(seconds: number): string {
   if (seconds <= 0) return "now";
-  if (seconds < 60) return `${seconds}s`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-  return `${Math.floor(seconds / 86400)}d`;
+  if (seconds < 60) return `${seconds} s`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} min${seconds % 60 ? ` ${seconds % 60} s` : ""}`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} h${Math.floor((seconds % 3600) / 60) ? ` ${Math.floor((seconds % 3600) / 60)} min` : ""}`;
+  return `${Math.floor(seconds / 86400)} d`;
 }
 
 export const CHAIN_LABEL: Record<string, string> = {

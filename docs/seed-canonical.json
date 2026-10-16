@@ -146,7 +146,13 @@
       "auth_id": 7,
       "auth_tx": "0x28efd4ff13b6f3fe1d81ec839b4debd742f0eecd26535006086986ef3b8b3f89",
       "pair_id": 6,
-      "register_tx": "0xecea036a8aa1fb4ed980dd6fb426b9c51af25c9d569c03b27c2040679d2b9a2e"
+      "register_tx": "0xecea036a8aa1fb4ed980dd6fb426b9c51af25c9d569c03b27c2040679d2b9a2e",
+      "check_id": 5,
+      "blocks": {
+        "ethereum": 26207887,
+        "polygon": 95654615
+      },
+      "monitor_tx": "0x3238db50e7e50f06d8372c33f80402d08d7683f5b3bd8e1f41291e404ee5b7db"
     }
   }
 }
