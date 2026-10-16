@@ -1,0 +1,1809 @@
+{
+  "started": "2026-10-16T20:46:08.315Z",
+  "pins": {
+    "arbitrum": {
+      "ethereum": {
+        "number": 26207498,
+        "timestamp": 1792182575,
+        "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+        "agree": true
+      },
+      "arbitrum": {
+        "number": 515481792,
+        "timestamp": 1792182572,
+        "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+        "agree": true
+      },
+      "gap_s": 3
+    },
+    "optimism": {
+      "ethereum": {
+        "number": 26207471,
+        "timestamp": 1792182251,
+        "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+        "agree": true
+      },
+      "optimism": {
+        "number": 158291737,
+        "timestamp": 1792182251,
+        "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+        "agree": true
+      },
+      "gap_s": 0
+    },
+    "base": {
+      "ethereum": {
+        "number": 26207479,
+        "timestamp": 1792182347,
+        "hash": "0x5df1f5d667cb4585bcb8f3c35e4a24e7b762be1566e9d8ecb14dfeffd2b4e4a3",
+        "agree": true
+      },
+      "base": {
+        "number": 52696499,
+        "timestamp": 1792182345,
+        "hash": "0xb7064a7029a89a746d6d345785213f584a0a0a360c729d6ce3bcb60ed25992d4",
+        "agree": true
+      },
+      "gap_s": 2
+    },
+    "polygon": {
+      "ethereum": {
+        "number": 26207512,
+        "timestamp": 1792182743,
+        "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+        "agree": true
+      },
+      "polygon": {
+        "number": 95651599,
+        "timestamp": 1792182743,
+        "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+        "agree": true
+      },
+      "gap_s": 0
+    },
+    "moonbeam": {
+      "ethereum": {
+        "number": 25724334,
+        "timestamp": 1786361759,
+        "hash": "0xd44cdad8745b42f76e4ef248a4a4fb6922f6ae2bfec32997f19e5d4f137cba3b",
+        "agree": true
+      },
+      "moonbeam": {
+        "number": 16796696,
+        "timestamp": 1786361757,
+        "hash": "0xc57e761b29c882d70c77ec21ee6aa74dda874aebc78bb9c5d3c4a6a577461c10",
+        "agree": true
+      },
+      "gap_s": 2
+    }
+  },
+  "rows": [
+    {
+      "kind": "arbitrum",
+      "sym": "USDC",
+      "source_token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "fake": null,
+      "ok": true,
+      "vault": "0xcee284f754e854890e311e3280b767f80797180d",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+          "decimals": 6,
+          "supply": "47573281850736"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xcee284f754e854890e311e3280b767f80797180d",
+        "L1GatewayRouter.calculateL2TokenAddress = 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+        "L2GatewayRouter.calculateL2TokenAddress = 0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 6,
+      "locked": "48936975403256",
+      "locked_norm": "48936975403256000000000000",
+      "supply_norm": "47573281850736000000000000",
+      "ratio": 1.028665,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "DAI",
+      "source_token": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "fake": null,
+      "ok": true,
+      "vault": "0xa10c7ce4b876998858b1a9e12b10092229539400",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+          "decimals": 18,
+          "supply": "17047498626663839240625713"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xd3b5b60020504bc3489d6949d545893982ba3011",
+        "L1GatewayRouter.calculateL2TokenAddress = 0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+        "L2GatewayRouter.calculateL2TokenAddress = 0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+        "gateway.l1Escrow = 0xa10c7ce4b876998858b1a9e12b10092229539400"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 18,
+      "locked": "17052552380266362049875084",
+      "locked_norm": "17052552380266362049875084",
+      "supply_norm": "17047498626663839240625713",
+      "ratio": 1.000296,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "WBTC",
+      "source_token": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "fake": null,
+      "ok": true,
+      "vault": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+          "decimals": 8,
+          "supply": "732655801260"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+        "L1GatewayRouter.calculateL2TokenAddress = 0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+        "L2GatewayRouter.calculateL2TokenAddress = 0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 8,
+      "locked": "738573574226",
+      "locked_norm": "7385735742260000000000",
+      "supply_norm": "7326558012600000000000",
+      "ratio": 1.008077,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "LINK",
+      "source_token": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "fake": null,
+      "ok": true,
+      "vault": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0xf97f4df75117a78c1a5a0dbb814af92458539fb4",
+          "decimals": 18,
+          "supply": "1872424204770341881670222"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+        "L1GatewayRouter.calculateL2TokenAddress = 0xf97f4df75117a78c1a5a0dbb814af92458539fb4",
+        "L2GatewayRouter.calculateL2TokenAddress = 0xf97f4df75117a78c1a5a0dbb814af92458539fb4",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 18,
+      "locked": "1880809897969777590987721",
+      "locked_norm": "1880809897969777590987721",
+      "supply_norm": "1872424204770341881670222",
+      "ratio": 1.004478,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "UNI",
+      "source_token": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "fake": null,
+      "ok": true,
+      "vault": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0xfa7f8980b0f1e64a2062791cc3b0871572f1f7f0",
+          "decimals": 18,
+          "supply": "1051445948540680972534581"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+        "L1GatewayRouter.calculateL2TokenAddress = 0xfa7f8980b0f1e64a2062791cc3b0871572f1f7f0",
+        "L2GatewayRouter.calculateL2TokenAddress = 0xfa7f8980b0f1e64a2062791cc3b0871572f1f7f0",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 18,
+      "locked": "1083330477972035133122481",
+      "locked_norm": "1083330477972035133122481",
+      "supply_norm": "1051445948540680972534581",
+      "ratio": 1.030324,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "AAVE",
+      "source_token": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "fake": null,
+      "ok": true,
+      "vault": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0xba5ddd1f9d7f570dc94a51479a000e3bce967196",
+          "decimals": 18,
+          "supply": "49025741236303061108377"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+        "L1GatewayRouter.calculateL2TokenAddress = 0xba5ddd1f9d7f570dc94a51479a000e3bce967196",
+        "L2GatewayRouter.calculateL2TokenAddress = 0xba5ddd1f9d7f570dc94a51479a000e3bce967196",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 18,
+      "locked": "49795583319158934333415",
+      "locked_norm": "49795583319158934333415",
+      "supply_norm": "49025741236303061108377",
+      "ratio": 1.015702,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "CRV",
+      "source_token": "0xd533a949740bb3306d119cc777fa900ba034cd52",
+      "fake": null,
+      "ok": true,
+      "vault": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0x11cdb42b0eb46d95f990bedd4695a6e3fa034978",
+          "decimals": 18,
+          "supply": "19733958353506777215343795"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+        "L1GatewayRouter.calculateL2TokenAddress = 0x11cdb42b0eb46d95f990bedd4695a6e3fa034978",
+        "L2GatewayRouter.calculateL2TokenAddress = 0x11cdb42b0eb46d95f990bedd4695a6e3fa034978",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 18,
+      "locked": "19751434847237399105286830",
+      "locked_norm": "19751434847237399105286830",
+      "supply_norm": "19733958353506777215343795",
+      "ratio": 1.000885,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "LDO",
+      "source_token": "0x5a98fcbea516cf06857215779fd812ca3bef1b32",
+      "fake": null,
+      "ok": true,
+      "vault": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0x13ad51ed4f1b7e9dc168d8a00cb3f4ddd85efa60",
+          "decimals": 18,
+          "supply": "1592291031971796761224032"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+        "L1GatewayRouter.calculateL2TokenAddress = 0x13ad51ed4f1b7e9dc168d8a00cb3f4ddd85efa60",
+        "L2GatewayRouter.calculateL2TokenAddress = 0x13ad51ed4f1b7e9dc168d8a00cb3f4ddd85efa60",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 18,
+      "locked": "1596736369028752821230697",
+      "locked_norm": "1596736369028752821230697",
+      "supply_norm": "1592291031971796761224032",
+      "ratio": 1.002791,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "wstETH",
+      "source_token": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+      "fake": null,
+      "ok": true,
+      "vault": "0x0f25c1dc2a9922304f2eac71dca9b07e310e8e5a",
+      "dest": [
+        {
+          "chain": "arbitrum",
+          "token": "0x5979d7b546e38e414f7e9822514be443a4800529",
+          "decimals": 18,
+          "supply": "45379825304129214856667"
+        }
+      ],
+      "proof": [
+        "L1GatewayRouter.getGateway = 0x0f25c1dc2a9922304f2eac71dca9b07e310e8e5a",
+        "L1GatewayRouter.calculateL2TokenAddress = 0x5979d7b546e38e414f7e9822514be443a4800529",
+        "L2GatewayRouter.calculateL2TokenAddress = 0x5979d7b546e38e414f7e9822514be443a4800529",
+        "gateway holds the escrow (no l1Escrow())"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      },
+      "source_decimals": 18,
+      "locked": "45536640511975014122660",
+      "locked_norm": "45536640511975014122660",
+      "supply_norm": "45379825304129214856667",
+      "ratio": 1.003455,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "arbitrum",
+      "sym": "USDT",
+      "source_token": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "fake": null,
+      "ok": false,
+      "why": "router has no gateway for this token",
+      "proof": [
+        "L1GatewayRouter.getGateway = 0x0000000000000000000000000000000000000000",
+        "L1GatewayRouter.calculateL2TokenAddress = 0x0000000000000000000000000000000000000000",
+        "L2GatewayRouter.calculateL2TokenAddress = 0x0000000000000000000000000000000000000000"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207498,
+          "timestamp": 1792182575,
+          "hash": "0x3822588ff63f600187aaf0470d4159fddc3d3f3d06de97085bf772119c900efc",
+          "agree": true
+        },
+        "arbitrum": {
+          "number": 515481792,
+          "timestamp": 1792182572,
+          "hash": "0x895ad7260df639884f387e1830d5b187dfa06d79b04b07428c64c0721d7a992f",
+          "agree": true
+        },
+        "gap_s": 3
+      }
+    },
+    {
+      "kind": "optimism",
+      "sym": "USDC",
+      "source_token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+          "decimals": 6,
+          "supply": "20952458823132"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 25671477383013"
+      ],
+      "deposits": "25671477383013",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 6,
+      "locked": "25676683139456",
+      "locked_norm": "25676683139456000000000000",
+      "supply_norm": "20952458823132000000000000",
+      "ratio": 1.225473,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "USDT",
+      "source_token": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
+          "decimals": 6,
+          "supply": "301645851818722"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 421035980865755"
+      ],
+      "deposits": "421035980865755",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 6,
+      "locked": "421035986294750",
+      "locked_norm": "421035986294750000000000000",
+      "supply_norm": "301645851818722000000000000",
+      "ratio": 1.395795,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "WBTC",
+      "source_token": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+          "decimals": 8,
+          "supply": "51649252374"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 52419879265"
+      ],
+      "deposits": "52419879265",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 8,
+      "locked": "52419879265",
+      "locked_norm": "524198792650000000000",
+      "supply_norm": "516492523740000000000",
+      "ratio": 1.01492,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "LINK",
+      "source_token": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0x350a791bfc2c21f9ed5d10980dad2e2638ffa7f6",
+          "decimals": 18,
+          "supply": "175493691434408284497177"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0x514910771af9ca656af840dff83e8264ecf986ca",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 180810420474098243414414"
+      ],
+      "deposits": "180810420474098243414414",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "180821542084098243414414",
+      "locked_norm": "180821542084098243414414",
+      "supply_norm": "175493691434408284497177",
+      "ratio": 1.030359,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "UNI",
+      "source_token": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0x6fd9d7ad17242c41f7131d257212c54a0e816691",
+          "decimals": 18,
+          "supply": "71939561798948486336676"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 79360246460844212866630"
+      ],
+      "deposits": "79360246460844212866630",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "79360247760844212866630",
+      "locked_norm": "79360247760844212866630",
+      "supply_norm": "71939561798948486336676",
+      "ratio": 1.103151,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "AAVE",
+      "source_token": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0x76fb31fb4af56892a25e32cfc43de717950c9278",
+          "decimals": 18,
+          "supply": "4736290878319267319636"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 4826917842792694152697"
+      ],
+      "deposits": "4826917842792694152697",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "4826917842792694152697",
+      "locked_norm": "4826917842792694152697",
+      "supply_norm": "4736290878319267319636",
+      "ratio": 1.019134,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "CRV",
+      "source_token": "0xd533a949740bb3306d119cc777fa900ba034cd52",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0x0994206dfe8de6ec6920ff4d779b0d950605fb53",
+          "decimals": 18,
+          "supply": "6466091773385100494562243"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0xd533a949740bb3306d119cc777fa900ba034cd52",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 6479835872831203593439864"
+      ],
+      "deposits": "6479835872831203593439864",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "6479835872831203593439864",
+      "locked_norm": "6479835872831203593439864",
+      "supply_norm": "6466091773385100494562243",
+      "ratio": 1.002125,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "LDO",
+      "source_token": "0x5a98fcbea516cf06857215779fd812ca3bef1b32",
+      "fake": null,
+      "ok": true,
+      "vault": "0x99c9fc46f92e8a1c0dec1b1747d010903e884be1",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0xfdb794692724153d1488ccdbe0c56c252596735f",
+          "decimals": 18,
+          "supply": "225439460730789808537768"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0x5a98fcbea516cf06857215779fd812ca3bef1b32",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 228881242429887160837764"
+      ],
+      "deposits": "228881242429887160837764",
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "228881242429887160837764",
+      "locked_norm": "228881242429887160837764",
+      "supply_norm": "225439460730789808537768",
+      "ratio": 1.015266,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "op_dai",
+      "sym": "DAI",
+      "source_token": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "fake": null,
+      "ok": true,
+      "vault": "0x467194771dae2967aef3ecbedd3bf9a310c76c65",
+      "dest": [
+        {
+          "chain": "optimism",
+          "token": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+          "decimals": 18,
+          "supply": "13572283089041896389792591"
+        }
+      ],
+      "proof": [
+        "L1DAITokenBridge l1Token=0x6b175474e89094c44da98b954eedeac495271d0f l2Token=0xda10009cbd5d07dd0cecc66161fc93d7c9000da1 escrow=0x467194771dae2967aef3ecbedd3bf9a310c76c65",
+        "L2DAITokenBridge l1Token=0x6b175474e89094c44da98b954eedeac495271d0f l2Token=0xda10009cbd5d07dd0cecc66161fc93d7c9000da1 l1DAITokenBridge=0x10e6593cdda8c58a1d0f14c5164b376352a55f2f"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "19888231688199913892560898",
+      "locked_norm": "19888231688199913892560898",
+      "supply_norm": "13572283089041896389792591",
+      "ratio": 1.465356,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "base",
+      "sym": "USDC",
+      "source_token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "fake": null,
+      "ok": true,
+      "vault": "0x3154cf16ccdb4c6d922629664174b904d80f2c35",
+      "dest": [
+        {
+          "chain": "base",
+          "token": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca",
+          "decimals": 6,
+          "supply": "5472277739122"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 6521630344474"
+      ],
+      "deposits": "6521630344474",
+      "blocks": {
+        "ethereum": {
+          "number": 26207479,
+          "timestamp": 1792182347,
+          "hash": "0x5df1f5d667cb4585bcb8f3c35e4a24e7b762be1566e9d8ecb14dfeffd2b4e4a3",
+          "agree": true
+        },
+        "base": {
+          "number": 52696499,
+          "timestamp": 1792182345,
+          "hash": "0xb7064a7029a89a746d6d345785213f584a0a0a360c729d6ce3bcb60ed25992d4",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 6,
+      "locked": "6545555149246",
+      "locked_norm": "6545555149246000000000000",
+      "supply_norm": "5472277739122000000000000",
+      "ratio": 1.196129,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "base",
+      "sym": "DAI",
+      "source_token": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "fake": null,
+      "ok": true,
+      "vault": "0x3154cf16ccdb4c6d922629664174b904d80f2c35",
+      "dest": [
+        {
+          "chain": "base",
+          "token": "0x50c5725949a6f0c72e6c4a641f24049a917db0cb",
+          "decimals": 18,
+          "supply": "1916112255943524814628970"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0x6b175474e89094c44da98b954eedeac495271d0f",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 1920416495885203262549522"
+      ],
+      "deposits": "1920416495885203262549522",
+      "blocks": {
+        "ethereum": {
+          "number": 26207479,
+          "timestamp": 1792182347,
+          "hash": "0x5df1f5d667cb4585bcb8f3c35e4a24e7b762be1566e9d8ecb14dfeffd2b4e4a3",
+          "agree": true
+        },
+        "base": {
+          "number": 52696499,
+          "timestamp": 1792182345,
+          "hash": "0xb7064a7029a89a746d6d345785213f584a0a0a360c729d6ce3bcb60ed25992d4",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 18,
+      "locked": "1920416497943578440449944",
+      "locked_norm": "1920416497943578440449944",
+      "supply_norm": "1916112255943524814628970",
+      "ratio": 1.002246,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "base",
+      "sym": "cbETH",
+      "source_token": "0xbe9895146f7af43049ca1c1ae358b0541ea49704",
+      "fake": null,
+      "ok": true,
+      "vault": "0x3154cf16ccdb4c6d922629664174b904d80f2c35",
+      "dest": [
+        {
+          "chain": "base",
+          "token": "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22",
+          "decimals": 18,
+          "supply": "90277936716685971053022"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0xbe9895146f7af43049ca1c1ae358b0541ea49704",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 90444462844950824901311"
+      ],
+      "deposits": "90444462844950824901311",
+      "blocks": {
+        "ethereum": {
+          "number": 26207479,
+          "timestamp": 1792182347,
+          "hash": "0x5df1f5d667cb4585bcb8f3c35e4a24e7b762be1566e9d8ecb14dfeffd2b4e4a3",
+          "agree": true
+        },
+        "base": {
+          "number": 52696499,
+          "timestamp": 1792182345,
+          "hash": "0xb7064a7029a89a746d6d345785213f584a0a0a360c729d6ce3bcb60ed25992d4",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 18,
+      "locked": "90444462846650824902311",
+      "locked_norm": "90444462846650824902311",
+      "supply_norm": "90277936716685971053022",
+      "ratio": 1.001844,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "base",
+      "sym": "rETH",
+      "source_token": "0xae78736cd615f374d3085123a210448e74fc6393",
+      "fake": null,
+      "ok": true,
+      "vault": "0x3154cf16ccdb4c6d922629664174b904d80f2c35",
+      "dest": [
+        {
+          "chain": "base",
+          "token": "0xb6fe221fe9eef5aba221c348ba20a1bf5e73624c",
+          "decimals": 18,
+          "supply": "1881737135178878457117"
+        }
+      ],
+      "proof": [
+        "l2token.remoteToken/l1Token = 0xae78736cd615f374d3085123a210448e74fc6393",
+        "l2token.bridge/l2Bridge = 0x4200000000000000000000000000000000000010",
+        "L1StandardBridge.deposits(l1,l2) = 1892031225093687990187"
+      ],
+      "deposits": "1892031225093687990187",
+      "blocks": {
+        "ethereum": {
+          "number": 26207479,
+          "timestamp": 1792182347,
+          "hash": "0x5df1f5d667cb4585bcb8f3c35e4a24e7b762be1566e9d8ecb14dfeffd2b4e4a3",
+          "agree": true
+        },
+        "base": {
+          "number": 52696499,
+          "timestamp": 1792182345,
+          "hash": "0xb7064a7029a89a746d6d345785213f584a0a0a360c729d6ce3bcb60ed25992d4",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 18,
+      "locked": "1892077225093687990187",
+      "locked_norm": "1892077225093687990187",
+      "supply_norm": "1881737135178878457117",
+      "ratio": 1.005494,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "base",
+      "sym": "LINK",
+      "source_token": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "fake": null,
+      "ok": false,
+      "why": "remote token is not the source token",
+      "proof": [
+        "l2token.remoteToken/l1Token = null",
+        "l2token.bridge/l2Bridge = null"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207479,
+          "timestamp": 1792182347,
+          "hash": "0x5df1f5d667cb4585bcb8f3c35e4a24e7b762be1566e9d8ecb14dfeffd2b4e4a3",
+          "agree": true
+        },
+        "base": {
+          "number": 52696499,
+          "timestamp": 1792182345,
+          "hash": "0xb7064a7029a89a746d6d345785213f584a0a0a360c729d6ce3bcb60ed25992d4",
+          "agree": true
+        },
+        "gap_s": 2
+      }
+    },
+    {
+      "kind": "polygon",
+      "sym": "USDC",
+      "source_token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+          "decimals": 6,
+          "supply": "1004077999313032"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 6,
+      "locked": "1004667337844580",
+      "locked_norm": "1004667337844580000000000000",
+      "supply_norm": "1004077999313032000000000000",
+      "ratio": 1.000586,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "USDT",
+      "source_token": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+          "decimals": 6,
+          "supply": "717405558849009"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0xdac17f958d2ee523a2206206994597c13d831ec7"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 6,
+      "locked": "4645097762211",
+      "locked_norm": "4645097762211000000000000",
+      "supply_norm": "717405558849009000000000000",
+      "ratio": 0.006474,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "UNDER_BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "DAI",
+      "source_token": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+          "decimals": 18,
+          "supply": "443563208687007485208653447"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0x6b175474e89094c44da98b954eedeac495271d0f"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "443860171746140072367163986",
+      "locked_norm": "443860171746140072367163986",
+      "supply_norm": "443563208687007485208653447",
+      "ratio": 1.000669,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "WBTC",
+      "source_token": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+          "decimals": 8,
+          "supply": "192386669935"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 8,
+      "locked": "192430023181",
+      "locked_norm": "1924300231810000000000",
+      "supply_norm": "1923866699350000000000",
+      "ratio": 1.000225,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "LINK",
+      "source_token": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+          "decimals": 18,
+          "supply": "1130772192453862543596060"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0x514910771af9ca656af840dff83e8264ecf986ca"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "1131964925353983331959031",
+      "locked_norm": "1131964925353983331959031",
+      "supply_norm": "1130772192453862543596060",
+      "ratio": 1.001054,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "AAVE",
+      "source_token": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+          "decimals": 18,
+          "supply": "59361755061164240253181"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0xd6df932a45c0f255f85145f286ea0b292b21c90b",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "69747280807974633242687",
+      "locked_norm": "69747280807974633242687",
+      "supply_norm": "59361755061164240253181",
+      "ratio": 1.174953,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "UNI",
+      "source_token": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0xb33eaad8d922b1083446dc23f610c2567fb5180f",
+          "decimals": 18,
+          "supply": "250740646151081573799227"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0xb33eaad8d922b1083446dc23f610c2567fb5180f",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "251116308154934790009669",
+      "locked_norm": "251116308154934790009669",
+      "supply_norm": "250740646151081573799227",
+      "ratio": 1.001498,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "CRV",
+      "source_token": "0xd533a949740bb3306d119cc777fa900ba034cd52",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0x172370d5cd63279efa6d502dab29171933a610af",
+          "decimals": 18,
+          "supply": "4458293123103798717898877"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0x172370d5cd63279efa6d502dab29171933a610af",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0xd533a949740bb3306d119cc777fa900ba034cd52"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "4467217809248351458144011",
+      "locked_norm": "4467217809248351458144011",
+      "supply_norm": "4458293123103798717898877",
+      "ratio": 1.002001,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "polygon",
+      "sym": "LDO",
+      "source_token": "0x5a98fcbea516cf06857215779fd812ca3bef1b32",
+      "fake": null,
+      "ok": true,
+      "vault": "0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+      "dest": [
+        {
+          "chain": "polygon",
+          "token": "0xc3c7d422809852031b44ab29eec9f1eff2a58756",
+          "decimals": 18,
+          "supply": "1390180512921075678124080"
+        }
+      ],
+      "proof": [
+        "RootChainManager.rootToChildToken = 0xc3c7d422809852031b44ab29eec9f1eff2a58756",
+        "RootChainManager.typeToPredicate(tokenToType) = 0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf",
+        "ChildChainManager.childToRootToken = 0x5a98fcbea516cf06857215779fd812ca3bef1b32"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207512,
+          "timestamp": 1792182743,
+          "hash": "0xc600ce2010219c105b2a41d1b6e4bc1db5fd9fcfc4e886d1a9de475d78dcc024",
+          "agree": true
+        },
+        "polygon": {
+          "number": 95651599,
+          "timestamp": 1792182743,
+          "hash": "0x23d2a02efd0b89570e919fc545e0405e743bd6c1077b98cdb705e68eee7b4b13",
+          "agree": true
+        },
+        "gap_s": 0
+      },
+      "source_decimals": 18,
+      "locked": "1401925724488828722249777",
+      "locked_norm": "1401925724488828722249777",
+      "supply_norm": "1390180512921075678124080",
+      "ratio": 1.008448,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "BACKED"
+    },
+    {
+      "kind": "nomad",
+      "sym": "USDC",
+      "source_token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "fake": null,
+      "ok": true,
+      "vault": "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+      "dest": [
+        {
+          "chain": "moonbeam",
+          "token": "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9",
+          "decimals": 6,
+          "supply": "2114959159180"
+        }
+      ],
+      "proof": [
+        "Moonbeam TokenRegistry 0xa7e4fea3c1468d6c1a3a77e21e6e43daed855c1b: getTokenId(rep) = (domain 6648936, 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48)",
+        "getLocalAddress(eth, l1) = 0x8f552a71efe5eefc207bf75485b356a0b3f01ec9",
+        "Moonbeam BridgeRouter.remotes(eth) = 0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+        "Ethereum TokenRegistry.getTokenId(l1) domain = 6648936 (local origin)"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 25724334,
+          "timestamp": 1786361759,
+          "hash": "0xd44cdad8745b42f76e4ef248a4a4fb6922f6ae2bfec32997f19e5d4f137cba3b",
+          "agree": true
+        },
+        "moonbeam": {
+          "number": 16796696,
+          "timestamp": 1786361757,
+          "hash": "0xc57e761b29c882d70c77ec21ee6aa74dda874aebc78bb9c5d3c4a6a577461c10",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 6,
+      "locked": "3720841451",
+      "locked_norm": "3720841451000000000000",
+      "supply_norm": "2114959159180000000000000",
+      "ratio": 0.001759,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "UNDER_BACKED"
+    },
+    {
+      "kind": "nomad",
+      "sym": "WETH",
+      "source_token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "fake": null,
+      "ok": true,
+      "vault": "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+      "dest": [
+        {
+          "chain": "moonbeam",
+          "token": "0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7",
+          "decimals": 18,
+          "supply": "603885662505566378443"
+        }
+      ],
+      "proof": [
+        "Moonbeam TokenRegistry 0xa7e4fea3c1468d6c1a3a77e21e6e43daed855c1b: getTokenId(rep) = (domain 6648936, 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2)",
+        "getLocalAddress(eth, l1) = 0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7",
+        "Moonbeam BridgeRouter.remotes(eth) = 0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+        "Ethereum TokenRegistry.getTokenId(l1) domain = 6648936 (local origin)"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 25724334,
+          "timestamp": 1786361759,
+          "hash": "0xd44cdad8745b42f76e4ef248a4a4fb6922f6ae2bfec32997f19e5d4f137cba3b",
+          "agree": true
+        },
+        "moonbeam": {
+          "number": 16796696,
+          "timestamp": 1786361757,
+          "hash": "0xc57e761b29c882d70c77ec21ee6aa74dda874aebc78bb9c5d3c4a6a577461c10",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 18,
+      "locked": "540930161643898773",
+      "locked_norm": "540930161643898773",
+      "supply_norm": "603885662505566378443",
+      "ratio": 0.000895,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "UNDER_BACKED"
+    },
+    {
+      "kind": "nomad",
+      "sym": "WBTC",
+      "source_token": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "fake": null,
+      "ok": true,
+      "vault": "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+      "dest": [
+        {
+          "chain": "moonbeam",
+          "token": "0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0",
+          "decimals": 8,
+          "supply": "756016422"
+        }
+      ],
+      "proof": [
+        "Moonbeam TokenRegistry 0xa7e4fea3c1468d6c1a3a77e21e6e43daed855c1b: getTokenId(rep) = (domain 6648936, 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599)",
+        "getLocalAddress(eth, l1) = 0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0",
+        "Moonbeam BridgeRouter.remotes(eth) = 0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+        "Ethereum TokenRegistry.getTokenId(l1) domain = 6648936 (local origin)"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 25724334,
+          "timestamp": 1786361759,
+          "hash": "0xd44cdad8745b42f76e4ef248a4a4fb6922f6ae2bfec32997f19e5d4f137cba3b",
+          "agree": true
+        },
+        "moonbeam": {
+          "number": 16796696,
+          "timestamp": 1786361757,
+          "hash": "0xc57e761b29c882d70c77ec21ee6aa74dda874aebc78bb9c5d3c4a6a577461c10",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 8,
+      "locked": "0",
+      "locked_norm": "0",
+      "supply_norm": "7560164220000000000",
+      "ratio": 0,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "UNDER_BACKED"
+    },
+    {
+      "kind": "nomad",
+      "sym": "USDT",
+      "source_token": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "fake": null,
+      "ok": true,
+      "vault": "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+      "dest": [
+        {
+          "chain": "moonbeam",
+          "token": "0x8e70cd5b4ff3f62659049e74b6649c6603a0e594",
+          "decimals": 6,
+          "supply": "77774577676"
+        }
+      ],
+      "proof": [
+        "Moonbeam TokenRegistry 0xa7e4fea3c1468d6c1a3a77e21e6e43daed855c1b: getTokenId(rep) = (domain 6648936, 0xdac17f958d2ee523a2206206994597c13d831ec7)",
+        "getLocalAddress(eth, l1) = 0x8e70cd5b4ff3f62659049e74b6649c6603a0e594",
+        "Moonbeam BridgeRouter.remotes(eth) = 0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+        "Ethereum TokenRegistry.getTokenId(l1) domain = 6648936 (local origin)"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 25724334,
+          "timestamp": 1786361759,
+          "hash": "0xd44cdad8745b42f76e4ef248a4a4fb6922f6ae2bfec32997f19e5d4f137cba3b",
+          "agree": true
+        },
+        "moonbeam": {
+          "number": 16796696,
+          "timestamp": 1786361757,
+          "hash": "0xc57e761b29c882d70c77ec21ee6aa74dda874aebc78bb9c5d3c4a6a577461c10",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 6,
+      "locked": "0",
+      "locked_norm": "0",
+      "supply_norm": "77774577676000000000000",
+      "ratio": 0,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "UNDER_BACKED"
+    },
+    {
+      "kind": "nomad",
+      "sym": "DAI",
+      "source_token": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "fake": null,
+      "ok": true,
+      "vault": "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+      "dest": [
+        {
+          "chain": "moonbeam",
+          "token": "0xc234a67a4f840e61ade794be47de455361b52413",
+          "decimals": 18,
+          "supply": "510151439076575142793576"
+        }
+      ],
+      "proof": [
+        "Moonbeam TokenRegistry 0xa7e4fea3c1468d6c1a3a77e21e6e43daed855c1b: getTokenId(rep) = (domain 6648936, 0x6b175474e89094c44da98b954eedeac495271d0f)",
+        "getLocalAddress(eth, l1) = 0xc234a67a4f840e61ade794be47de455361b52413",
+        "Moonbeam BridgeRouter.remotes(eth) = 0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3",
+        "Ethereum TokenRegistry.getTokenId(l1) domain = 6648936 (local origin)"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 25724334,
+          "timestamp": 1786361759,
+          "hash": "0xd44cdad8745b42f76e4ef248a4a4fb6922f6ae2bfec32997f19e5d4f137cba3b",
+          "agree": true
+        },
+        "moonbeam": {
+          "number": 16796696,
+          "timestamp": 1786361757,
+          "hash": "0xc57e761b29c882d70c77ec21ee6aa74dda874aebc78bb9c5d3c4a6a577461c10",
+          "agree": true
+        },
+        "gap_s": 2
+      },
+      "source_decimals": 18,
+      "locked": "5",
+      "locked_norm": "5",
+      "supply_norm": "510151439076575142793576",
+      "ratio": 0,
+      "decimals_match": true,
+      "agree": true,
+      "disagreements": [],
+      "verdict": "UNDER_BACKED"
+    },
+    {
+      "kind": "optimism",
+      "sym": "USDC",
+      "source_token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "fake": "native USDC on OP, not a bridge token",
+      "ok": false,
+      "why": "remote token is not the source token",
+      "proof": [
+        "l2token.remoteToken/l1Token = null",
+        "l2token.bridge/l2Bridge = null"
+      ],
+      "blocks": {
+        "ethereum": {
+          "number": 26207471,
+          "timestamp": 1792182251,
+          "hash": "0x0e1183a546c6ef7bb270b8eb7cf11ccde7caadaf1fff35e409658fe48345b28a",
+          "agree": true
+        },
+        "optimism": {
+          "number": 158291737,
+          "timestamp": 1792182251,
+          "hash": "0x941dd6b34eec55b59a5a8e8d6a7dcdd7e627e66a7a5cb1e2d90dde6284d5384f",
+          "agree": true
+        },
+        "gap_s": 0
+      }
+    }
+  ]
+}
