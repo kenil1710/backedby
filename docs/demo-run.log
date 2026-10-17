@@ -61,3 +61,317 @@ GenLayer RPC error (gen_call): fetch failed
 
 ## 6. Waiting until finalized blocks exist after the bond started (Ethereum finality is ~15-20 min)  (2026-10-17T09:10:36.649Z)
    ... finalized Ethereum block at 2026-10-17T08:51:35.000Z, bond started 2026-10-17T09:08:06.000Z
+   ... finalized Ethereum block at 2026-10-17T08:51:35.000Z, bond started 2026-10-17T09:08:06.000Z
+   ... finalized Ethereum block at 2026-10-17T09:00:47.000Z, bond started 2026-10-17T09:08:06.000Z
+   ... finalized Ethereum block at 2026-10-17T09:00:47.000Z, bond started 2026-10-17T09:08:06.000Z
+   ... finalized Ethereum block at 2026-10-17T09:00:47.000Z, bond started 2026-10-17T09:08:06.000Z
+   ... finalized Ethereum block at 2026-10-17T09:05:11.000Z, bond started 2026-10-17T09:08:06.000Z
+   ... finalized Ethereum block at 2026-10-17T09:05:11.000Z, bond started 2026-10-17T09:08:06.000Z
+   ... finalized Ethereum block at 2026-10-17T09:05:11.000Z, bond started 2026-10-17T09:08:06.000Z
+
+## 7. Challenge -> BACKED, contested, re-read, upheld: the stakes go into the bond  (2026-10-17T09:27:56.208Z)
+  challenge([1,"{\"ethereum\":26211297,\"arbitrum\":515632202}"]) value=10000000000000000 -> ok ACCEPTED 13s tx 0x819f9503e792062bc436df795f048e4db1692e467765de1bef525cbc79b08d74 {"check_id":2,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",2,1]) -> ok ACCEPTED 21s tx 0x0c658f4c72589957afcffcf225ce51bad51ecf2c36b4315eddd28a0a4358dd75 {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|2|1","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 12s tx 0x8f8c019e5ad43c58eb8b47c0066295ebc618effe39e6707f35f95f129ddf1ecd {"check_id":2,"contestable_until":1792229413,"ok":true,"ratio_bps":10043,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 2: PROVISIONAL BACKED ratio_bps 10043  
+  contest([2]) value=10000000000000000 -> ok ACCEPTED 11s tx 0x843464c7171aada0d7e752b05253c0de1bb8e639edc7bddb58edc1c75fe1d5f5 {"check_id":2,"ok":true,"reread_by":1792229635}
+   -> check 2: CONTESTED BACKED ratio_bps 10043  
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … read_check fee attempt 1 hit transient RPC noise, waiting 2s
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",2,2]) -> ok ACCEPTED 69s tx 0x44e642fa2c24bb3075ff43f85421dad0c6131cc4d874f1d0c559d41daddbd1cf {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|2|2","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 18s tx 0x922e5b570c80cc29c2cbad11c2334df9c6c10b6bd19941f3e61a5a9bb13911e6 {"check_id":2,"ok":true,"payouts":{"bond_in":"20000000000000000","bounty":"0","challenger":"0","contest_lost":"10000000000000000","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 2: FINAL BACKED ratio_bps 10043 LOCKED_COVERS_SUPPLY CONTEST_UPHELD_RULING
+   bond 1: {"amount":"70000000000000000","bond_id":1,"closed_at":0,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":1,"since":1792228056,"slashed":"0","status":"ACTIVE","unbond_at":0,"withdrawable_at":0,"won":"20000000000000000"}
+
+## 8. Challenge -> UNDER_BACKED: the USDT pair as registered (PoS predicate only) holds 0.64%; window passes, bond slashed, bounty paid  (2026-10-17T09:30:33.780Z)
+  challenge([2,"{\"ethereum\":26211307,\"polygon\":95682061}"]) value=10000000000000000 -> ok ACCEPTED 13s tx 0xdbe0d2c1dfec06c65497b17b6712f431be5f368a8c3b7e489d1995703c9247c0 {"check_id":3,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",3,1]) -> ok ACCEPTED 32s tx 0xf9169adfa63f118507891d4db84d7ec3bc3189e07a61d8fcc3113316d8ba89a3 {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|3|1","reason":"","status":"OK"}
+  rule([3]) -> ok ACCEPTED 13s tx 0x966b27cfa89b002c2f94a09d49ec91d6e05196668b1574a7fefffb2ac96b9d2e {"check_id":3,"contestable_until":1792229609,"ok":true,"ratio_bps":64,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+   -> check 3: PROVISIONAL UNDER_BACKED ratio_bps 64  
+   ... waiting 89s (contest window)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([3]) -> ok ACCEPTED 15s tx 0x8438a6692618f34dd6c8b3e20a81ee393e0320b413ec82a00283d40fffbb2909 {"check_id":3,"ok":true,"payouts":{"bond_in":"0","bounty":"25000000000000000","challenger":"35000000000000000","contest_lost":"0","contest_refund":"0","slash":"50000000000000000","treasury":"25000000000000000"},"status":
+   -> check 3: FINAL UNDER_BACKED ratio_bps 64 LOCKED_BELOW_SUPPLY WINDOW_PASSED
+   payouts {"bond_in":"0","bounty":"25000000000000000","challenger":"35000000000000000","contest_lost":"0","contest_refund":"0","slash":"50000000000000000","treasury":"25000000000000000"}
+   bond 2: {"amount":"0","bond_id":2,"closed_at":1792229624,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":2,"since":1792228069,"slashed":"50000000000000000","status":"SLASHED","unbond_at":0,"withdrawable_at":0,"won":"0"}
+
+## 9. The verdict above was about an incomplete pair: anyone adds the missing vault (USDT0's LayerZero adapter)  (2026-10-17T09:33:54.422Z)
+   an unauthenticated vault is refused (Polygon's USDC.e has no OFT):
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_polygon","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x2791bca1f2de4661ed88a30c99a7a9449aa84174"]) -> FAILED ACCEPTED 12s tx 0xbbfad8852bf409c471d0d12cdf491a11890f6481d847b0cdc1d4fcf191fcf5c7 revert: REFUSED: NOT_AUTHENTICATED: OFT_HAS_NO_ETHEREUM_PEER
+   -> refused: REFUSED: NOT_AUTHENTICATED: OFT_HAS_NO_ETHEREUM_PEER
+GenLayer RPC error (eth_getTransactionByHash): fetch failed
+  … authenticate poll attempt 1 hit transient RPC noise, waiting 2s
+  authenticate(["oft_polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 39s tx 0x4fbc343ed0c98a1c5f888205288f9bd4db1a2a68d12dab92896ae3d577106bc8 {"auth_id":29,"dest_decimals":6,"source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+   adapter derived from the token: 0x6c96de32cea08842dcc4058c14d3aaad7fa41dee
+  add_vault([2,29]) -> ok ACCEPTED 12s tx 0x89591fc381e184785db3b57714e4257e148fe77e25b37cd6064dfcb666d77a1c {"max_gap_s":120,"ok":true,"pair_id":2,"vaults":2}
+   -> pair 2 vaults: ["0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf polygon","0x6c96de32cea08842dcc4058c14d3aaad7fa41dee oft_polygon"], max gap 120s
+   the same vault again:
+  authenticate(["oft_polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 20s tx 0xd9c8ad486001f769fb73b8ac4e740995e51a468ca76f900b39bbb4e8647103cc {"auth_id":30,"dest_decimals":6,"source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for add_vault (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  add_vault([2,30]) -> FAILED ACCEPTED 11s tx 0xfd0d9c1878c8c3f95ca5e2db481b6162b2d99524106b6ef80ca861608303455a revert: REFUSED: VAULT_ALREADY_IN_THIS_PAIR
+   -> refused: REFUSED: VAULT_ALREADY_IN_THIS_PAIR
+   a vault proved only onto a token this pair does not have (USDT0 on Arbitrum):
+  authenticate(["oft_arbitrum","0xdac17f958d2ee523a2206206994597c13d831ec7","0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"]) -> ok ACCEPTED 14s tx 0x0318bcceb9283e797d2b5fd0382ff0ee49e137f12a8f9629b0d1f30cad212001 {"auth_id":31,"dest_decimals":6,"source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for add_vault (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  add_vault([2,31]) -> FAILED ACCEPTED 11s tx 0x24b7b2c847efede3a9558b3e21dae02d2e0a10d8e30cc22e6196040c8aac4bb2 revert: REFUSED: VAULT_DOES_NOT_BACK_A_DESTINATION_OF_THIS_PAIR
+   -> refused: REFUSED: VAULT_DOES_NOT_BACK_A_DESTINATION_OF_THIS_PAIR
+GenLayer RPC error (gen_call): fetch failed
+  … get_pair attempt 1 hit transient RPC noise, waiting 4s
+  monitor([2,"{\"ethereum\":26211339,\"polygon\":95682317}"]) -> ok ACCEPTED 12s tx 0xe1b6aa8eaa9fa3870edbccbd330cb8082c358067b4d13f53f9a5e1fffeef2e80 {"check_id":4,"ok":true}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",4,1]) -> ok ACCEPTED 184s tx 0x377e3b6db76fe439c1e9869eda9d67b9d28e5006f8f1b440d53913bb7b50a9f7 {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|4|1","reason":"","status":"OK"}
+  rule([4]) -> ok ACCEPTED 12s tx 0xb6e00cae04fa82383ac2b68d745f6594b7c7e002ddae505b50931f85fc77ce19 {"check_id":4,"contestable_until":1792230116,"ok":true,"ratio_bps":43462,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 4: PROVISIONAL BACKED ratio_bps 43462  
+   locked per vault ["4645097762211","3111823199987583"]
+   ... waiting 89s (contest window)
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … finalize fee attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … finalize fee attempt 2 hit transient RPC noise, waiting 4s
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … write fee simulation failed for finalize (An unknown RPC error occurred.
+
+Details: fetch failed
+Version: viem@2.57.7)
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … finalize fee attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … finalize fee attempt 2 hit transient RPC noise, waiting 4s
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … fee estimate unavailable (An unknown RPC error occurred.
+
+Details: fetch failed
+Version: viem@2.57.7), using node default
+GenLayer RPC error (eth_getTransactionCount): fetch failed
+  … finalize attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (eth_getTransactionCount): fetch failed
+  … finalize attempt 2 hit transient RPC noise, waiting 8s
+GenLayer RPC error (eth_getTransactionCount): fetch failed
+  … finalize attempt 3 hit transient RPC noise, waiting 12s
+GenLayer RPC error (eth_getTransactionCount): fetch failed
+  … finalize attempt 4 hit transient RPC noise, waiting 16s
+GenLayer RPC error (eth_getTransactionCount): fetch failed
+  … finalize attempt 5 hit transient RPC noise, waiting 20s
+GenLayer RPC error (eth_getTransactionCount): fetch failed
+  finalize([4]) -> FAILED UNSETTLED 72s tx null revert: submit failed — An unknown RPC error occurred.
+
+Details: fetch failed
+Version: viem@2.57.7
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 2 hit transient RPC noise, waiting 8s
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 3 hit transient RPC noise, waiting 12s
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 4 hit transient RPC noise, waiting 16s
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 5 hit transient RPC noise, waiting 20s
+GenLayer RPC error (gen_call): fetch failed
+file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/buildRequest.js:127
+                        throw new UnknownRpcError(err);
+                              ^
+
+UnknownRpcError: An unknown RPC error occurred.
+
+Details: fetch failed
+Version: viem@2.57.7
+    at withRetry.delay.count.count (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/buildRequest.js:127:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async attemptRetry (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/promise/withRetry.js:24:30) {
+  details: 'fetch failed',
+  docsPath: undefined,
+  metaMessages: undefined,
+  shortMessage: 'An unknown RPC error occurred.',
+  version: '2.57.7',
+  code: -1,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:14976:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Object.request (file:///Users/kenilvakariya/dev/backedby/test/node_modules/genlayer-js/dist/index.js:5724:26)
+      at async withRetry.delay.count.count (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/buildRequest.js:30:24)
+      at async attemptRetry (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/promise/withRetry.js:24:30) {
+    [cause]: Error: getaddrinfo ENOTFOUND backedby-ledger.vercel.app
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'backedby-ledger.vercel.app'
+    }
+  }
+}
+
+Node.js v22.22.2
+
+# Demo run 2026-10-17T10:54:36.463Z on 0xBb87c7D651a61041ED3ED7EB8059034634a528a1 (commit 6f9431f901d3b3006b25a93c42954b593abc2307)
+config: window 90s, read timeout 300s, unbond delay 120s, min bond 50000000000000000, min stake 10000000000000000, fast gap 120s
+
+## 1. Register five real pairs, each authenticated by its bridge's own mapping  (2026-10-17T10:54:36.466Z)
+   -> pair 1: LINK on Arbitrum (demo) (registered earlier)
+GenLayer RPC error (gen_call): fetch failed
+  … get_pairs attempt 1 hit transient RPC noise, waiting 4s
+   -> pair 2: USDT on Polygon, PoS vault only (demo) (registered earlier)
+   -> pair 3: madUSDC on Moonbeam (demo) (registered earlier)
+   -> pair 4: USDC.e on OP Mainnet (demo) (registered earlier)
+   -> pair 5: A token bridged to OP on 2026-09-01 (demo) (registered earlier)
+
+## Resuming at step 10: bond 1 on pair 1, bond 2 on pair 2  (2026-10-17T10:55:46.768Z)
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 1 hit transient RPC noise, waiting 4s
+   ... waiting 8s (window of check 4)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([4]) -> ok ACCEPTED 13s tx 0x7e83ba7b2cb30865326b58d0559218af0a4bc3386f9714d6fc14ba0374d29fd5 {"check_id":4,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 4: FINAL BACKED ratio_bps 43462 LOCKED_COVERS_SUPPLY WINDOW_PASSED
+
+## 10. Monitoring INCONCLUSIVE: pins that break the 10-minute gap rule  (2026-10-17T10:56:53.856Z)
+  monitor([4,"{\"ethereum\":26211714,\"optimism\":158316886}"]) -> ok ACCEPTED 19s tx 0xe88471994a41328f2193e2c6b775ff375a162c5b46f97abb697d7635dc73a724 {"check_id":5,"ok":true}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",5,1]) -> ok ACCEPTED 38s tx 0x62ad3a09af329fd70885301c777550560a9c0e0c2eb5b11fcc7a45e133f7e33f {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|5|1","reason":"","status":"OK"}
+GenLayer RPC error (sim_estimateTransactionFees): terminated
+  … write fee simulation failed for rule (An unknown RPC error occurred.
+
+Details: terminated
+Version: viem@2.57.7)
+  rule([5]) -> ok ACCEPTED 231s tx 0x22ff8b463e5a939c0ff2ce2731ea46ae6843803062625193af2eab67a25d5138 {"check_id":5,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"0"},"reason":"GAP_810S_OVER_600S","status":"INCONCLUSIVE"}
+   -> check 5: INCONCLUSIVE INCONCLUSIVE ratio_bps -1 GAP_810S_OVER_600S READ_PIN
+
+## 11. Timeout: a monitoring check nobody reads expires INCONCLUSIVE  (2026-10-17T11:02:07.403Z)
+  monitor([3,"{\"ethereum\":25724334,\"moonbeam\":16796696}"]) -> ok ACCEPTED 13s tx 0x07e2d8c02776f098f3c70f628b536d3873f9182747c0f6500804fe18fc4297f9 {"check_id":6,"ok":true}
+   ... waiting 298s (read deadline)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for expire (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  expire([6]) -> ok ACCEPTED 13s tx 0x7122fad243cb4ceb74f93df270ce654a815dc1258f0ffbd3aa7c5cf76fa64dd8 {"check_id":6,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"0"},"status":"INCONCLUSIVE"}
+   -> check 6: INCONCLUSIVE INCONCLUSIVE  NO_READING_BEFORE_DEADLINE TIMEOUT_UNREAD
+
+## 12. INCONCLUSIVE about the pair: blocks pinned before the OP token existed, so its supply cannot be read  (2026-10-17T11:07:51.161Z)
+   pinned {"ethereum":25871849,"optimism":156269701} (OP token created at block 156278236)
+  monitor([5,"{\"ethereum\":25871849,\"optimism\":156269701}"]) -> ok ACCEPTED 18s tx 0x0d6fb623d9b03d4252df840909a7d7391b37b0704be18b76ce941964f4cf6ba2 {"check_id":7,"ok":true}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",7,1]) -> ok ACCEPTED 23s tx 0x5019e7d460ad95056b1dceba73a6e727f9b4f18f7a2691a0f5b5dbb79881e712 {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|7|1","reason":"CALL_FAILED:optimism","status":"INCONCLUSIVE"}
+  rule([7]) -> ok ACCEPTED 13s tx 0xcea6d7a42f40dd02508a563754864469600e760b7bfe9afc5e1b61f9f415a5d4 {"check_id":7,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"0"},"reason":"CALL_FAILED:optimism","status":"INCONCLUSIVE"}
+   -> check 7: INCONCLUSIVE INCONCLUSIVE ratio_bps -1 CALL_FAILED:optimism READ_DATA
+   latest ruling for pair 5: {"check_id":7,"final_at":1792235354,"found":true,"last_bad_time":1788138179,"pair":true,"ratio_bps":-1,"reason":"CALL_FAILED:optimism","source_time":1788138179,"status":"INCONCLUSIVE","tolerance_bps":0,"verdict":"INCONCLUSIVE"}
+
+## 13. Monitoring FINAL on three more pairs (the gate needs final rulings)  (2026-10-17T11:09:24.277Z)
+  monitor([3,"{\"ethereum\":25724334,\"moonbeam\":16796696}"]) -> ok ACCEPTED 14s tx 0xfc5ecd7911a6d7ca65046d548c85eb1b4d99b12b37db4d6b9b22931e724e13c8 {"check_id":8,"ok":true}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",8,1]) -> ok ACCEPTED 24s tx 0x2e6a55573c76b4396c0871b00fa5ededcb0e14890d8dc32465c5204dd061da07 {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|8|1","reason":"","status":"OK"}
+  rule([8]) -> ok ACCEPTED 32s tx 0x8d54137ebd747015a80d51824b23cea5f3af1bd6deed76f3d75750ff55587e08 {"check_id":8,"contestable_until":1792235533,"ok":true,"ratio_bps":17,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+   -> check 8: PROVISIONAL UNDER_BACKED ratio_bps 17  
+  monitor([4,"{\"ethereum\":26211780,\"optimism\":158317687}"]) -> ok ACCEPTED 13s tx 0x19f9c5e688a12330c189ec986794a09664d7930f8afe3259d307cc61ee02e0fc {"check_id":9,"ok":true}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",9,1]) -> ok ACCEPTED 24s tx 0x7a87407037fc68f984ff798c5b33a8e081eea9f7a7aef316e62a5fa9e007d10a {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|9|1","reason":"","status":"OK"}
+GenLayer RPC error (eth_getTransactionReceipt): fetch failed
+  rule([9]) -> ok FINALIZED 44s tx 0xb4b6e9a14ef4a32853ec08d51e3dbf8f54d91cc54f2d234aeafb1b0796eb8349 {"check_id":9,"contestable_until":1792235599,"ok":true,"ratio_bps":10002,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 9: PROVISIONAL BACKED ratio_bps 10002  
+GenLayer RPC error (eth_estimateGas): fetch failed
+Gas estimation failed, using default 200_000: UnknownRpcError: An unknown RPC error occurred.
+
+Details: fetch failed
+Version: viem@2.57.7
+    at withRetry.delay.count.count (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/buildRequest.js:127:31)
+    at async attemptRetry (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/promise/withRetry.js:24:30) {
+  details: 'fetch failed',
+  docsPath: undefined,
+  metaMessages: undefined,
+  shortMessage: 'An unknown RPC error occurred.',
+  version: '2.57.7',
+  code: -1,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:14976:13
+      at async Object.request (file:///Users/kenilvakariya/dev/backedby/test/node_modules/genlayer-js/dist/index.js:5724:26)
+      at async withRetry.delay.count.count (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/buildRequest.js:30:24)
+      at async attemptRetry (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/promise/withRetry.js:24:30) {
+    [cause]: Error: read ETIMEDOUT
+        at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
+      errno: -60,
+      code: 'ETIMEDOUT',
+      syscall: 'read'
+    }
+  }
+}
+  monitor([1,"{\"ethereum\":26211809,\"arbitrum\":515652223}"]) -> ok ACCEPTED 50s tx 0x71f441029582cf4bd580678208539c91a16b80eab4aea0d6f20d5f6aa86033a7 {"check_id":10,"ok":true}
+  read_check(["0xBb87c7D651a61041ED3ED7EB8059034634a528a1",10,1]) -> ok ACCEPTED 21s tx 0x5e37ea58e88ce67e408852808d136a7aaf4097bd5b0f8bedf8768ff73f3bda0c {"key":"0xbb87c7d651a61041ed3ed7eb8059034634a528a1|10|1","reason":"","status":"OK"}
+  rule([10]) -> ok ACCEPTED 11s tx 0x9a362f9f9618084fabb0b4abac11b452866d54d0540b22f59d216d4cf546f7d2 {"check_id":10,"contestable_until":1792235733,"ok":true,"ratio_bps":10043,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 10: PROVISIONAL BACKED ratio_bps 10043  
+   ... waiting 8s (window of check 8)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([8]) -> ok ACCEPTED 16s tx 0xd8caf678920a8df274d7ba9956436f7cda73302f921958df66f532d29e768660 {"check_id":8,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"UNDER_BACKED"}
+   -> check 8: FINAL UNDER_BACKED ratio_bps 17 LOCKED_BELOW_SUPPLY WINDOW_PASSED
+   ... waiting 8s (window of check 9)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([9]) -> ok ACCEPTED 11s tx 0x7744a09ed3d38900367b7baac5225a9914f313768fa9413cb6fd8ca79e7b37c2 {"check_id":9,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 9: FINAL BACKED ratio_bps 10002 LOCKED_COVERS_SUPPLY WINDOW_PASSED
+   ... waiting 45s (window of check 10)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([10]) -> ok ACCEPTED 11s tx 0xbd624d7844fd41b308e610602ffd8332d3f4d1a7d17df3c5b637bf100eddea2d {"check_id":10,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 10: FINAL BACKED ratio_bps 10043 LOCKED_COVERS_SUPPLY WINDOW_PASSED
+
+## 14. CollateralGate: allowed on a fresh BACKED pair; refused on INCONCLUSIVE, UNDER_BACKED, a recent non-BACKED ruling, stale, and unknown pairs  (2026-10-17T11:15:52.810Z)
+   borrow on pair 1 (arb): tx 0x39b236bd98b590c4082f58d697a8d8cd668bc6d0cc6a9aef8c1e1f47c0c5f8c4 -> "{\"allowed\":true\"attempt_id\":1\"reason\":\"BACKED\"}"
+   borrow on pair 5 (recent): tx 0x61dc4c038d1766541d90207ddad399b2fca242e087d1379375593e9ef382f0d5 -> "{\"allowed\":false\"attempt_id\":2\"reason\":\"INCONCLUSIVE\"}"
+   borrow on pair 3 (nomad): tx 0xf9aab791bed2c666758466a514f77e160e572c6eeb5daffb28fce6ad3455bb36 -> "{\"allowed\":false\"attempt_id\":3\"reason\":\"UNDER_BACKED\"}"
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … borrow fee attempt 1 hit transient RPC noise, waiting 2s
+   borrow on pair 2 (pol): tx 0x8660e7c38f26dab0c5ccc144594612256c89f6920e9cf281e6c61dc3bd5b1e09 -> "{\"allowed\":false\"attempt_id\":4\"reason\":\"STALE_7025S_OVER_1800S\"}"
+   borrow on pair 4 (op): tx 0x3c6668c6c4a55a75c2f1be702d78d7214e159d4defc47644fa09e7e9eb45a934 -> "{\"allowed\":true\"attempt_id\":5\"reason\":\"BACKED\"}"
+   borrow on pair 99: tx 0x9eeafdfd3f8d9fb4dae5311d1b94c9275475c96729ea17ffa5f0f4ea746557c3 -> "{\"allowed\":false\"attempt_id\":6\"reason\":\"NO_SUCH_PAIR\"}"
+   attempts: {"allowed":2,"attempts":[{"allowed":false,"amount":"1000","at":1792235872,"attempt_id":6,"check_id":0,"note":"demo no such pair","pair_id":99,"reason":"NO_SUCH_PAIR","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":true,"amount":"1000","at":1792235860,"attempt_id":5,"check_id":9,"note":"demo op","pair_id":4,"reason":"BACKED","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1792235848,"attempt_id":4,"check_id":4,"note":"demo pol","pair_id":2,"reason":"STALE_7025S_OVER_1800S","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1792235778,"attempt_id":3,"check_id":8,"note":"demo nomad","pair_id":3,"reason":"UNDER_BACKED","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1792235767,"attempt_id":2,"check_id":7,"note":"demo recent","pair_id":5,"reason":"INCONCLUSIVE","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":true,"amount":"1000","at":1792235756,"attempt_id":1,"check_id":10,"note":"demo arb","pair_id":1,"reason":"BACKED","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"}],"refused":4,"total":6}
+
+## 15. Unbond and withdraw the surviving bond  (2026-10-17T11:18:00.940Z)
+  request_unbond([1]) -> ok ACCEPTED 12s tx 0xf05b3b3fa772353776efdfe4e1e182b2ef7bd8bbd97c69d6816e84708bb553aa {"bond_id":1,"ok":true,"withdrawable_at":1792236004}
+   ... waiting 119s (unbond delay)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for withdraw_bond (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  withdraw_bond([1]) -> ok ACCEPTED 11s tx 0x69a2648ec1785bc044fa1eb9e17924349e4fe46e128250218cd34aa1644db621 {"bond_id":1,"credited":"70000000000000000","ok":true}
+   bond 1: {"amount":"0","bond_id":1,"closed_at":1792236016,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":1,"since":1792228056,"slashed":"0","status":"WITHDRAWN","unbond_at":1792235884,"withdrawable_at":1792236004,"won":"20000000000000000"}
+
+## 16. Everyone claims; the registry drains to 0  (2026-10-17T11:20:24.589Z)
+  claim([]) -> ok ACCEPTED 17s tx 0x71e5cc0942fedec01abdcf560fc1ca02bf89a91c451483ba66c81baf8c2d90df {"claimed":"70000000000000000","ok":true}
+   operator: {"address":"0x00bb59efe7cd069df92c711ef80908473a36b814","claimable":"0","claimed":"70000000000000000"}
+  claim([]) -> ok ACCEPTED 11s tx 0x4b26e3616230ef6d6615b6dfdda404c52ab20dbe79cac12c88a084ea6a6a18a2 {"claimed":"45000000000000000","ok":true}
+   challenger: {"address":"0xfe86fc89b5a04d699198d03afe4b0686acf5c0d6","claimable":"0","claimed":"45000000000000000"}
+GenLayer RPC error (gen_call): fetch failed
+  … get_claimable attempt 1 hit transient RPC noise, waiting 4s
+   contester: {"address":"0xa069b6552559228b73e6829a2c44fed9afe9cb21","claimable":"0","claimed":"0"}
+   patrol: {"address":"0xd646234dc825632b0388e48823c4e48405fa65df","claimable":"0","claimed":"0"}
+   seeder: {"address":"0x14c049216210556810060ee8ea3bc18f3f304276","claimable":"0","claimed":"0"}
+  claim([]) -> ok ACCEPTED 11s tx 0x3ce06df19804efa011eabde408382b892a812e1b1108c536033291185ba53682 {"claimed":"25000000000000000","ok":true}
+   treasury: {"address":"0x8c47a9ad90ab7aef4e160d274bb6f0782fb3071e","claimable":"0","claimed":"25000000000000000"}
+   ledger: {"bonds":"0","bonds_recomputed_match":true,"bounties":"25000000000000000","claimable":"0","claimed":"140000000000000000","held_now":"0","invariant_holds":true,"on_chain_balance":"140000000000000000","open_recomputed_match":true,"open_stakes":"0","received":"140000000000000000","slashed":"50000000000000000"}
+
+RESULT demo: held_now 0 (received 140000000000000000 = claimed 140000000000000000), invariant true
