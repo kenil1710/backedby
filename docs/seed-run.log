@@ -1,0 +1,8 @@
+
+=== seed run 2026-10-17T06:23:23.854Z
+
+--- pass 1: 16 to do
+
+== USDC.e on Arbitrum
+  authenticate(["arbitrum","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xff970a61a04b1ca14834a43f5de4533ebddb5cc8"]) -> ok ACCEPTED 17s tx 0xf0e39668d21632807e20fa9d14fcab849717ebfbddbc8b8bbf4b39f27218943d {"auth_id":1,"dest_decimals":6,"source_decimals":6,"vault":"0xcee284f754e854890e311e3280b767f80797180d"}
+  register_pair(["1",0,"USDC.e on Arbitrum"]) -> ok ACCEPTED 14s tx 0xfd66c27c2b897151572a659b172f6a8cd71ea321574883887ea09f8ebbafa1c6 {"destinations":1,"ok":true,"pair_id":1,"vaults":1}

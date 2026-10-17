@@ -1,0 +1,15 @@
+{
+  "seeds": {
+    "USDC.e on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+      "label": "USDC.e on Arbitrum",
+      "auth_id": 1,
+      "auth_tx": "0xf0e39668d21632807e20fa9d14fcab849717ebfbddbc8b8bbf4b39f27218943d",
+      "pair_id": 1,
+      "register_tx": "0xfd66c27c2b897151572a659b172f6a8cd71ea321574883887ea09f8ebbafa1c6"
+    }
+  }
+}

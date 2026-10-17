@@ -8,7 +8,7 @@ Live: **https://backedby-ledger.vercel.app** · Rules: [docs/RULES.md](docs/RULE
 
 ## What and why
 
-A bridged token is only worth what the bridge still holds. Nomad's Ethereum vault was drained in August 2022 and its
+A bridged token is only worth what its bridges still hold. Nomad's Ethereum vault was drained in August 2022 and its
 Moonbeam tokens kept circulating; today the vault holds about 0.2% of the madUSDC outstanding. Nobody has to trust a
 dashboard for that number: both halves are public chain state. BackedBy makes reading them a GenLayer transaction, so
 the number is agreed by independent validators, pinned to specific blocks, and usable by other contracts: an
@@ -17,18 +17,22 @@ operator can bond that a pair stays backed, anyone can challenge with a stake, a
 
 ## How the rules work
 
-1. **Pairs are authenticated by the bridge itself.** ChainReader reads the bridge's own mapping on both chains
-   (Arbitrum's gateway routers, the OP Stack token's `remoteToken`/`bridge`, Polygon's Root/ChildChainManager, the DAI
-   bridges, Nomad's TokenRegistry). Anything it cannot prove is refused. Anyone can add a destination token a pair is
-   missing, with the same proof.
+1. **Pairs are authenticated by the bridges themselves.** A pair is one source token, 1..n vaults holding it on
+   Ethereum (summed) and 1..n destination tokens (summed). ChainReader proves every vault and destination from the
+   bridge's own mapping on both chains (Arbitrum's gateway routers, the OP Stack token's `remoteToken`/`bridge`,
+   Polygon's Root/ChildChainManager, the DAI bridges, Nomad's TokenRegistry, LayerZero OFT peers such as USDT0's).
+   Anything it cannot prove is refused. Anyone can add a missing vault or destination with the same proof, so a token
+   with two mint paths (Polygon's USDT: the PoS bridge and USDT0) is judged against both.
 2. **One finalized block per chain, source last.** The Ethereum block must be at or after every destination block and
-   at most 10 minutes later (5 for Polygon), so transfers in flight can only look over-backed, never under
+   at most 10 minutes later (5 for Polygon, 2 once a pair holds a fast LayerZero vault), so transfers in flight can
+   only look over-backed, never under, except a fast bridge's, which RULES.md bounds
    ([why](docs/RULES.md#why-this-order-makes-in-flight-transfers-look-over-backed-never-under)).
 3. **Two RPCs per chain, or INCONCLUSIVE.** Every value is read from two RPCs run by different operators and must be
    identical; validators accept the leader's reading only if it matches their own. Any disagreement, error, missing
    block, decimals change or bridge remapping is INCONCLUSIVE and refunds every stake.
 4. **The verdict is arithmetic.** Decimals are normalized exactly; BACKED if `locked >= supply * (1 - tolerance)`, with
-   the tolerance frozen at registration. No model is involved anywhere.
+   the tolerance frozen at registration. On OP and Base a token counts as the larger of its supply and the bridge's
+   own ledger, which can only err towards UNDER_BACKED. No model is involved anywhere.
 5. **Bonds and challenges.** UNDER_BACKED slashes the bond (challenger gets the stake back plus half, the treasury the
    other half); BACKED moves the challenger's stake into the bond; INCONCLUSIVE refunds.
 6. **PROVISIONAL, CONTESTABLE, FINAL.** Every ruling can be contested for 6 hours (90 s on the demo registry); a contest
@@ -38,15 +42,15 @@ operator can bond that a pair stays backed, anyone can challenge with a stake, a
 
 ## Addresses (GenLayer Studio Dev, chain 61997)
 
-Every contract was deployed from commit `e915d21e8a25e35c06baa614b5f234ccaf74b826`.
+Every contract was deployed from commit `6f9431f901d3b3006b25a93c42954b593abc2307`.
 
 | Contract | Address | Deployed file | sha256 | Constructor |
 |---|---|---|---|---|
-| ChainReader | [`0x73217767D2F71cdc9D22b19e65d7aA8926D328B9`](https://explorer-studio-dev.genlayer.com/address/0x73217767D2F71cdc9D22b19e65d7aA8926D328B9) | `build/ChainReader.py` | `5a141b225eb1b469` | `[]` |
-| BackedByRegistry | [`0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD`](https://explorer-studio-dev.genlayer.com/address/0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD) | `build/BackedByRegistry.py` | `358403350b9e3749` | `["CANONICAL", "0x73217767D2F71cdc9D22b19e65d7aA8926D328B9"]` |
-| BackedByRegistryDemo | [`0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6`](https://explorer-studio-dev.genlayer.com/address/0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6) | `build/BackedByRegistry.py` | `358403350b9e3749` | `["DEMO", "0x73217767D2F71cdc9D22b19e65d7aA8926D328B9"]` |
-| CollateralGate | [`0x2B7A38AaDF934887b2f6A4b057D63e99259aA831`](https://explorer-studio-dev.genlayer.com/address/0x2B7A38AaDF934887b2f6A4b057D63e99259aA831) | `build/CollateralGate.py` | `e0b6ab99a08b23d6` | `["0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD", 86400, 50]` |
-| CollateralGateDemo | [`0x6F049473c968ce668Aebd46239CDFcCf8554086d`](https://explorer-studio-dev.genlayer.com/address/0x6F049473c968ce668Aebd46239CDFcCf8554086d) | `build/CollateralGate.py` | `e0b6ab99a08b23d6` | `["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6", 1800, 50]` |
+| ChainReader | [`0x0F4ba6e25Deb78B977B71CBf54d13eD263510319`](https://explorer-studio-dev.genlayer.com/address/0x0F4ba6e25Deb78B977B71CBf54d13eD263510319) | `build/ChainReader.py` | `7abbb98cf4823c18` | `[]` |
+| BackedByRegistry | [`0x09b185B68B6d2f27D7d7Be3c4918e4dD0DFe0c6e`](https://explorer-studio-dev.genlayer.com/address/0x09b185B68B6d2f27D7d7Be3c4918e4dD0DFe0c6e) | `build/BackedByRegistry.py` | `4941c5defbb7cf36` | `["CANONICAL", "0x0F4ba6e25Deb78B977B71CBf54d13eD263510319"]` |
+| BackedByRegistryDemo | [`0xBb87c7D651a61041ED3ED7EB8059034634a528a1`](https://explorer-studio-dev.genlayer.com/address/0xBb87c7D651a61041ED3ED7EB8059034634a528a1) | `build/BackedByRegistry.py` | `4941c5defbb7cf36` | `["DEMO", "0x0F4ba6e25Deb78B977B71CBf54d13eD263510319"]` |
+| CollateralGate | [`0xF19f7E68661d2267324277005041B6655be7B58c`](https://explorer-studio-dev.genlayer.com/address/0xF19f7E68661d2267324277005041B6655be7B58c) | `build/CollateralGate.py` | `764bf95b37fc9b73` | `["0x09b185B68B6d2f27D7d7Be3c4918e4dD0DFe0c6e", 86400, 50]` |
+| CollateralGateDemo | [`0xB8b50FE0Ef0CdeF3163fA0a1743ED1558D8484A4`](https://explorer-studio-dev.genlayer.com/address/0xB8b50FE0Ef0CdeF3163fA0a1743ED1558D8484A4) | `build/CollateralGate.py` | `764bf95b37fc9b73` | `["0xBb87c7D651a61041ED3ED7EB8059034634a528a1", 1800, 50]` |
 
 The canonical registry runs the 6 h contest window and holds the seeded pairs; the demo registry runs a 90 s window
 and holds the [demo run](docs/demo-run.log), drained to 0.
@@ -76,8 +80,9 @@ and holds the [demo run](docs/demo-run.log), drained to 0.
   makes a pair look better backed than it is, never worse.
 - "Locked" is the vault's balance of the source token. A rebasing source token or a destination token that can mint
   outside the bridge is measured as the chains report it, which is the point.
-- Polygon USDT is UNDER_BACKED against the PoS bridge's predicate because its supply is now also minted through
-  USDT0's LayerZero adapter; BackedBy says nothing about USDT0 itself.
+- USDT0's Ethereum adapter backs USDT0 on many chains; BackedBy counts the ones it reads (Polygon, Arbitrum, OP
+  Mainnet). The USDT pair's ratio therefore leaves out USDT0 supply on other chains, which makes it read higher than a
+  count of every USDT0 chain would.
 - Moonbeam has not produced a block since 2026-08-10, so Nomad pairs can only be checked at that moment.
 - Studio Dev records a claim's value transfer but does not deliver it; the registry's books (`get_ledger`) are what
   drain to 0.

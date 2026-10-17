@@ -1,4 +1,4 @@
-# Is that bridged token actually backed? I built something that checks, and it found six that aren't
+# Is that bridged token actually backed? I built something that checks, and it found five that aren't
 
 If you hold USDC on Arbitrum that came over the official bridge, you are trusting one thing: that the gateway contract
 on Ethereum still holds at least as much USDC as exists on Arbitrum. Usually it does. Sometimes it really, really does
@@ -74,18 +74,27 @@ contract checks the order, the gap, and that both blocks are finalized.
 
 ## What it found
 
-I seeded the registry with 15 real pairs across Arbitrum, OP Mainnet, Base, Polygon and Nomad. Most are fine:
-Arbitrum's USDC gateway sits around 103%, the OP DAI bridge around 147%. Six are not:
+I seeded the registry with 18 real pairs across Arbitrum, OP Mainnet, Base, Polygon and Nomad. Most are fine:
+Arbitrum's USDC gateway sits around 103%, and on OP and Base the vaults match the bridge's own deposit ledger almost
+to the wei. Five are not: the Nomad tokens on Moonbeam, between 0% and 0.2% backed. (Moonbeam itself hasn't produced
+a block since August 10th, so those checks are pinned to its last finalized block and the first Ethereum block after
+it.)
 
-- The five Nomad tokens on Moonbeam, between 0% and 0.2% backed. (Moonbeam itself hasn't produced a block since
-  August 10th, so those checks are pinned to its last finalized block and the first Ethereum block after it.)
-- USDT on Polygon, at well under 1% against the PoS bridge's vault. This one isn't a hack: Polygon's USDT is now also
-  minted through USDT0's LayerZero adapter, so most of it was never locked in the PoS bridge. By the rule BackedBy
-  enforces (the canonical vault against the canonical token), that bridge does not back it. I think that's worth
-  knowing even if it isn't a scandal.
+There was a sixth, and it was wrong. The first version said USDT on Polygon was 0.64% backed, because it only looked
+at the PoS bridge's vault. But that token has a second mint path: USDT0, Tether's LayerZero setup, also mints it, and
+locks the USDT for it in a different contract on Ethereum. A token with two mint paths has two vaults, and judging it
+against one of them is a false alarm about a real token. So now a pair can hold several vaults, summed, and anyone can
+add a missing one with the same kind of on-chain proof: for USDT0, the Polygon token names its OFT contract, the OFT
+names the Ethereum adapter as its peer, and the adapter names the OFT back. With both vaults counted, against USDT0's
+supply on Polygon, Arbitrum and OP Mainnet, it comes out around 200%.
 
-Every one of those rulings sat through a six-hour contest window before it became final, and every number on the site
-links to a block explorer at the exact block it was read from.
+LayerZero brought one more thing to think about: it is fast. A transfer from Polygon to Ethereum can land in 96
+seconds, so a check whose two blocks are ten minutes apart could see tokens released on Ethereum that were still in
+supply on Polygon. Pairs with a LayerZero vault are held to a two-minute gap, and the rules spell out how much
+in-flight volume could still slip through.
+
+Every ruling sat through a six-hour contest window before it became final, and every number on the site links to a
+block explorer at the exact block it was read from.
 
 ## Things I'd tell you before you rely on it
 
@@ -94,6 +103,6 @@ needs its own authentication rule. It counts the supply on the chains it reads, 
 somewhere it doesn't look, the pair looks better than it is, never worse. And it depends on public RPCs, which are
 not always in a good mood; when they aren't, you get INCONCLUSIVE, not a wrong answer.
 
-The code, the tests (400+ of them, plus the attack round), and a script that checks the deployed bytecode against the
+The code, the tests (440+ of them, plus two attack rounds), and a script that checks the deployed bytecode against the
 commit byte for byte are all on GitHub: https://github.com/kenil1710/backedby. The live board is at
 https://backedby-ledger.vercel.app.
