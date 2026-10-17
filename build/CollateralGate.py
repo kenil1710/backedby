@@ -32,28 +32,26 @@ MAX_NOTE = 80
 CHAINS = {
     "ethereum": (1, ("https://eth-pokt.nodies.app", "https://rpc.mevblocker.io")),
     "arbitrum": (42161, ("https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co")),
-    "optimism": (10, ("https://mainnet.optimism.io", "https://optimism.drpc.org")),
+    "optimism": (10, ("https://mainnet.optimism.io", "https://op-pokt.nodies.app")),
     "base": (8453, ("https://base-pokt.nodies.app", "https://base.drpc.org")),
     "polygon": (137, ("https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro")),
     "moonbeam": (1284, ("https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public")),
     "mantle": (5000, ("https://rpc.mantle.xyz", "https://mantle.drpc.org")),
     "xlayer": (196, ("https://xlayerrpc.okx.com", "https://xlayer.drpc.org")),
     "sei": (1329, ("https://evm-rpc.sei-apis.com", "https://sei.api.pocket.network")),
-    "flare": (14, ("https://flare-api.flare.network/ext/C/rpc", "https://rpc.ankr.com/flare")),
+    "flare": (14, ("https://rpc.ankr.com/flare", "https://flare.public-rpc.com")),
     "hedera": (295, ("https://mainnet.hashio.io/api", "https://hedera.linkpool.pro")),
     "unichain": (130, ("https://mainnet.unichain.org", "https://unichain.drpc.org")),
     "morph": (2818, ("https://rpc.morphl2.io", "https://rpc-quicknode.morphl2.io")),
-    "ink": (57073, ("https://rpc-gel.inkonchain.com", "https://ink.drpc.org")),
-    "berachain": (80094, ("https://rpc.berachain.com", "https://berachain.drpc.org")),
-    "hyperevm": (999, ("https://rpc.hyperliquid.xyz/evm", "https://hyperliquid.drpc.org")),
+    "ink": (57073, ("https://rpc-gel.inkonchain.com", "https://rpc-qnd.inkonchain.com")),
+    "berachain": (80094, ("https://rpc.berachain.com", "https://berachain-rpc.publicnode.com")),
+    "hyperevm": (999, ("https://rpc.hyperliquid.xyz/evm", "https://hyperliquid-json-rpc.stakely.io")),
     "monad": (143, ("https://rpc.monad.xyz", "https://monad-mainnet-rpc.spidernode.net")),
 }
 # Largest JSON-RPC batch each endpoint accepts (measured: dRPC's free tier
 # refuses a batch of more than 3).
-RPC_BATCH = {"https://optimism.drpc.org": 3, "https://base.drpc.org": 3, "https://polygon.drpc.org": 3,
-             "https://moonbeam.drpc.org": 3, "https://mantle.drpc.org": 3, "https://xlayer.drpc.org": 3,
-             "https://unichain.drpc.org": 3, "https://ink.drpc.org": 3, "https://berachain.drpc.org": 3,
-             "https://hyperliquid.drpc.org": 3}
+RPC_BATCH = {"https://base.drpc.org": 3, "https://polygon.drpc.org": 3, "https://moonbeam.drpc.org": 3,
+             "https://mantle.drpc.org": 3, "https://xlayer.drpc.org": 3, "https://unichain.drpc.org": 3}
 RPC_TRIES = 4
 LEADER_LAG_S = 1800       # a leader-named block may be this much older than a validator's own finalized block
 ZERO = "0x" + "0" * 40

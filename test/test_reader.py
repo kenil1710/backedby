@@ -466,15 +466,15 @@ class Read(Base):
             self.s.read(cid)
 
     def test_batches_respect_drpc_cap(self):
-        pid, cid, blocks = self.pair_check("op_usdc")
-        stub.WEB.caps["https://optimism.drpc.org"] = 3
+        pid, cid, blocks = self.pair_check("base_usdc")
+        stub.WEB.caps["https://base.drpc.org"] = 3
         stub.WEB.caps["https://polygon.drpc.org"] = 3
         self.assertEqual(self.s.read(cid)["status"], "OK")
 
     def test_batch_over_cap_would_fail(self):
         # the cap table is what keeps dRPC answering: without it the batch is refused
-        pid, cid, blocks = self.pair_check("op_usdc")
-        stub.WEB.caps["https://optimism.drpc.org"] = 2
+        pid, cid, blocks = self.pair_check("base_usdc")
+        stub.WEB.caps["https://base.drpc.org"] = 2
         self.assertEqual(self.s.read(cid)["reason"], "RPC_UNREADABLE")
 
     def test_reading_view_shape(self):

@@ -133,7 +133,7 @@ def iso_minute(epoch: int) -> str:
 # ==== end shared ====
 
 
-EXTRA = ['https://mantle.drpc.org', 'https://rpc.mantle.xyz', 'https://conflux-espace.blockpi.network/v1/rpc/public', 'https://evm.confluxrpc.com', 'https://xlayer.drpc.org', 'https://xlayerrpc.okx.com', 'https://rpc.xlayer.tech', 'https://evm-rpc.sei-apis.com', 'https://sei.api.pocket.network', 'https://flare-api.flare.network/ext/C/rpc', 'https://flare.rpc.thirdweb.com', 'https://rpc.ankr.com/flare', 'https://mainnet.hashio.io/api', 'https://hedera.linkpool.pro', 'https://295.rpc.thirdweb.com', 'https://unichain.drpc.org', 'https://mainnet.unichain.org', 'https://rpc.morphl2.io', 'https://rpc-quicknode.morphl2.io', 'https://rpc-gel.inkonchain.com', 'https://ink.drpc.org', 'https://rpc-qnd.inkonchain.com', 'https://rpc.berachain.com', 'https://berachain.drpc.org', 'https://berachain-rpc.publicnode.com', 'https://rpc.hyperliquid.xyz/evm', 'https://hyperliquid.drpc.org', 'https://rpc.monad.xyz', 'https://monad-mainnet-rpc.spidernode.net', 'https://rpc2.monad.xyz']
+EXTRA = ["https://flare.public-rpc.com", "https://rpc.ankr.com/flare", "https://berachain-rpc.publicnode.com", "https://hyperliquid-json-rpc.stakely.io", "https://op-pokt.nodies.app", "https://rpc-qnd.inkonchain.com"]
 
 
 def _one(url: str) -> str:

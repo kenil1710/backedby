@@ -6,13 +6,13 @@ Plain ASCII. Counts are characters, checked by `node tools/submission.mjs`.
 
 BackedBy checks whether bridged tokens are actually backed: vault balance vs minted supply, read at pinned blocks on both chains, verdict by code.
 
-## Description (838 / 1000)
+## Description (850 / 1000)
 
-BackedBy compares what a token's bridges hold in their Ethereum vaults with the supply minted on Arbitrum, OP, Base, Polygon or Moonbeam. Every vault and destination is proven by that bridge's own on-chain mapping; anyone can add a missing one. Each check pins one finalized block per chain. Validators independently read both chains at the pinned blocks, from two RPCs per chain, and must agree; any disagreement or error is INCONCLUSIVE and refunds every stake. Code computes every number and the verdict (BACKED if locked covers supply, else UNDER_BACKED); the model never decides, no model is called at all. Operators bond that a pair stays backed, anyone challenges with a stake, rulings are contestable for 6 h, and CollateralGate lets a lender refuse unbacked tokens. Seeded with 18 real pairs; it flags the 5 drained Nomad tokens.
+BackedBy compares what a token's bridges hold in their Ethereum vaults with the supply minted on 16 chains (Arbitrum, OP, Base, Polygon, Moonbeam and 11 USDT0 chains). Every vault and destination is proven by that bridge's own on-chain mapping, and a vault is judged against every chain it backs. Each check pins one finalized block per chain; validators read both chains from two RPCs each and must agree, or it is INCONCLUSIVE and refunds every stake. Code computes every number and the verdict (BACKED if locked covers supply, else UNDER_BACKED); no model is called. Operators bond that a pair stays backed, anyone challenges with a stake, rulings are contestable for 6 h, and CollateralGate lets a lender refuse unbacked tokens. Payouts are real GEN transfers, each proved on chain. Seeded with 18 real pairs; it flags the 5 drained Nomad tokens.
 
-## Review verification (336 / 500)
+## Review verification (392 / 500)
 
-Open /verify: each contract's on-chain code is compared byte for byte with the build files at the deploy commit. Open any pair: every number links to the explorer at the pinned block. Run node tools/final_check.mjs: source, addresses, links, FINAL seeds, demo drained to 0, 440+ offline tests. docs/demo-run.log has every path on chain.
+Open /verify: each contract's on-chain code is compared byte for byte with the build files at the deploy commit. Open any pair: every number links to the explorer at the pinned block. Run node tools/final_check.mjs: source, addresses, links, FINAL seeds, each demo payout re-read from chain, eth_getBalance of every registry (demo 0), offline tests. docs/demo-run.log has every path on chain.
 
 ## Links
 

@@ -135,20 +135,20 @@ only if it is identical to their own.
 |---|---|---|
 | Ethereum | eth-pokt.nodies.app | rpc.mevblocker.io |
 | Arbitrum One | arb-pokt.nodies.app | arbitrum.gateway.tenderly.co |
-| OP Mainnet | mainnet.optimism.io | optimism.drpc.org |
+| OP Mainnet | mainnet.optimism.io | op-pokt.nodies.app |
 | Base | base-pokt.nodies.app | base.drpc.org |
 | Polygon PoS | polygon.drpc.org | rpc-mainnet.matic.quiknode.pro |
 | Moonbeam | moonbeam.drpc.org | moonbeam.api.onfinality.io/public |
 | Mantle | rpc.mantle.xyz | mantle.drpc.org |
 | X Layer | xlayerrpc.okx.com | xlayer.drpc.org |
 | Sei | evm-rpc.sei-apis.com | sei.api.pocket.network |
-| Flare | flare-api.flare.network/ext/C/rpc | rpc.ankr.com/flare |
+| Flare | rpc.ankr.com/flare | flare.public-rpc.com |
 | Hedera | mainnet.hashio.io/api | hedera.linkpool.pro |
 | Unichain | mainnet.unichain.org | unichain.drpc.org |
 | Morph | rpc.morphl2.io | rpc-quicknode.morphl2.io |
-| Ink | rpc-gel.inkonchain.com | ink.drpc.org |
-| Berachain | rpc.berachain.com | berachain.drpc.org |
-| HyperEVM | rpc.hyperliquid.xyz/evm | hyperliquid.drpc.org |
+| Ink | rpc-gel.inkonchain.com | rpc-qnd.inkonchain.com |
+| Berachain | rpc.berachain.com | berachain-rpc.publicnode.com |
+| HyperEVM | rpc.hyperliquid.xyz/evm | hyperliquid-json-rpc.stakely.io |
 | Monad | rpc.monad.xyz | monad-mainnet-rpc.spidernode.net |
 
 Any disagreement, an error, a missing block, a call that reverts, a decimals value different from the frozen one, or

@@ -14,7 +14,7 @@ Both RPCs agreed on every value of every authenticated pair: yes.
 |---|---|---|---|
 | ethereum | https://eth-pokt.nodies.app | https://rpc.mevblocker.io | both serve state 72 h+ back |
 | arbitrum | https://arb-pokt.nodies.app | https://arbitrum.gateway.tenderly.co | both serve state 72 h+ back |
-| optimism | https://mainnet.optimism.io | https://optimism.drpc.org | both serve state 72 h+ back |
+| optimism | https://mainnet.optimism.io | https://op-pokt.nodies.app | both serve state 72 h+ back |
 | base | https://base-pokt.nodies.app | https://base.drpc.org | both serve state 72 h+ back |
 | polygon | https://polygon.drpc.org | https://rpc-mainnet.matic.quiknode.pro | both serve state 72 h+ back |
 | moonbeam | https://moonbeam.drpc.org | https://moonbeam.api.onfinality.io/public | both serve state 72 h+ back |
