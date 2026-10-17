@@ -121,7 +121,7 @@ CHAINS = {
     "arbitrum": (42161, ("https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co")),
     "optimism": (10, ("https://mainnet.optimism.io", "https://optimism.drpc.org")),
     "base": (8453, ("https://base-pokt.nodies.app", "https://base.drpc.org")),
-    "polygon": (137, ("https://polygon.drpc.org", "https://polygon.gateway.tenderly.co")),
+    "polygon": (137, ("https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro")),
     "moonbeam": (1284, ("https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public")),
 }
 # Largest JSON-RPC batch each endpoint accepts (measured: dRPC's free tier

@@ -6,7 +6,7 @@ export const RPCS: Record<string, string[]> = {
   arbitrum: ["https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co"],
   optimism: ["https://mainnet.optimism.io", "https://optimism.drpc.org"],
   base: ["https://base-pokt.nodies.app", "https://base.drpc.org"],
-  polygon: ["https://polygon.drpc.org", "https://polygon.gateway.tenderly.co"],
+  polygon: ["https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro"],
   moonbeam: ["https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public"],
 };
 

@@ -116,7 +116,7 @@ CHAINS = {
     "arbitrum": (42161, ("https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co")),
     "optimism": (10, ("https://mainnet.optimism.io", "https://optimism.drpc.org")),
     "base": (8453, ("https://base-pokt.nodies.app", "https://base.drpc.org")),
-    "polygon": (137, ("https://polygon.drpc.org", "https://polygon.gateway.tenderly.co")),
+    "polygon": (137, ("https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro")),
     "moonbeam": (1284, ("https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public")),
 }
 # Largest JSON-RPC batch each endpoint accepts (measured: dRPC's free tier
@@ -399,6 +399,29 @@ def finalized_low(chain: str) -> typing.Any:
         if low is None or blk["number"] < low["number"]:
             low = blk
     return low
+
+
+def heads_at(chain: str, block: int) -> typing.Any:
+    """One batch per RPC: [finalized, chainId, header(block)]. Returns
+    {"header": {...}} when the header is identical on both RPCs and at or
+    below both RPCs' finalized blocks, else {"reason": ...}. ReadFailed and
+    Disagree propagate."""
+    calls = [["eth_getBlockByNumber", ["finalized", False]], ["eth_chainId", []], ["eth_getBlockByNumber", [hex(block), False]]]
+    heads = []
+    for url in CHAINS[chain][1]:
+        got = rpc_send(url, calls)
+        fin = _block_of(got[0])
+        cid = _proj(["eth_chainId", []], got[1])
+        if fin is None or cid != CHAINS[chain][0]:
+            return {"reason": "RPC_UNREADABLE"}
+        if block > fin["number"]:
+            return {"reason": "BLOCK_NOT_FINALIZED:" + chain}
+        heads.append(_block_of(got[2]))
+    if _canon(heads[0]) != _canon(heads[1]):
+        raise Disagree("headers differ")
+    if heads[0] is None or heads[0]["number"] != block:
+        return {"reason": "BLOCK_MISSING:" + chain}
+    return {"header": heads[0]}
 
 
 def eth_call(to: str, data: str, block: int) -> list:
@@ -766,23 +789,15 @@ def read_at(req: dict) -> dict:
            "dests": [], "anchors": []}
     names = sorted(list(blocks.keys()))
     anchors = req.get("anchors", [])
-    # phase 1: finality and the pinned headers, every chain
+    # phase 1: finality, chain id and the pinned header, one batch per RPC per chain
     try:
-        for c in names:
-            low = finalized_low(c)
-            if low is None:
-                out["reason"] = "RPC_UNREADABLE"
-                return out
-            if blocks[c] > low["number"]:
-                out["reason"] = "BLOCK_NOT_FINALIZED:" + c
-                return out
         heads = {}
         for c in names:
-            h = dual_read(c, [get_block(blocks[c])])[0]
-            if h is None or h["number"] != blocks[c]:
-                out["reason"] = "BLOCK_MISSING:" + c
+            h = heads_at(c, blocks[c])
+            if "header" not in h:
+                out["reason"] = h["reason"]
                 return out
-            heads[c] = h
+            heads[c] = h["header"]
     except ReadFailed:
         out["reason"] = "RPC_UNREADABLE"
         return out

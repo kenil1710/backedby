@@ -6,7 +6,7 @@ export const CHAINS = {
   arbitrum: { id: 42161, rpcs: ["https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co"], explorer: "https://arbitrum.blockscout.com" },
   optimism: { id: 10, rpcs: ["https://mainnet.optimism.io", "https://optimism.drpc.org"], explorer: "https://optimism.blockscout.com" },
   base: { id: 8453, rpcs: ["https://base-pokt.nodies.app", "https://base.drpc.org"], explorer: "https://basescan.org" },
-  polygon: { id: 137, rpcs: ["https://polygon.drpc.org", "https://polygon.gateway.tenderly.co"], explorer: "https://polygon.blockscout.com" },
+  polygon: { id: 137, rpcs: ["https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro"], explorer: "https://polygon.blockscout.com" },
   moonbeam: { id: 1284, rpcs: ["https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public"], explorer: "https://moonbeam.subscan.io" },
 };
 

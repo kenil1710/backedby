@@ -173,6 +173,29 @@ def finalized_low(chain: str) -> typing.Any:
     return low
 
 
+def heads_at(chain: str, block: int) -> typing.Any:
+    """One batch per RPC: [finalized, chainId, header(block)]. Returns
+    {"header": {...}} when the header is identical on both RPCs and at or
+    below both RPCs' finalized blocks, else {"reason": ...}. ReadFailed and
+    Disagree propagate."""
+    calls = [["eth_getBlockByNumber", ["finalized", False]], ["eth_chainId", []], ["eth_getBlockByNumber", [hex(block), False]]]
+    heads = []
+    for url in CHAINS[chain][1]:
+        got = rpc_send(url, calls)
+        fin = _block_of(got[0])
+        cid = _proj(["eth_chainId", []], got[1])
+        if fin is None or cid != CHAINS[chain][0]:
+            return {"reason": "RPC_UNREADABLE"}
+        if block > fin["number"]:
+            return {"reason": "BLOCK_NOT_FINALIZED:" + chain}
+        heads.append(_block_of(got[2]))
+    if _canon(heads[0]) != _canon(heads[1]):
+        raise Disagree("headers differ")
+    if heads[0] is None or heads[0]["number"] != block:
+        return {"reason": "BLOCK_MISSING:" + chain}
+    return {"header": heads[0]}
+
+
 def eth_call(to: str, data: str, block: int) -> list:
     return ["eth_call", [{"to": to, "data": data}, hex(block)]]
 

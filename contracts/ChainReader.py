@@ -464,23 +464,15 @@ def read_at(req: dict) -> dict:
            "dests": [], "anchors": []}
     names = sorted(list(blocks.keys()))
     anchors = req.get("anchors", [])
-    # phase 1: finality and the pinned headers, every chain
+    # phase 1: finality, chain id and the pinned header, one batch per RPC per chain
     try:
-        for c in names:
-            low = finalized_low(c)
-            if low is None:
-                out["reason"] = "RPC_UNREADABLE"
-                return out
-            if blocks[c] > low["number"]:
-                out["reason"] = "BLOCK_NOT_FINALIZED:" + c
-                return out
         heads = {}
         for c in names:
-            h = dual_read(c, [get_block(blocks[c])])[0]
-            if h is None or h["number"] != blocks[c]:
-                out["reason"] = "BLOCK_MISSING:" + c
+            h = heads_at(c, blocks[c])
+            if "header" not in h:
+                out["reason"] = h["reason"]
                 return out
-            heads[c] = h
+            heads[c] = h["header"]
     except ReadFailed:
         out["reason"] = "RPC_UNREADABLE"
         return out
