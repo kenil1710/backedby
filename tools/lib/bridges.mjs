@@ -3,11 +3,11 @@
 // checks the two agree.
 export const CHAINS = {
   ethereum: { id: 1, rpcs: ["https://eth-pokt.nodies.app", "https://rpc.mevblocker.io"], explorer: "https://etherscan.io" },
-  arbitrum: { id: 42161, rpcs: ["https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co"], explorer: "https://arbiscan.io" },
+  arbitrum: { id: 42161, rpcs: ["https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co"], explorer: "https://arbitrum.blockscout.com" },
   optimism: { id: 10, rpcs: ["https://mainnet.optimism.io", "https://optimism.drpc.org"], explorer: "https://optimistic.etherscan.io" },
   base: { id: 8453, rpcs: ["https://base-pokt.nodies.app", "https://base.drpc.org"], explorer: "https://basescan.org" },
-  polygon: { id: 137, rpcs: ["https://polygon.drpc.org", "https://polygon.gateway.tenderly.co"], explorer: "https://polygonscan.com" },
-  moonbeam: { id: 1284, rpcs: ["https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public"], explorer: "https://moonscan.io" },
+  polygon: { id: 137, rpcs: ["https://polygon.drpc.org", "https://polygon.gateway.tenderly.co"], explorer: "https://polygon.blockscout.com" },
+  moonbeam: { id: 1284, rpcs: ["https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public"], explorer: "https://moonbeam.subscan.io" },
 };
 
 export const BRIDGE = {
@@ -40,3 +40,10 @@ export const L1 = {
   cbETH: "0xbe9895146f7af43049ca1c1ae358b0541ea49704",
   rETH: "0xae78736cd615f374d3085123a210448e74fc6393",
 };
+
+/** An explorer link; Subscan (Moonbeam) names addresses "account" and tokens "erc20_token". */
+export function explorerLink(chain, kind, value) {
+  const base = CHAINS[chain].explorer;
+  if (chain === "moonbeam") kind = { address: "account", token: "erc20_token" }[kind] ?? kind;
+  return `${base}/${kind}/${value}`;
+}

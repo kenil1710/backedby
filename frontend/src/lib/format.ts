@@ -83,8 +83,8 @@ export const CHAIN_LABEL: Record<string, string> = {
 };
 
 export const EXPLORER_HOST: Record<string, string> = {
-  ethereum: "etherscan.io", arbitrum: "arbiscan.io", optimism: "optimistic.etherscan.io",
-  base: "basescan.org", polygon: "polygonscan.com", moonbeam: "moonscan.io",
+  ethereum: "etherscan.io", arbitrum: "arbitrum.blockscout.com", optimism: "optimistic.etherscan.io",
+  base: "basescan.org", polygon: "polygon.blockscout.com", moonbeam: "moonbeam.subscan.io",
 };
 
 /** A token holder's balance page: the explorer's own view of one read. */
@@ -95,7 +95,8 @@ export function holderUrl(chain: string, token: string, holder: string): string 
 /** A block explorer link on one of the six chains. */
 export function chainUrl(chain: string, kind: "address" | "tx" | "block", value: string | number): string {
   const host = EXPLORER_HOST[chain] ?? EXPLORER_HOST.ethereum;
-  return `https://${host}/${kind}/${value}`;
+  const k = chain === "moonbeam" && kind === "address" ? "account" : kind;
+  return `https://${host}/${k}/${value}`;
 }
 
 /** A raw token amount as a decimal string with separators (integer arithmetic). */

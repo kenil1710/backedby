@@ -1,6 +1,6 @@
 // docs/feasibility.json -> docs/FEASIBILITY.md
 import { readFileSync, writeFileSync } from "node:fs";
-import { CHAINS } from "./lib/bridges.mjs";
+import { CHAINS, explorerLink } from "./lib/bridges.mjs";
 const doc = JSON.parse(readFileSync(new URL("../docs/feasibility.json", import.meta.url), "utf8"));
 const destOf = (k) => ({ op_dai: "optimism", nomad: "moonbeam" }[k] ?? k);
 const fmt = (raw, dec) => {
@@ -10,7 +10,7 @@ const fmt = (raw, dec) => {
   return dec ? `${w}.${f}` : w;
 };
 const short = (a) => `${a.slice(0, 6)}...${a.slice(-4)}`;
-const link = (ch, a) => `[${short(a)}](${CHAINS[ch].explorer}/address/${a})`;
+const link = (ch, a) => `[${short(a)}](${explorerLink(ch, "address", a)})`;
 const iso = (t) => new Date(t * 1000).toISOString().replace(".000Z", "Z");
 const ok = doc.rows.filter((r) => r.ok);
 const under = ok.filter((r) => r.verdict === "UNDER_BACKED");
@@ -43,7 +43,7 @@ finalized, the Ethereum (locked) block at or after the destination block, gap at
 
 | Destination | Ethereum block | Destination block | Gap |
 |---|---|---|---|
-${Object.entries(doc.pins).map(([d, p]) => `| ${d} | [${p.ethereum.number}](https://etherscan.io/block/${p.ethereum.number}) ${iso(p.ethereum.timestamp)} | [${p[d].number}](${CHAINS[d].explorer}/block/${p[d].number}) ${iso(p[d].timestamp)} | ${p.gap_s} s |`).join("\n")}
+${Object.entries(doc.pins).map(([d, p]) => `| ${d} | [${p.ethereum.number}](https://etherscan.io/block/${p.ethereum.number}) ${iso(p.ethereum.timestamp)} | [${p[d].number}](${explorerLink(d, "block", p[d].number)}) ${iso(p[d].timestamp)} | ${p.gap_s} s |`).join("\n")}
 
 **Moonbeam has not produced a block since ${iso(doc.pins.moonbeam.moonbeam.timestamp)}.** Three unrelated RPCs (dRPC,
 OnFinality, 1RPC) report the same head, \`${doc.pins.moonbeam.moonbeam.number + 3}\`; its finalized block is

@@ -2,7 +2,7 @@
 // contract; explorer links on both chains for every read.
 import { readFileSync, writeFileSync } from "node:fs";
 import { actor } from "./lib/flow.mjs";
-import { CHAINS } from "./lib/bridges.mjs";
+import { CHAINS, explorerLink } from "./lib/bridges.mjs";
 
 const a = actor({ role: "patrol", registry: "BackedByRegistry", log: () => {} });
 const SITE = "https://backedby-ledger.vercel.app";
@@ -12,7 +12,7 @@ const SYM = {
   "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0": "wstETH", "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": "WETH",
   "0xbe9895146f7af43049ca1c1ae358b0541ea49704": "cbETH",
 };
-const ex = (ch, kind, v) => `${CHAINS[ch].explorer}/${kind}/${v}`;
+const ex = (ch, kind, v) => explorerLink(ch, kind, v);
 const short = (x) => `${x.slice(0, 6)}...${x.slice(-4)}`;
 const fmt = (raw, d) => {
   const s = String(raw).padStart(d + 1, "0");
