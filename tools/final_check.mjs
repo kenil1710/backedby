@@ -7,7 +7,9 @@
  *      deployments.json, and nowhere is a contract address that is not in deployments.json
  *   3. links: every http(s) link in README and docs/*.md answers HTTP 200 (GET, redirects followed)
  *   4. seeds: every canonical pair has a FINAL ruling; every UNDER_BACKED found in FEASIBILITY.md is seeded
- *   5. demo: the demo registry's ledger holds 0 and its invariant holds
+ *   5. demo: the demo registry's eth_getBalance is 0 (only then "drained"), its ledger agrees, and every demo
+ *      payout in docs/payouts.json is re-read from chain: finalized, value effect delivered and not skipped,
+ *      registry balance down by exactly the amount; every registry's eth_getBalance equals its ledger
  *   6. tests: the offline suite passes
  *   7. docs truth: the numbers RULES.md states equal the deployed contracts' get_config
  *   8. site: the live site answers, /api/verify says all identical, /api/backed answers for a seeded pair
@@ -15,6 +17,9 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
 import { actor, deployments } from "./lib/flow.mjs";
+import { payoutDelivered } from "./lib/payout.mjs";
+import { USDT0_DESTS } from "./lib/bridges.mjs";
+import { connect } from "../test/harness.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const SITE = "https://backedby-ledger.vercel.app";
@@ -91,9 +96,43 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
   for (const p of pairs) for (const d of p.dests) final.set(d.token, p.latest?.status === "FINAL" ? p.latest.verdict : null);
   const missing = feas.filter((r) => !final.get(r.dest[0].token)).map((r) => `${r.kind} ${r.sym}`);
   const verdicts = feas.map((r) => `${r.kind} ${r.sym}: ${final.get(r.dest[0].token)}`);
+  const ADAPTER = "0x6c96de32cea08842dcc4058c14d3aaad7fa41dee";
+  const shared = pairs.filter((p) => p.vaults.some((v) => v.vault === ADAPTER));
+  const want = ["polygon", ...USDT0_DESTS.map(([k]) => k.slice(4))];
+  const have = shared[0] ? shared[0].dests.map((d) => d.chain) : [];
+  const lack = want.filter((c) => !have.includes(c));
+  check("seeds: the USDT0 adapter's pair lists every destination two RPCs can read", shared.length === 1 && lack.length === 0,
+    shared.length !== 1 ? `${shared.length} pairs hold the adapter` : lack.length ? `missing ${lack.join(", ")}` : `pair ${shared[0].pair_id}: ${have.length} destinations, ${shared[0].latest?.status} ${shared[0].latest?.verdict}`);
   check("seeds: every pair FEASIBILITY.md read as UNDER_BACKED is seeded with a FINAL ruling", missing.length === 0, missing.length ? `missing [${missing.join(", ")}]` : verdicts.join("; "));
   const L = await demo.rv("get_ledger");
-  check("demo: drained to 0, invariant holds", L.held_now === "0" && L.invariant_holds, `held ${L.held_now}, received ${L.received}, claimed ${L.claimed}`);
+  const rd = connect({ address: dep.contracts.BackedByRegistryDemo.address, role: "patrol" }).read;
+  const bal = async (a) => (await rd.getBalance({ address: a })).toString();
+  const demoBal = await bal(dep.contracts.BackedByRegistryDemo.address);
+  check("demo: drained to 0 by eth_getBalance, ledger agrees, invariant holds", demoBal === "0" && L.held_now === "0" && L.invariant_holds,
+    `eth_getBalance ${demoBal} wei, ledger held ${L.held_now}, received ${L.received}, claimed ${L.claimed}`);
+  const regs = [];
+  for (const [name, a] of addrs) {
+    if (!/Registry/.test(name)) continue;
+    const l = await (name === "BackedByRegistry" ? canon : demo).rv("get_ledger");
+    regs.push([name, await bal(a), l.held_now]);
+  }
+  check("balances: every registry's eth_getBalance equals what its ledger holds", regs.every(([, b, h]) => b === h),
+    regs.map(([n, b, h]) => `${n} eth_getBalance ${b} / ledger ${h}`).join("; "));
+  const pay = JSON.parse(readFileSync(root + "docs/payouts.json", "utf8"));
+  const bad = [];
+  let sum = 0n;
+  for (const p of pay.payouts) {
+    const tx = JSON.parse(JSON.stringify(await rd.getTransaction({ hash: p.tx }), (k, v) => (typeof v === "bigint" ? v.toString() : v)));
+    const d = payoutDelivered(tx, p.payee, p.amount);
+    if (!d.ok) bad.push(`${p.label} ${p.tx.slice(0, 10)}: ${d.why}`);
+    if (BigInt(p.registry_before) - BigInt(p.registry_after) !== BigInt(p.amount)) bad.push(`${p.label}: registry balance moved by ${BigInt(p.registry_after) - BigInt(p.registry_before)}`);
+    sum += BigInt(p.amount);
+  }
+  if (pay.registry !== dep.contracts.BackedByRegistryDemo.address) bad.push("docs/payouts.json is for another registry");
+  if (pay.payouts.length === 0) bad.push("no payouts recorded");
+  if (sum.toString() !== L.claimed) bad.push(`payouts sum ${sum} != ledger claimed ${L.claimed}`);
+  check("payouts: every demo payout arrived (finalized, delivered, not skipped; registry balance down by the amount)", bad.length === 0,
+    bad.length ? bad.join("; ") : pay.payouts.map((p) => `${p.label} ${p.amount} wei -> ${p.payee} tx ${p.tx.slice(0, 10)}`).join("; "));
   // 7. docs truth
   const c = await canon.rv("get_config"), d = await demo.rv("get_config");
   const rules = readFileSync(root + "docs/RULES.md", "utf8");
@@ -116,8 +155,9 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
 // 6. tests
 {
   const r = spawnSync("sh", [root + "test/run_offline.sh"], { encoding: "utf8" });
-  const ran = (r.stderr.match(/Ran (\d+) tests/) ?? [])[1];
-  check("tests: offline suite passes", r.status === 0, `${ran} tests ${r.status === 0 ? "OK" : "FAILED"}`);
+  const ran = Number((r.stderr.match(/Ran (\d+) tests/) ?? [])[1] ?? 0);
+  const node = Number((r.stdout.match(/# pass (\d+)/) ?? [])[1] ?? 0);
+  check("tests: offline suite passes", r.status === 0, `${ran + node} tests (${ran} Python, ${node} node) ${r.status === 0 ? "OK" : "FAILED"}`);
 }
 
 // 8. site
