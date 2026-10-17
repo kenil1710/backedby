@@ -75,20 +75,20 @@ The first deployment (commit `e915d21`, one vault per pair) is retired; its reco
 
 ## Scope
 
-- Source chain is Ethereum; destinations are Arbitrum One, OP Mainnet, Base, Polygon PoS and Moonbeam, through six
+- Source chain is Ethereum; destinations are Arbitrum One, OP Mainnet, Base, Polygon PoS and Moonbeam through six
   bridge kinds (Arbitrum's escrow gateways, the OP and Base Standard Bridges, the OP DAI bridge, Polygon PoS's ERC20
-  predicate, Nomad). Other bridges need their own authentication rule in ChainReader.
-- A pair's supply is the destination tokens' `totalSupply` (capped by the bridge's own per-token deposits on OP
-  Stack chains). Tokens the same vault backs on chains BackedBy does not read are not counted; leaving them out only
-  makes a pair look better backed than it is, never worse.
+  predicate, Nomad), plus LayerZero OFTs on those chains and on Mantle, X Layer, Sei, Flare, Hedera, Unichain, Morph,
+  Ink, Berachain, HyperEVM and Monad. Other bridges need their own authentication rule in ChainReader.
+- A pair's supply is the destination tokens' `totalSupply` (on OP Stack chains, the bridge's own per-token deposits
+  if larger). A vault belongs to one pair, which lists every destination it backs that two RPCs can read
+  ([shared vaults](docs/SEEDS.md#shared-vaults)). USDT0's adapter has peers on six chains left out (Conflux, Rootstock,
+  Plasma, Stable, MegaETH, Tempo: no second honest RPC or no finalized tag); their supply is not counted, which can
+  only make the USDT pair look better backed, never worse.
 - "Locked" is the vault's balance of the source token. A rebasing source token or a destination token that can mint
   outside the bridge is measured as the chains report it, which is the point.
-- USDT0's Ethereum adapter backs USDT0 on many chains; BackedBy counts the ones it reads (Polygon, Arbitrum, OP
-  Mainnet). The USDT pair's ratio therefore leaves out USDT0 supply on other chains, which makes it read higher than a
-  count of every USDT0 chain would.
 - Moonbeam has not produced a block since 2026-08-10, so Nomad pairs can only be checked at that moment.
-- Studio Dev records a claim's value transfer but does not deliver it; the registry's books (`get_ledger`) are what
-  drain to 0.
+- Payouts are external value messages, delivered when the claim finalizes; every demo payout is proved by the
+  finalized transaction and by `eth_getBalance` ([docs/payouts.json](docs/payouts.json), [docs/PAYOUT_PROBE.md](docs/PAYOUT_PROBE.md)).
 - The read path depends on public RPC endpoints. When one is down or throttling, reads come back INCONCLUSIVE and
   are retried; they never become a verdict.
 

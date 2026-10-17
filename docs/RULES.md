@@ -137,8 +137,19 @@ only if it is identical to their own.
 | Arbitrum One | arb-pokt.nodies.app | arbitrum.gateway.tenderly.co |
 | OP Mainnet | mainnet.optimism.io | optimism.drpc.org |
 | Base | base-pokt.nodies.app | base.drpc.org |
-| Polygon PoS | polygon.drpc.org | polygon.gateway.tenderly.co |
+| Polygon PoS | polygon.drpc.org | rpc-mainnet.matic.quiknode.pro |
 | Moonbeam | moonbeam.drpc.org | moonbeam.api.onfinality.io/public |
+| Mantle | rpc.mantle.xyz | mantle.drpc.org |
+| X Layer | xlayerrpc.okx.com | xlayer.drpc.org |
+| Sei | evm-rpc.sei-apis.com | sei.api.pocket.network |
+| Flare | flare-api.flare.network/ext/C/rpc | rpc.ankr.com/flare |
+| Hedera | mainnet.hashio.io/api | hedera.linkpool.pro |
+| Unichain | mainnet.unichain.org | unichain.drpc.org |
+| Morph | rpc.morphl2.io | rpc-quicknode.morphl2.io |
+| Ink | rpc-gel.inkonchain.com | ink.drpc.org |
+| Berachain | rpc.berachain.com | berachain.drpc.org |
+| HyperEVM | rpc.hyperliquid.xyz/evm | hyperliquid.drpc.org |
+| Monad | rpc.monad.xyz | monad-mainnet-rpc.spidernode.net |
 
 Any disagreement, an error, a missing block, a call that reverts, a decimals value different from the frozen one, or
 a changed anchor makes the check **INCONCLUSIVE**: every stake is refunded, nobody is slashed. An INCONCLUSIVE that is
@@ -199,9 +210,21 @@ overturn a ruling; the timeout above ends it.
 ## 7. Withdrawals, monitoring and the gate
 
 - `request_unbond(bond)` ends the bond's coverage at that moment; `withdraw_bond(bond)` after **24 h** (demo 120 s) and
-  only while no check on the bond is open credits the bond to the operator. `claim()` pays out every credit; balances
-  are zeroed before the transfer is posted. Ledger, checked by tests and by `get_ledger`:
-  `received = bonds + open stakes + claimable + claimed`.
+  only while no check on the bond is open credits the bond to the operator. Ledger, checked by tests and by
+  `get_ledger`: `received = bonds + open stakes + claimable + claimed`.
+
+### Payouts
+
+Every bounty, refund (stake, contest stake, refused payable), bond withdrawal and treasury share is first credited to
+its owner, and `claim()` is the one way GEN leaves: it zeroes the credit, adds it to `claimed`, and in the same
+transaction posts one external value message to the claimant (`gl.evm.Account(claimant).emit_call(amount, b"")`),
+applied when the transaction finalizes. If the registry's balance is short of the credit the claim is refused and
+nothing is marked. The internal `emit_transfer` is not used: on Studio Dev it is stored with a declared budget of 0,
+skipped at finalization and credited back to the contract (docs/PAYOUT_PROBE.md). The client attaches one External
+message allocation naming the claimant (500,000 gas at the locked price plus headroom) and refuses to submit a claim
+without it (`tools/lib/payout.mjs`). A payout counts as made only when the finalized transaction shows the value
+effect delivered and not skipped and the registry's `eth_getBalance` fell by the amount; `tools/final_check.mjs`
+re-reads every demo payout that way, and calls the demo registry drained only when `eth_getBalance` is 0.
 - `monitor(pair, blocks)`: no stake, only when no check is open on the pair, and at most one **ruled** monitoring
   check per pair per **1 h** (demo 30 s). Filings whose pins break the rules do not use up the interval.
 - **Patrol**: `tools/patrol.mjs` runs every 6 h in GitHub Actions. It reads, rules, finalizes or expires every open
