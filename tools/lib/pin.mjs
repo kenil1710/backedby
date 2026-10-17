@@ -7,11 +7,23 @@
 import { rpc } from "./evm.mjs";
 import { CHAINS } from "./bridges.mjs";
 
+// Pinning only needs block numbers and timestamps, so it may ask any healthy
+// endpoint; the contract re-reads everything from its own two RPCs.
+const EXTRA = {
+  ethereum: ["https://ethereum-rpc.publicnode.com", "https://eth.drpc.org"],
+  arbitrum: ["https://arb1.arbitrum.io/rpc", "https://arbitrum-one-rpc.publicnode.com"],
+  optimism: ["https://op-pokt.nodies.app", "https://optimism-rpc.publicnode.com"],
+  base: ["https://base-rpc.publicnode.com", "https://1rpc.io/base"],
+  polygon: ["https://polygon-bor-rpc.publicnode.com", "https://polygon.gateway.tenderly.co"],
+  moonbeam: ["https://1rpc.io/glmr"],
+};
+const urlsOf = (chain) => [...CHAINS[chain].rpcs, ...(EXTRA[chain] ?? [])];
+
 const hx = (n) => "0x" + n.toString(16);
 async function blk(chain, tag) {
   let last;
-  for (const u of CHAINS[chain].rpcs) {
-    for (let i = 0; i < 3; i++) {
+  for (const u of urlsOf(chain)) {
+    for (let i = 0; i < 2; i++) {
       try {
         const b = await rpc(u, "eth_getBlockByNumber", [typeof tag === "number" ? hx(tag) : tag, false]);
         if (b) return { number: parseInt(b.number), timestamp: parseInt(b.timestamp), hash: b.hash };
@@ -21,14 +33,18 @@ async function blk(chain, tag) {
   throw last ?? new Error("no block");
 }
 
-/** The finalized head as the LOWER of the two RPCs' views. */
+/** The finalized head as the LOWER of the answers of up to two healthy endpoints. */
 export async function finalized(chain) {
   const out = [];
-  for (const u of CHAINS[chain].rpcs) {
-    const b = await rpc(u, "eth_getBlockByNumber", ["finalized", false]);
-    out.push({ number: parseInt(b.number), timestamp: parseInt(b.timestamp), hash: b.hash });
+  for (const u of urlsOf(chain)) {
+    if (out.length === 2) break;
+    try {
+      const b = await rpc(u, "eth_getBlockByNumber", ["finalized", false]);
+      if (b) out.push({ number: parseInt(b.number), timestamp: parseInt(b.timestamp), hash: b.hash });
+    } catch { /* next endpoint */ }
   }
-  return out[0].number <= out[1].number ? out[0] : out[1];
+  if (out.length === 0) throw new Error("no endpoint answered for " + chain);
+  return out.reduce((a, b) => (a.number <= b.number ? a : b));
 }
 
 /** first block (<= hi) with timestamp >= t, or last block with timestamp <= t. */

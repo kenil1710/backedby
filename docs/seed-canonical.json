@@ -9,7 +9,216 @@
       "auth_id": 1,
       "auth_tx": "0xf0e39668d21632807e20fa9d14fcab849717ebfbddbc8b8bbf4b39f27218943d",
       "pair_id": 1,
-      "register_tx": "0xfd66c27c2b897151572a659b172f6a8cd71ea321574883887ea09f8ebbafa1c6"
+      "register_tx": "0xfd66c27c2b897151572a659b172f6a8cd71ea321574883887ea09f8ebbafa1c6",
+      "blocks": {
+        "ethereum": 26210362,
+        "arbitrum": 515596278
+      },
+      "check_id": 1,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10286,
+      "contest_deadline": 1792239894,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "WBTC on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+      "label": "WBTC on Arbitrum",
+      "auth_id": 2,
+      "auth_tx": "0x39848dacb64809c484fb6183445c9e25659021e28564fd3bf34ea8f71ea67934",
+      "pair_id": 2,
+      "register_tx": "0xfa2fb42e406b12d526ccecaac22b4d2ea2f4c0098e8ea88b451bceb73a2d5289",
+      "blocks": {
+        "ethereum": 26210362,
+        "arbitrum": 515596278
+      },
+      "check_id": 2,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10080,
+      "contest_deadline": 1792239993,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "DAI on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+      "label": "DAI on Arbitrum",
+      "auth_id": 3,
+      "auth_tx": "0x9fdf9006c225385ed4d00f67c81ae33c455a891f6c51423df30c2991a0e0e71b",
+      "pair_id": 3,
+      "register_tx": "0xdb0dad4d3207d7522f4bdaf8ba4bd86a1ccc87a04ccdfab87a745b19a9036b39",
+      "blocks": {
+        "ethereum": 26210362,
+        "arbitrum": 515596278
+      },
+      "check_id": 3,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10002,
+      "contest_deadline": 1792240095,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "wstETH on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "wstETH",
+      "l1": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+      "l2": "0x5979d7b546e38e414f7e9822514be443a4800529",
+      "label": "wstETH on Arbitrum",
+      "auth_id": 4,
+      "auth_tx": "0x34ccfe7ad33a1b1f2df2adc1c36933387b755e74bb00ec8d4993154bb67ca818",
+      "pair_id": 4,
+      "register_tx": "0xd045c3f2c8ac237a6f4682d41aa73c55fe70dc6da7caefa579ff60938bdb12b7",
+      "blocks": {
+        "ethereum": 26210403,
+        "arbitrum": 515597840
+      },
+      "check_id": 4,
+      "status": "OPEN",
+      "verdict1": "",
+      "contest_deadline": 0
+    },
+    "DAI on OP Mainnet": {
+      "kind": "op_dai",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+      "label": "DAI on OP Mainnet",
+      "auth_id": 5,
+      "auth_tx": "0x467ca69c58f5722567e4d85cba0282e0becf30fb37eeeca4dd1dd6c7ecb9e582",
+      "pair_id": 5,
+      "register_tx": "0x76c0e52afc8eceac57963f53192d8c4fd73be8d494f7476f1a7d3d86cb3bf2fb",
+      "blocks": {
+        "ethereum": 26210480,
+        "optimism": 158309857
+      },
+      "check_id": 5,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 14653,
+      "contest_deadline": 1792241633,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "USDbC on Base": {
+      "kind": "base",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca",
+      "label": "USDbC on Base",
+      "auth_id": 6,
+      "auth_tx": "0x714907a095e4d7331307940169c64db6c4fcce7461dc76bc4455a9689561e620",
+      "pair_id": 6,
+      "register_tx": "0x0793f30c263a79a06a50df80d0a43127fe4008623456d3d954959eeae730ce2a",
+      "blocks": {
+        "ethereum": 26210497,
+        "base": 52714674
+      },
+      "check_id": 6,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10036,
+      "contest_deadline": 1792241733,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "cbETH on Base": {
+      "kind": "base",
+      "sym": "cbETH",
+      "l1": "0xbe9895146f7af43049ca1c1ae358b0541ea49704",
+      "l2": "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22",
+      "label": "cbETH on Base",
+      "auth_id": 7,
+      "auth_tx": "0xff573ec55e15a1b43b368a0f71897b86651d7d6e559128d12d73c3a43cf2c8b8",
+      "pair_id": 7,
+      "register_tx": "0xa112d421f17f560f765b58f6e012247214558db0754651a2daaf50298c356ee3",
+      "blocks": {
+        "ethereum": 26210497,
+        "base": 52714674
+      },
+      "check_id": 7,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10000,
+      "contest_deadline": 1792241841,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "USDC.e on Polygon": {
+      "kind": "polygon",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+      "label": "USDC.e on Polygon",
+      "auth_id": 8,
+      "auth_tx": "0x04edf4de19cfc7c93c914014820c8b482c6d0973c23529c6d22b0f028f2638a5",
+      "pair_id": 8,
+      "register_tx": "0x4f62cf8ed393adc02b859e9451486f93202550b96256ddc629ed18d09e589102",
+      "blocks": {
+        "ethereum": 26210534,
+        "polygon": 95675861
+      },
+      "check_id": 8,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10006,
+      "contest_deadline": 1792241941,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "WBTC on Polygon": {
+      "kind": "polygon",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+      "label": "WBTC on Polygon",
+      "auth_id": 9,
+      "auth_tx": "0x8a1f353db925d40c978beb3657eec905ee51a916acb79eabdb49ebdc6e481096",
+      "pair_id": 9,
+      "register_tx": "0x5e28a6221599a1421bff3b78a1368510f78c19f7d452743cf5f40cdec9290353",
+      "blocks": {
+        "ethereum": 26210566,
+        "polygon": 95676117
+      },
+      "check_id": 9,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10002,
+      "contest_deadline": 1792242039,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "DAI on Polygon": {
+      "kind": "polygon",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "label": "DAI on Polygon",
+      "auth_id": 10,
+      "auth_tx": "0xad7948cfaefe8d833ec33cd4530e5fb0fe15e8a0e56a552eccd3fcf3ac18a82a",
+      "pair_id": 10,
+      "register_tx": "0x5330304561fa07a482fb140073624a4ad70d8a8f662abca2be19dbcf6f982b99",
+      "blocks": {
+        "ethereum": 26210566,
+        "polygon": 95676117
+      },
+      "check_id": 10,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10006,
+      "contest_deadline": 1792242151,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "USDT on Polygon": {
+      "kind": "polygon",
+      "sym": "USDT",
+      "l1": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "l2": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      "label": "USDT on Polygon",
+      "auth_id": 11,
+      "auth_tx": "0x1643bd6b4f06bba5361e097f838dd579320a5586a48ae2948c7dd708e1639aaa",
+      "pair_id": 11,
+      "register_tx": "0xad99411a5cb19606255a63a6d8dc6f6217dcc9ce7e538797f32e4d16060bca44",
+      "extras_done": true
     }
   }
 }

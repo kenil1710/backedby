@@ -32,12 +32,12 @@ export function actor({ set = "final", role, registry = "BackedByRegistry", log 
   /** Public RPCs answer Studio's shared egress with 429s in bursts. A transport
    *  failure (REFUSED: RPC_UNREADABLE, or a reading recorded INCONCLUSIVE ·
    *  RPC_UNREADABLE) is waited out and tried again; nothing else is retried. */
-  async function patiently(label, attempt, isTransport, tries = 6) {
+  async function patiently(label, attempt, isTransport, tries = 12) {
     let last;
     for (let i = 1; i <= tries; i++) {
-      last = await attempt();
+      try { last = await attempt(); } catch (e) { last = { ok: false, revertReason: "RPC_UNREADABLE local: " + String(e.message).slice(0, 80), check: { status: "INCONCLUSIVE", reason: "RPC_UNREADABLE" } }; }
       if (!isTransport(last)) return last;
-      const wait = 45 + 30 * i;
+      const wait = Math.min(60 + 45 * i, 480);
       log(`  ... ${label}: RPC throttled from GenVM (attempt ${i}), retrying in ${wait}s`);
       await sleep(wait * 1000);
     }
