@@ -66,13 +66,17 @@ B_WITHDRAWN = "WITHDRAWN"
 B_SLASHED = "SLASHED"
 
 KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
-         "polygon": "polygon", "nomad": "moonbeam"}
+         "polygon": "polygon", "nomad": "moonbeam", "oft_polygon": "polygon", "oft_arbitrum": "arbitrum",
+         "oft_optimism": "optimism", "oft_base": "base"}
 DEPOSIT_KINDS = ("optimism", "base")
 MAX_GAP_S = 600
-KIND_MAX_GAP_S = {"polygon": 300}
+FAST_GAP_S = 120              # any pair holding a fast-bridge (LayerZero OFT) vault
+KIND_MAX_GAP_S = {"polygon": 300, "oft_polygon": FAST_GAP_S, "oft_arbitrum": FAST_GAP_S,
+                  "oft_optimism": FAST_GAP_S, "oft_base": FAST_GAP_S}
 MAX_TOLERANCE_BPS = 1000
 BOUNTY_BPS = 5000             # share of a slash paid to the challenger; the rest to the treasury
 MAX_DESTS = 8
+MAX_VAULTS = 8
 MAX_DECIMALS = 36
 MAX_LABEL = 48
 MAX_AMOUNT = 10 ** 30
@@ -84,9 +88,17 @@ DATA_REASONS = ("RPC_DISAGREE", "CALL_FAILED", "MALFORMED_ANSWER", "DECIMALS_MIS
                 "CONTEST_DISAGREES", "CONTEST_REREAD_INCONCLUSIVE")
 MAX_ANCHORS = 32
 
+def gap_for(kinds: list) -> int:
+    g = MAX_GAP_S
+    for k in kinds:
+        if KIND_MAX_GAP_S.get(k, MAX_GAP_S) < g:
+            g = KIND_MAX_GAP_S.get(k, MAX_GAP_S)
+    return g
+
+
 HOWS = ("WINDOW_PASSED", "CONTEST_UPHELD_RULING", "CONTEST_DISAGREES", "CONTEST_REREAD_INCONCLUSIVE",
         "TIMEOUT_UNREAD", "TIMEOUT_CONTEST_UNREAD", "SUPERSEDED", "READ_DATA", "READ_PIN", "READ_TRANSPORT")
-COUNT_KEYS = ["pairs", "bonds", "bonds_withdrawn", "destinations_added", "contests", "refused_payable",
+COUNT_KEYS = ["pairs", "bonds", "bonds_withdrawn", "destinations_added", "vaults_added", "contests", "refused_payable",
               "filed:CHALLENGE", "filed:MONITOR", "provisional:BACKED", "provisional:UNDER_BACKED",
               "status:FINAL", "status:INCONCLUSIVE", "verdict:BACKED", "verdict:UNDER_BACKED",
               "verdict:INCONCLUSIVE"] + ["how:" + h for h in HOWS]
@@ -154,8 +166,10 @@ def check_pins(blocks: dict, max_gap: int) -> str:
 
 def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
     """The whole decision for one reading. terms: source_decimals,
-    tolerance_bps, max_gap_s, dests [{chain, token, decimals}]. cover:
-    None for a monitoring check, else [since, until] (until 0 = open-ended)."""
+    tolerance_bps, max_gap_s, vaults [addr], dests [{chain, token, decimals}],
+    anchors. cover: None for a monitoring check, else [since, until] (until 0 =
+    open-ended). Locked is the sum over every vault; a destination with a
+    per-token bridge ledger counts max(totalSupply, deposits)."""
     out = {"verdict": V_INC, "reason": "", "cls": "", "source_time": 0, "locked_norm": "", "supply_norm": "",
            "ratio_bps": -1, "scale_decimals": -1, "counted": []}
     if not isinstance(reading, dict) or reading.get("status") not in ("OK", "INCONCLUSIVE"):
@@ -219,11 +233,19 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
             return out
         if int(d["decimals"]) > big:
             big = int(d["decimals"])
-    locked = _as_int(reading.get("locked", ""), -1)
-    if locked < 0 or big > MAX_DECIMALS:
+    held = reading.get("locked_by_vault") or []
+    if len(held) != len(terms["vaults"]) or big > MAX_DECIMALS:
         out["reason"] = "MALFORMED_ANSWER"
         out["cls"] = "DATA"
         return out
+    locked = 0
+    for h in held:
+        hv = _as_int(h, -1)
+        if hv < 0:
+            out["reason"] = "MALFORMED_ANSWER"
+            out["cls"] = "DATA"
+            return out
+        locked += hv
     locked_n = locked * (10 ** (big - sd))
     supply_n = 0
     counted = []
@@ -242,7 +264,7 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
                 out["reason"] = "MALFORMED_ANSWER"
                 out["cls"] = "DATA"
                 return out
-            if dv < c:
+            if dv > c:
                 c = dv
         counted.append(str(c))
         supply_n += c * (10 ** (big - int(d["decimals"])))
@@ -293,6 +315,7 @@ class Pair:
     max_gap_s: u64
     label: str
     dests_json: str
+    vaults_json: str
     anchors_json: str
     registered_by: str
     registered_at: u64
@@ -369,7 +392,7 @@ class BackedByRegistry(gl.contract.Contract):
     n_bonds: u64
     n_checks: u64
     pairs: gl.storage.TreeMap[u64, Pair]
-    pair_by_key: gl.storage.TreeMap[str, u64]
+    vault_owner: gl.storage.TreeMap[str, u64]
     dest_owner: gl.storage.TreeMap[str, u64]
     bonds: gl.storage.TreeMap[u64, Bond]
     checks: gl.storage.TreeMap[u64, Check]
@@ -448,6 +471,12 @@ class BackedByRegistry(gl.contract.Contract):
     def _dests(self, p: Pair) -> list:
         return json.loads(p.dests_json)
 
+    def _vaults(self, p: Pair) -> list:
+        return json.loads(p.vaults_json)
+
+    def _gap(self, vaults: list, dests: list) -> int:
+        return gap_for([v["kind"] for v in vaults] + [d.get("kind", "") for d in dests])
+
     def _chains(self, p: Pair) -> list:
         out = [SOURCE_CHAIN]
         for d in self._dests(p):
@@ -481,7 +510,8 @@ class BackedByRegistry(gl.contract.Contract):
     def _terms(self, p: Pair, c: Check) -> dict:
         req = json.loads(c.request_json)
         return {"source_decimals": int(p.source_decimals), "tolerance_bps": int(p.tolerance_bps),
-                "max_gap_s": int(p.max_gap_s), "dests": req["terms_dests"], "anchors": req["terms_anchors"]}
+                "max_gap_s": int(req["terms_max_gap_s"]), "vaults": req["vaults"], "dests": req["terms_dests"],
+                "anchors": req["terms_anchors"]}
 
     def _cover(self, c: Check) -> typing.Any:
         if c.purpose != P_CHALLENGE:
@@ -492,11 +522,13 @@ class BackedByRegistry(gl.contract.Contract):
     def _new_check(self, p: Pair, purpose: str, bond_id: int, stake: int, blocks: dict, now: int) -> int:
         dests = self._dests(p)
         anchors = json.loads(p.anchors_json)
-        req = {"source_chain": SOURCE_CHAIN, "vault": p.vault, "source_token": p.source_token,
-               "dests": [{"chain": d["chain"], "token": d["token"], "deposits": p.kind in DEPOSIT_KINDS} for d in dests],
+        req = {"source_chain": SOURCE_CHAIN, "vaults": [v["vault"] for v in self._vaults(p)],
+               "source_token": p.source_token,
+               "dests": [{"chain": d["chain"], "token": d["token"], "deposits_vault": d.get("deposits_vault", "")}
+                         for d in dests],
                "blocks": blocks, "anchors": [[a[0], a[1], a[2]] for a in anchors],
                "terms_dests": [{"chain": d["chain"], "token": d["token"], "decimals": int(d["decimals"])} for d in dests],
-               "terms_anchors": anchors}
+               "terms_anchors": anchors, "terms_max_gap_s": int(p.max_gap_s)}
         cid = int(self.n_checks) + 1
         self.checks[u64(cid)] = Check(
             check_id=u64(cid), pair_id=p.pair_id, purpose=purpose, bond_id=u64(bond_id), filer=self._sender(),
@@ -606,10 +638,29 @@ class BackedByRegistry(gl.contract.Contract):
 
     # --- pairs ----------------------------------------------------------------
 
+    def _dest_of(self, a: dict, now: int) -> dict:
+        return {"chain": a["dest_chain"], "token": a["dest_token"], "decimals": int(a["dest_decimals"]),
+                "kind": a["kind"], "deposits_vault": a["vault"] if a["kind"] in DEPOSIT_KINDS else "",
+                "auth_id": int(a["auth_id"]), "added_by": self._sender(), "added_at": now}
+
+    def _vault_of(self, a: dict, now: int) -> dict:
+        return {"vault": a["vault"], "kind": a["kind"], "auth_id": int(a["auth_id"]), "added_by": self._sender(),
+                "added_at": now}
+
+    def _merge_anchors(self, have: list, more: list) -> typing.Any:
+        out = [x for x in have]
+        for an in more:
+            if an not in out:
+                out.append(an)
+        if len(out) > MAX_ANCHORS:
+            return None
+        return out
+
     @gl.public.write
     def register_pair(self, auth_ids: str, tolerance_bps: int, label: str) -> typing.Any:
         """Register a pair from ChainReader authentications (comma-separated
-        ids, one per destination token, all of the same vault and source token)."""
+        ids, one per destination token, all through ONE vault for one source
+        token). More vaults are added with add_vault."""
         now = self._now()
         if now <= 0:
             raise gl.vm.UserError("REFUSED: NO_CLOCK")
@@ -634,50 +685,49 @@ class BackedByRegistry(gl.contract.Contract):
                 raise gl.vm.UserError("REFUSED: " + a)
             if len(auths) > 0:
                 f = auths[0]
-                if a["kind"] != f["kind"] or a["vault"] != f["vault"] or a["source_token"] != f["source_token"] \
+                if a["vault"] != f["vault"] or a["source_token"] != f["source_token"] \
                         or int(a["source_decimals"]) != int(f["source_decimals"]):
-                    raise gl.vm.UserError("REFUSED: AUTHS_ARE_NOT_ONE_PAIR")
+                    raise gl.vm.UserError("REFUSED: AUTHS_ARE_NOT_ONE_VAULT")
             dk = a["dest_chain"] + "|" + a["dest_token"]
             if dk in seen:
                 raise gl.vm.UserError("REFUSED: DUPLICATE_DESTINATION")
             seen.append(dk)
             auths.append(a)
         f = auths[0]
-        key = SOURCE_CHAIN + "|" + f["vault"] + "|" + f["source_token"] + "|" + str(tol)
-        if int(self.pair_by_key.get(key, u64(0))) != 0:
-            raise gl.vm.UserError("REFUSED: PAIR_EXISTS_AS_" + str(int(self.pair_by_key.get(key, u64(0)))) + "_ADD_A_DESTINATION_INSTEAD")
+        key = str(tol) + "|" + f["vault"] + "|" + f["source_token"]
+        if int(self.vault_owner.get(key, u64(0))) != 0:
+            raise gl.vm.UserError("REFUSED: VAULT_ALREADY_IN_PAIR_" + str(int(self.vault_owner.get(key, u64(0)))) + "_ADD_A_DESTINATION_INSTEAD")
         for dk in seen:
             if int(self.dest_owner.get(str(tol) + "|" + dk, u64(0))) != 0:
                 raise gl.vm.UserError("REFUSED: DESTINATION_ALREADY_IN_PAIR_" + str(int(self.dest_owner.get(str(tol) + "|" + dk, u64(0)))))
         anchors = []
         for a in auths:
-            for an in a["anchors"]:
-                if an not in anchors:
-                    anchors.append(an)
-        if len(anchors) > MAX_ANCHORS:
-            raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
-        dests = [{"chain": a["dest_chain"], "token": a["dest_token"], "decimals": int(a["dest_decimals"]),
-                  "auth_id": int(a["auth_id"]), "added_by": self._sender(), "added_at": now} for a in auths]
+            anchors = self._merge_anchors(anchors, a["anchors"])
+            if anchors is None:
+                raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
+        dests = [self._dest_of(a, now) for a in auths]
+        vaults = [self._vault_of(f, now)]
         # --- writes
         pid = int(self.n_pairs) + 1
         self.pairs[u64(pid)] = Pair(
             pair_id=u64(pid), key=key, kind=f["kind"], source_chain=SOURCE_CHAIN, vault=f["vault"],
             source_token=f["source_token"], source_decimals=u64(int(f["source_decimals"])), tolerance_bps=u64(tol),
-            max_gap_s=u64(KIND_MAX_GAP_S.get(f["kind"], MAX_GAP_S)), label=clean_label(label),
-            dests_json=_canon(dests), anchors_json=_canon(anchors), registered_by=self._sender(), registered_at=u64(now),
+            max_gap_s=u64(self._gap(vaults, dests)), label=clean_label(label),
+            dests_json=_canon(dests), vaults_json=_canon(vaults), anchors_json=_canon(anchors),
+            registered_by=self._sender(), registered_at=u64(now),
             open_check=u64(0), latest_check=u64(0), latest_time=u64(0), last_bad_time=u64(0), last_monitor_at=u64(0),
             checks_csv="", bonds_csv="")
-        self.pair_by_key[key] = u64(pid)
+        self.vault_owner[key] = u64(pid)
         for dk in seen:
             self.dest_owner[str(tol) + "|" + dk] = u64(pid)
         self.n_pairs = u64(pid)
         self._bump("pairs")
-        return {"ok": True, "pair_id": pid, "destinations": len(dests)}
+        return {"ok": True, "pair_id": pid, "destinations": len(dests), "vaults": 1}
 
     @gl.public.write
     def add_destination(self, pair_id: int, auth_id: int) -> typing.Any:
-        """Anyone: add a destination token the pair is missing, with the same
-        on-chain proof. Checks already filed keep the destinations they had."""
+        """Anyone: add a destination token the pair is missing, proved through
+        one of the pair's vaults. Checks already filed keep what they had."""
         now = self._now()
         if now <= 0:
             raise gl.vm.UserError("REFUSED: NO_CLOCK")
@@ -687,8 +737,9 @@ class BackedByRegistry(gl.contract.Contract):
         a = self._auth(_as_int(auth_id, -1), now)
         if isinstance(a, str):
             raise gl.vm.UserError("REFUSED: " + a)
-        if a["kind"] != p.kind or a["vault"] != p.vault or a["source_token"] != p.source_token \
-                or int(a["source_decimals"]) != int(p.source_decimals):
+        vaults = self._vaults(p)
+        if a["source_token"] != p.source_token or int(a["source_decimals"]) != int(p.source_decimals) \
+                or a["vault"] not in [v["vault"] for v in vaults]:
             raise gl.vm.UserError("REFUSED: AUTH_IS_FOR_ANOTHER_PAIR")
         dk = str(int(p.tolerance_bps)) + "|" + a["dest_chain"] + "|" + a["dest_token"]
         if int(self.dest_owner.get(dk, u64(0))) != 0:
@@ -696,20 +747,65 @@ class BackedByRegistry(gl.contract.Contract):
         dests = self._dests(p)
         if len(dests) >= MAX_DESTS:
             raise gl.vm.UserError("REFUSED: PAIR_HAS_" + str(MAX_DESTS) + "_DESTINATIONS")
-        anchors = json.loads(p.anchors_json)
-        for an in a["anchors"]:
-            if an not in anchors:
-                anchors.append(an)
-        if len(anchors) > MAX_ANCHORS:
+        anchors = self._merge_anchors(json.loads(p.anchors_json), a["anchors"])
+        if anchors is None:
             raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
-        dests.append({"chain": a["dest_chain"], "token": a["dest_token"], "decimals": int(a["dest_decimals"]),
-                      "auth_id": int(a["auth_id"]), "added_by": self._sender(), "added_at": now})
+        dests.append(self._dest_of(a, now))
         # --- writes
         p.dests_json = _canon(dests)
         p.anchors_json = _canon(anchors)
+        p.max_gap_s = u64(self._gap(vaults, dests))
         self.dest_owner[dk] = p.pair_id
         self._bump("destinations_added")
         return {"ok": True, "pair_id": int(p.pair_id), "destinations": len(dests)}
+
+    @gl.public.write
+    def add_vault(self, pair_id: int, auth_id: int) -> typing.Any:
+        """Anyone: add a vault that also backs the pair's tokens (a second
+        mint path), proved by that bridge's own mapping onto one of the pair's
+        destinations. Its balance is summed into locked from the next check."""
+        now = self._now()
+        if now <= 0:
+            raise gl.vm.UserError("REFUSED: NO_CLOCK")
+        p = self.pairs.get(u64(max(_as_int(pair_id, 0), 0)))
+        if p is None:
+            raise gl.vm.UserError("REFUSED: NO_SUCH_PAIR")
+        a = self._auth(_as_int(auth_id, -1), now)
+        if isinstance(a, str):
+            raise gl.vm.UserError("REFUSED: " + a)
+        dests = self._dests(p)
+        if a["source_token"] != p.source_token or int(a["source_decimals"]) != int(p.source_decimals):
+            raise gl.vm.UserError("REFUSED: AUTH_IS_FOR_ANOTHER_SOURCE_TOKEN")
+        hit = -1
+        for i in range(len(dests)):
+            if dests[i]["chain"] == a["dest_chain"] and dests[i]["token"] == a["dest_token"]:
+                hit = i
+        if hit < 0:
+            raise gl.vm.UserError("REFUSED: VAULT_DOES_NOT_BACK_A_DESTINATION_OF_THIS_PAIR")
+        if int(dests[hit]["decimals"]) != int(a["dest_decimals"]):
+            raise gl.vm.UserError("REFUSED: DECIMALS_DIFFER")
+        vaults = self._vaults(p)
+        if a["vault"] in [v["vault"] for v in vaults]:
+            raise gl.vm.UserError("REFUSED: VAULT_ALREADY_IN_THIS_PAIR")
+        key = str(int(p.tolerance_bps)) + "|" + a["vault"] + "|" + p.source_token
+        if int(self.vault_owner.get(key, u64(0))) != 0:
+            raise gl.vm.UserError("REFUSED: VAULT_ALREADY_IN_PAIR_" + str(int(self.vault_owner.get(key, u64(0)))))
+        if len(vaults) >= MAX_VAULTS:
+            raise gl.vm.UserError("REFUSED: PAIR_HAS_" + str(MAX_VAULTS) + "_VAULTS")
+        anchors = self._merge_anchors(json.loads(p.anchors_json), a["anchors"])
+        if anchors is None:
+            raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
+        vaults.append(self._vault_of(a, now))
+        if a["kind"] in DEPOSIT_KINDS and dests[hit].get("deposits_vault", "") == "":
+            dests[hit]["deposits_vault"] = a["vault"]
+        # --- writes
+        p.vaults_json = _canon(vaults)
+        p.dests_json = _canon(dests)
+        p.anchors_json = _canon(anchors)
+        p.max_gap_s = u64(self._gap(vaults, dests))
+        self.vault_owner[key] = p.pair_id
+        self._bump("vaults_added")
+        return {"ok": True, "pair_id": int(p.pair_id), "vaults": len(vaults), "max_gap_s": int(p.max_gap_s)}
 
     # --- bonds ----------------------------------------------------------------
 
@@ -1028,7 +1124,8 @@ class BackedByRegistry(gl.contract.Contract):
 
     def _pair_view(self, p: Pair) -> dict:
         return {"pair_id": int(p.pair_id), "key": p.key, "kind": p.kind, "source_chain": p.source_chain,
-                "vault": p.vault, "source_token": p.source_token, "source_decimals": int(p.source_decimals),
+                "vault": p.vault, "vaults": self._vaults(p), "source_token": p.source_token,
+                "source_decimals": int(p.source_decimals),
                 "tolerance_bps": int(p.tolerance_bps), "max_gap_s": int(p.max_gap_s), "label": p.label,
                 "dests": self._dests(p), "anchors": json.loads(p.anchors_json), "registered_by": p.registered_by,
                 "registered_at": int(p.registered_at), "last_bad_time": int(p.last_bad_time),
@@ -1048,7 +1145,7 @@ class BackedByRegistry(gl.contract.Contract):
         req = json.loads(c.request_json)
         return {"check_id": int(c.check_id), "pair_id": int(c.pair_id), "purpose": c.purpose,
                 "bond_id": int(c.bond_id), "filer": c.filer, "stake": str(int(c.stake)), "blocks": req["blocks"],
-                "dests": req["terms_dests"], "filed_at": int(c.filed_at), "read_deadline": int(c.read_deadline),
+                "vaults": req["vaults"], "dests": req["terms_dests"], "max_gap_s": int(req["terms_max_gap_s"]), "filed_at": int(c.filed_at), "read_deadline": int(c.read_deadline),
                 "status": c.status, "round": int(c.round), "verdict1": c.verdict1,
                 "ruling1": json.loads(c.ruling1_json) if c.ruling1_json != "" else None, "ruled_at": int(c.ruled_at),
                 "contest_deadline": int(c.contest_deadline), "contester": c.contester,
@@ -1192,6 +1289,6 @@ class BackedByRegistry(gl.contract.Contract):
                 "read_timeout_s": int(self.read_timeout_s), "contest_timeout_s": int(self.contest_timeout_s),
                 "unbond_delay_s": int(self.unbond_delay_s), "monitor_interval_s": int(self.monitor_interval_s),
                 "min_stake": str(int(self.min_stake)), "min_bond": str(int(self.min_bond)),
-                "auth_max_age_s": int(self.auth_max_age_s), "max_gap_s": MAX_GAP_S, "kind_max_gap_s": KIND_MAX_GAP_S,
+                "auth_max_age_s": int(self.auth_max_age_s), "max_gap_s": MAX_GAP_S, "fast_gap_s": FAST_GAP_S, "kind_max_gap_s": KIND_MAX_GAP_S,
                 "max_tolerance_bps": MAX_TOLERANCE_BPS, "bounty_bps": BOUNTY_BPS, "kinds": KINDS,
                 "deposit_kinds": list(DEPOSIT_KINDS), "data_reasons": list(DATA_REASONS)}

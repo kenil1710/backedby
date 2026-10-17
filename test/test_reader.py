@@ -263,7 +263,7 @@ class Read(Base):
         out = self.s.read(cid)
         self.assertEqual(out["status"], "OK")
         r = self.reading(cid)["reading"]
-        self.assertEqual(r["locked"], str(1_000_000 * 10 ** 6))
+        self.assertEqual(r["locked_by_vault"], [str(1_000_000 * 10 ** 6)])
         self.assertEqual(r["blocks"]["ethereum"]["number"], blocks["ethereum"])
         self.assertEqual(r["dests"][0]["supply"], str(1_000_000 * 10 ** 6))
 
@@ -271,7 +271,7 @@ class Read(Base):
         pid, cid, blocks = self.pair_check()
         self.s.net.balance("ethereum", USDC, F.ARB_GW, 1, from_block=blocks["ethereum"] + 1)
         self.s.read(cid)
-        self.assertEqual(self.reading(cid)["reading"]["locked"], str(1_000_000 * 10 ** 6))
+        self.assertEqual(self.reading(cid)["reading"]["locked_by_vault"], [str(1_000_000 * 10 ** 6)])
 
     def test_deposits_read_for_opstack(self):
         pid, cid, _ = self.pair_check("op_usdc")
@@ -486,7 +486,7 @@ class Read(Base):
         self.assertEqual(r["reader"], F.PATROL)
 
     def test_req_shape_checks(self):
-        ok = {"ok": True, "source_chain": "ethereum", "vault": F.ARB_GW, "source_token": USDC,
+        ok = {"ok": True, "source_chain": "ethereum", "vaults": [F.ARB_GW], "source_token": USDC,
               "dests": [{"chain": "arbitrum", "token": F.ARB_USDC}], "blocks": {"ethereum": 5, "arbitrum": 6}}
         self.assertEqual(CR._req_ok(ok), "")
         self.assertEqual(CR._req_ok(dict(ok, source_chain="base")), "BAD_SOURCE_CHAIN")
@@ -495,7 +495,12 @@ class Read(Base):
         self.assertEqual(CR._req_ok(dict(ok, dests=[{"chain": "solana", "token": F.ARB_USDC}])), "BAD_DEST")
         self.assertEqual(CR._req_ok(dict(ok, blocks={"ethereum": 0, "arbitrum": 6})), "BAD_BLOCK_NUMBER")
         self.assertEqual(CR._req_ok(dict(ok, ok=False)), "NOT_READABLE")
-        self.assertEqual(CR._req_ok(dict(ok, vault="nope")), "BAD_ADDRESSES")
+        self.assertEqual(CR._req_ok(dict(ok, vaults=["nope"])), "BAD_VAULTS")
+        self.assertEqual(CR._req_ok(dict(ok, vaults=[])), "BAD_VAULTS")
+        self.assertEqual(CR._req_ok(dict(ok, vaults=[F.ARB_GW, F.ARB_GW])), "BAD_VAULTS")
+        self.assertEqual(CR._req_ok(dict(ok, vaults=[F.addr(i) for i in range(9)])), "BAD_VAULTS")
+        self.assertEqual(CR._req_ok(dict(ok, dests=[{"chain": "arbitrum", "token": F.ARB_USDC, "deposits_vault": F.addr(5)}])), "BAD_DEST")
+        self.assertEqual(CR._req_ok(dict(ok, source_token="x")), "BAD_ADDRESSES")
 
     def test_config(self):
         c = self.s.view(self.s.reader, "get_config")

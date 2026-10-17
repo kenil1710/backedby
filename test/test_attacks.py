@@ -16,29 +16,33 @@ Reverted = world.Reverted
 
 
 class H1LookalikeToken(Base):
-    """A contract that answers remoteToken()=USDC and bridge()=L2StandardBridge
-    but mints at will is added as a destination to frame an honest operator."""
+    """A contract on Optimism or Base that answers remoteToken()=USDC and
+    bridge()=L2StandardBridge but mints outside the bridge. First fix (a cap
+    at the bridge's deposits) could hide money the vault still owed; the
+    revised rule counts max(totalSupply, deposits). The lookalike's extra
+    units are then counted: they are a bridge-recognized token the vault
+    cannot redeem, so UNDER_BACKED is the true verdict, not a frame."""
 
-    def test_frame_attempt_fails(self):
-        pid, bid = self.bonded("op_usdc")
+    def test_lookalike_counts_in_full(self):
+        pid = self.s.pair("op_usdc")
         self.s.net.supply("optimism", F.OP_FAKE, 10 ** 30)
         a = self.s.auth("optimism", USDC, F.OP_FAKE, sender=STRANGER)["auth_id"]
         self.s.call(self.s.reg, "add_destination", pid, a, sender=STRANGER)
-        cid = self.s.challenge(bid, self.s.blocks(pid), sender=STRANGER)["check_id"]
-        self.provisional(cid)
-        self.s.finalize_after_window(cid)
-        self.assertEqual(self.s.check(cid)["verdict"], "BACKED")
-        self.assertEqual(self.s.view(self.s.reg, "get_bond", bid)["status"], "ACTIVE")
-
-    def test_cap_is_the_bridges_own_deposits(self):
-        pid = self.s.pair("op_usdc")
-        self.s.net.deposits(CR.OP_L1_BRIDGE, USDC, F.OP_USDC, 1)
         self.s.after_bond()
         cid = self.s.monitor(pid, self.s.blocks(pid))["check_id"]
-        self.provisional(cid)
-        self.assertEqual(self.s.check(cid)["ruling1"]["counted"], ["1"])
+        self.assertEqual(self.provisional(cid)["verdict"], "UNDER_BACKED")
 
-    def test_no_cap_for_kinds_without_deposits(self):
+    def test_old_cap_would_hide_pending_withdrawals(self):
+        # what min(supply, deposits) got wrong: 50 burned on L2, unpaid, vault short by 10
+        t = {"source_decimals": 6, "tolerance_bps": 0, "max_gap_s": 600, "vaults": [CR.OP_L1_BRIDGE],
+             "dests": [{"chain": "optimism", "token": F.OP_USDC, "decimals": 6}]}
+        r = {"status": "OK", "reason": "", "blocks": {"ethereum": {"number": 1, "hash": "0x" + "1" * 64, "timestamp": 10},
+             "optimism": {"number": 2, "hash": "0x" + "2" * 64, "timestamp": 10}}, "locked_by_vault": ["100"],
+             "source_decimals": 6, "dests": [{"chain": "optimism", "token": F.OP_USDC, "supply": "60", "decimals": 6,
+                                              "deposits": "110"}]}
+        self.assertEqual(RG.compute(r, t, None)["verdict"], "UNDER_BACKED")
+
+    def test_no_ledger_for_kinds_without_deposits(self):
         pid = self.s.pair("arb_usdc")
         self.s.after_bond()
         cid = self.s.monitor(pid, self.s.blocks(pid))["check_id"]
@@ -130,7 +134,7 @@ class H3PairSquatting(Base):
     def test_same_variant_twice_refused(self):
         self.s.pair("arb_usdc", tol=10)
         a = self.s.auth("arbitrum", USDC, F.ARB_USDC)["auth_id"]
-        self.refuses("register_pair", str(a), 10, "x", why="PAIR_EXISTS_AS_1")
+        self.refuses("register_pair", str(a), 10, "x", why="VAULT_ALREADY_IN_PAIR_1")
 
     def test_gate_refuses_lax_tolerance(self):
         a = self.s.auth("arbitrum", USDC, F.ARB_USDC)["auth_id"]

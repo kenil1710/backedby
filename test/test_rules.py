@@ -11,7 +11,7 @@ import fixtures as F
 from fixtures import RG, GT, CR
 
 E = "ethereum"
-TERMS = {"source_decimals": 6, "tolerance_bps": 0, "max_gap_s": 600,
+TERMS = {"source_decimals": 6, "tolerance_bps": 0, "max_gap_s": 600, "vaults": [F.ARB_GW],
          "dests": [{"chain": "arbitrum", "token": F.ARB_USDC, "decimals": 6}]}
 
 
@@ -20,7 +20,8 @@ def reading(locked, supply, sts=1000, dts=1000, sdec=6, ddec=6, deposits="", sta
     return {"status": status, "reason": reason,
             "blocks": {E: {"number": 1, "hash": "0x" + "1" * 64, "timestamp": sts},
                        chain: {"number": 2, "hash": "0x" + "2" * 64, "timestamp": dts}},
-            "locked": str(locked), "source_decimals": sdec,
+            "locked_by_vault": [str(x) for x in (locked if isinstance(locked, list) else [locked])],
+            "source_decimals": sdec,
             "dests": [{"chain": chain, "token": token or F.ARB_USDC, "supply": str(supply), "decimals": ddec,
                        "deposits": deposits}]}
 
@@ -71,8 +72,21 @@ class Pins(unittest.TestCase):
         self.assertEqual(RG.check_pins({"arbitrum": {"timestamp": 1}}, 600), "SOURCE_BLOCK_MISSING")
 
     def test_kind_gap_table(self):
-        self.assertEqual(RG.KIND_MAX_GAP_S, {"polygon": 300})
+        self.assertEqual(RG.KIND_MAX_GAP_S["polygon"], 300)
+        for k in ("oft_polygon", "oft_arbitrum", "oft_optimism", "oft_base"):
+            self.assertEqual(RG.KIND_MAX_GAP_S[k], 120)
         self.assertEqual(RG.MAX_GAP_S, 600)
+
+    def test_gap_for_takes_the_strictest(self):
+        self.assertEqual(RG.gap_for(["arbitrum"]), 600)
+        self.assertEqual(RG.gap_for(["polygon"]), 300)
+        self.assertEqual(RG.gap_for(["polygon", "oft_polygon"]), 120)
+        self.assertEqual(RG.gap_for(["arbitrum", "oft_arbitrum", "optimism"]), 120)
+        self.assertEqual(RG.gap_for([]), 600)
+
+    def test_fast_gap_120_ok_121_refused(self):
+        self.assertEqual(RG.check_pins(self.blocks(1120, 1000), 120), "")
+        self.assertEqual(RG.check_pins(self.blocks(1121, 1000), 120), "GAP_121S_OVER_120S")
 
 
 class Verdict(unittest.TestCase):
@@ -133,16 +147,42 @@ class Verdict(unittest.TestCase):
         o = self.v(100, 100, ddec=18)
         self.assertTrue(o["reason"].startswith("DECIMALS_MISMATCH:0x"))
 
-    def test_deposits_cap_counts_min(self):
+    def test_supply_above_deposits_counts_supply(self):
+        # minted outside the bridge: those units are unbacked, and counted
         o = self.v(100, 10 ** 15, deposits="1")
-        self.assertEqual((o["verdict"], o["counted"]), ("BACKED", ["1"]))
+        self.assertEqual((o["verdict"], o["counted"]), ("UNDER_BACKED", [str(10 ** 15)]))
 
-    def test_deposits_cap_does_not_hide_real_shortfall(self):
-        o = self.v(50, 100, deposits="100")
-        self.assertEqual(o["verdict"], "UNDER_BACKED")
+    def test_deposits_above_supply_counts_deposits(self):
+        # withdrawals burned on L2 but not yet finalized are still owed by the vault
+        o = self.v(100, 60, deposits="110")
+        self.assertEqual((o["verdict"], o["counted"]), ("UNDER_BACKED", ["110"]))
 
-    def test_deposits_above_supply_counts_supply(self):
-        self.assertEqual(self.v(100, 100, deposits="500")["counted"], ["100"])
+    def test_vault_equal_to_ledger_is_backed(self):
+        self.assertEqual(self.v(110, 60, deposits="110")["verdict"], "BACKED")
+
+    def test_counted_never_below_either(self):
+        for sup, dep in ((0, 0), (5, 0), (0, 5), (7, 9), (9, 7), (10 ** 30, 1)):
+            c = int(self.v(1, sup, deposits=str(dep))["counted"][0])
+            self.assertGreaterEqual(c, sup)
+            self.assertGreaterEqual(c, dep)
+
+    def test_two_vaults_summed(self):
+        t = terms(vaults=[F.ARB_GW, F.addr(77)])
+        self.assertEqual(RG.compute(reading([60, 40], 100), t, None)["verdict"], "BACKED")
+        self.assertEqual(RG.compute(reading([60, 39], 100), t, None)["verdict"], "UNDER_BACKED")
+        self.assertEqual(RG.compute(reading([60, 40], 100), t, None)["locked_norm"], "100")
+
+    def test_one_vault_of_two_alone_is_under(self):
+        t = terms(vaults=[F.ARB_GW])
+        self.assertEqual(RG.compute(reading([60], 100), t, None)["verdict"], "UNDER_BACKED")
+
+    def test_vault_count_mismatch_malformed(self):
+        t = terms(vaults=[F.ARB_GW, F.addr(77)])
+        self.assertEqual(RG.compute(reading([100], 100), t, None)["reason"], "MALFORMED_ANSWER")
+
+    def test_negative_vault_balance_malformed(self):
+        t = terms(vaults=[F.ARB_GW, F.addr(77)])
+        self.assertEqual(RG.compute(reading(["5", "-1"], 1), t, None)["reason"], "MALFORMED_ANSWER")
 
     def test_bad_deposits_text(self):
         self.assertEqual(self.v(100, 100, deposits="x")["reason"], "MALFORMED_ANSWER")
@@ -372,12 +412,14 @@ def _sweep():
                 self.assertEqual(RG.compute(reading(5 * one_s - 1, 5 * one_d, sdec=sd, ddec=dd), t, None)["verdict"],
                                  "UNDER_BACKED")
         setattr(Verdict, "test_decimals_%d_vs_%d" % (sd, dd), dec)
-    for gap in (0, 1, 299, 300, 301, 599, 600, 601, 3600):
+    for gap in (0, 1, 119, 120, 121, 299, 300, 301, 599, 600, 601, 3600):
         def g(self, gap=gap):
             o = RG.compute(reading(1, 1, sts=10000, dts=10000 - gap), terms(), None)
             self.assertEqual(o["verdict"] == "BACKED", gap <= 600)
             o = RG.compute(reading(1, 1, sts=10000, dts=10000 - gap), terms(max_gap_s=300), None)
             self.assertEqual(o["verdict"] == "BACKED", gap <= 300)
+            o = RG.compute(reading(1, 1, sts=10000, dts=10000 - gap), terms(max_gap_s=120), None)
+            self.assertEqual(o["verdict"] == "BACKED", gap <= 120)
         setattr(Pins, "test_gap_sweep_%ds" % gap, g)
 
 

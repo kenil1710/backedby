@@ -61,6 +61,10 @@ S_TOKEN_REGISTRY = "0x9d23c4c7"   # tokenRegistry()
 S_GET_TOKEN_ID = "0xf1537686"     # getTokenId(address)
 S_GET_LOCAL = "0x589b3c64"        # getLocalAddress(uint32,bytes32)
 S_REMOTES = "0x83bbb806"          # remotes(uint32)
+S_TOKEN = "0xfc0c546a"            # token()
+S_ENDPOINT = "0x5e280f11"         # endpoint()
+S_PEERS = "0xbb0b6a53"            # peers(uint32)
+S_OFT_CONTRACT = "0x232849c3"     # oftContract()
 
 ARB_L1_ROUTER = "0x72ce9c846789fdb6fc1f34ac4ad25dd9ef7031ef"
 ARB_L2_ROUTER = "0x5288c571fd7ad117bea99bf60fe0846c4e84f933"
@@ -74,6 +78,8 @@ POL_CHILD_MANAGER = "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa"
 NOMAD_ETH_ROUTER = "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"
 NOMAD_BEAM_ROUTER = "0xd3dfd3ede74e0dcebc1aa685e151332857efce2d"
 NOMAD_ETH_DOMAIN = 6648936        # "eth"
+LZ_ENDPOINT = "0x1a44076050125825900e736c501f859c50fe728c"   # LayerZero EndpointV2, same address on every chain here
+LZ_EID = {"ethereum": 30101, "polygon": 30109, "arbitrum": 30110, "optimism": 30111, "base": 30184}
 POL_ERC20_TYPE = "0x8ae85d849167ff996c04040c44924fd364217285e4cad818292c7ac37c0a345b"   # keccak256("ERC20")
 # Arbitrum gateways that ESCROW the L1 token (measured: each holds >= the L2
 # supply, docs/FEASIBILITY.md). A gateway that mints on L1 instead of
@@ -89,11 +95,13 @@ MAX_ANCHORS = 32
 
 # kind -> destination chain. The source chain is always Ethereum.
 KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
-         "polygon": "polygon", "nomad": "moonbeam"}
-# kinds whose L1 bridge keeps per-pair deposits and never releases more than
-# them: a destination token's supply is counted as min(totalSupply, deposits)
+         "polygon": "polygon", "nomad": "moonbeam", "oft_polygon": "polygon", "oft_arbitrum": "arbitrum",
+         "oft_optimism": "optimism", "oft_base": "base"}
+# kinds whose L1 bridge keeps a per-token ledger (deposits(l1, l2)); a
+# destination's supply is counted as max(totalSupply, deposits) - see RULES.md
 DEPOSIT_KINDS = ("optimism", "base")
 MAX_DESTS = 8
+MAX_VAULTS = 8
 MAX_DECIMALS = 36
 
 # INLINE:common
@@ -297,6 +305,43 @@ def _auth_nomad(l1: str, l2: str, be: int, bd: int) -> dict:
             "anchors": anchors}
 
 
+def _auth_oft(dest: str, l1: str, l2: str, be: int, bd: int) -> dict:
+    """LayerZero OFT: the destination token's OFT (its oftContract(), or the
+    token itself) has the Ethereum adapter as its peer; the adapter's token()
+    is the source token and its peer for this chain is that OFT; both sit on
+    the LayerZero endpoint. The vault is the adapter, derived, never supplied."""
+    d = _q(dest, bd, [[l2, S_OFT_CONTRACT], [l2, S_DECIMALS]])
+    oc = _addr_w(d[0])
+    oft = oc if _nonzero(oc) else l2
+    dd = _decimals(d[1])
+    p = _q(dest, bd, [[oft, S_PEERS + _pad(hex(LZ_EID["ethereum"]))], [oft, S_ENDPOINT], [oft, S_TOKEN]])
+    adapter = _addr_w(p[0])
+    if not _nonzero(adapter):
+        raise Refuse("OFT_HAS_NO_ETHEREUM_PEER")
+    if _addr_w(p[1]) != LZ_ENDPOINT:
+        raise Refuse("OFT_NOT_ON_THE_LAYERZERO_ENDPOINT")
+    if oft != l2 and _addr_w(p[2]) != l2:
+        raise Refuse("OFT_TOKEN_IS_NOT_THE_DESTINATION_TOKEN")
+    e = _q(SOURCE_CHAIN, be, [[adapter, S_TOKEN], [adapter, S_ENDPOINT], [adapter, S_PEERS + _pad(hex(LZ_EID[dest]))],
+                             [l1, S_DECIMALS]])
+    if _addr_w(e[0]) != l1:
+        raise Refuse("ADAPTER_TOKEN_IS_NOT_THE_SOURCE_TOKEN")
+    if _addr_w(e[1]) != LZ_ENDPOINT:
+        raise Refuse("ADAPTER_NOT_ON_THE_LAYERZERO_ENDPOINT")
+    if _addr_w(e[2]) != oft:
+        raise Refuse("ADAPTER_PEER_IS_NOT_THE_DESTINATION_OFT")
+    proof = ["destination oftContract()=" + oft, "OFT.peers(Ethereum)=" + adapter, "OFT.endpoint()=" + LZ_ENDPOINT,
+             "adapter.token()=" + l1, "adapter.peers(" + dest + ")=" + oft]
+    anchors = [[SOURCE_CHAIN, adapter, S_TOKEN, _aw(l1)],
+               [SOURCE_CHAIN, adapter, S_PEERS + _pad(hex(LZ_EID[dest])), _aw(oft)],
+               [dest, oft, S_PEERS + _pad(hex(LZ_EID["ethereum"])), _aw(adapter)]]
+    if oft != l2:
+        anchors.append([dest, l2, S_OFT_CONTRACT, _aw(oft)])
+        anchors.append([dest, oft, S_TOKEN, _aw(l2)])
+    return {"vault": adapter, "source_decimals": _decimals(e[3]), "dest_decimals": dd, "proof": proof,
+            "anchors": anchors}
+
+
 def pin_final(chain: str, block: int) -> dict:
     """Leader (block < 0): the lower of the two RPCs' finalized blocks.
     Validator: the leader's block, if final on both of its own RPCs and not
@@ -345,6 +390,8 @@ def authenticate_at(p: dict, be: int, bd: int) -> dict:
             a = _auth_op_dai(p["source_token"], p["dest_token"], ne, nd)
         elif kind == "polygon":
             a = _auth_polygon(p["source_token"], p["dest_token"], ne, nd)
+        elif kind.startswith("oft_"):
+            a = _auth_oft(dest, p["source_token"], p["dest_token"], ne, nd)
         else:
             a = _auth_nomad(p["source_token"], p["dest_token"], ne, nd)
     except Refuse as e:
@@ -366,14 +413,23 @@ def _req_ok(req: typing.Any) -> str:
         return "NOT_READABLE"
     if req.get("source_chain") != SOURCE_CHAIN:
         return "BAD_SOURCE_CHAIN"
-    if _addr(req.get("vault", "")) == "" or _addr(req.get("source_token", "")) == "":
+    if _addr(req.get("source_token", "")) == "":
         return "BAD_ADDRESSES"
+    vaults = req.get("vaults")
+    if not isinstance(vaults, list) or len(vaults) < 1 or len(vaults) > MAX_VAULTS:
+        return "BAD_VAULTS"
+    for v in vaults:
+        if _addr(v) == "" or vaults.count(v) != 1:
+            return "BAD_VAULTS"
     dests = req.get("dests")
     blocks = req.get("blocks")
     if not isinstance(dests, list) or len(dests) < 1 or len(dests) > MAX_DESTS or not isinstance(blocks, dict):
         return "BAD_DESTS"
     for d in dests:
         if not isinstance(d, dict) or d.get("chain") not in CHAINS or _addr(d.get("token", "")) == "":
+            return "BAD_DEST"
+        dv = d.get("deposits_vault", "")
+        if dv != "" and dv not in vaults:
             return "BAD_DEST"
     need = [SOURCE_CHAIN]
     for d in dests:
@@ -404,8 +460,8 @@ def read_at(req: dict) -> dict:
     blocks = {}
     for c in req["blocks"]:
         blocks[c] = _as_int(req["blocks"][c], -1)
-    out = {"status": "INCONCLUSIVE", "reason": "", "blocks": {}, "locked": "", "source_decimals": -1, "dests": [],
-           "anchors": []}
+    out = {"status": "INCONCLUSIVE", "reason": "", "blocks": {}, "locked_by_vault": [], "source_decimals": -1,
+           "dests": [], "anchors": []}
     names = sorted(list(blocks.keys()))
     anchors = req.get("anchors", [])
     # phase 1: finality and the pinned headers, every chain
@@ -439,11 +495,13 @@ def read_at(req: dict) -> dict:
     try:
         src = req["source_chain"]
         be = blocks[src]
-        calls = [eth_call(req["source_token"], S_BALANCE + _pad(req["vault"]), be),
-                 eth_call(req["source_token"], S_DECIMALS, be)]
+        nv = len(req["vaults"])
+        calls = [eth_call(req["source_token"], S_DECIMALS, be)]
+        for v in req["vaults"]:
+            calls.append(eth_call(req["source_token"], S_BALANCE + _pad(v), be))
         for d in req["dests"]:
-            if d.get("deposits") is True:
-                calls.append(eth_call(req["vault"], S_DEPOSITS + _pad(req["source_token"]) + _pad(d["token"]), be))
+            if d.get("deposits_vault", "") != "":
+                calls.append(eth_call(d["deposits_vault"], S_DEPOSITS + _pad(req["source_token"]) + _pad(d["token"]), be))
         n_src = len(calls)
         for a in anchors:
             if a[0] == src:
@@ -455,15 +513,21 @@ def read_at(req: dict) -> dict:
             if anchors[i][0] == src:
                 got[i] = _w32(r[k])
                 k += 1
-        locked = _word(r[0])
-        sdec = _word(r[1])
-        if locked < 0 or sdec < 0 or sdec > MAX_DECIMALS:
+        sdec = _word(r[0])
+        held = []
+        for j in range(nv):
+            v = _word(r[1 + j])
+            if v < 0:
+                out["reason"] = "CALL_FAILED:" + src
+                return out
+            held.append(str(v))
+        if sdec < 0 or sdec > MAX_DECIMALS:
             out["reason"] = "CALL_FAILED:" + src
             return out
         deps = []
-        k = 2
+        k = 1 + nv
         for d in req["dests"]:
-            if d.get("deposits") is True:
+            if d.get("deposits_vault", "") != "":
                 v = _word(r[k])
                 k += 1
                 if v < 0:
@@ -505,7 +569,7 @@ def read_at(req: dict) -> dict:
         rows = sorted(rows, key=lambda x: x[0])
         out["dests"] = [x[1] for x in rows]
         out["anchors"] = [got.get(i, "") for i in range(len(anchors))]
-        out["locked"] = str(locked)
+        out["locked_by_vault"] = held
         out["source_decimals"] = sdec
         out["status"] = "OK"
         return out
@@ -717,5 +781,6 @@ class ChainReader(gl.contract.Contract):
         return {"version": VERSION, "contract": "ChainReader", "source_chain": SOURCE_CHAIN,
                 "chains": {k: {"chain_id": CHAINS[k][0], "rpcs": list(CHAINS[k][1])} for k in CHAINS},
                 "kinds": KINDS, "deposit_kinds": list(DEPOSIT_KINDS), "leader_lag_s": LEADER_LAG_S,
+                "layerzero_endpoint": LZ_ENDPOINT, "layerzero_eids": LZ_EID,
                 "arbitrum_escrow_gateways": ARB_ESCROW_GATEWAYS, "polygon_erc20_type": POL_ERC20_TYPE,
                 "auths": int(self.n_auth), "readings": int(self.n_readings)}

@@ -36,6 +36,13 @@ USDC = addr(0x0dc0)
 WBTC = addr(0xb7c)
 DAI = addr(0xda1)
 LINK = addr(0x11c)
+USDT = addr(0x0d07)
+# LayerZero OFT (USDT0-style): adapter on Ethereum, OFT contracts on the destinations
+USDT0_ADAPTER = addr(0x0f7a)
+POL_OFT = addr(0x0f7b)
+ARB_OFT = addr(0x0f7c)
+FAKE_ADAPTER = addr(0x0bad1)
+FAKE_OFT = addr(0x0bad2)
 # vaults / gateways
 ARB_GW = "0xa3a7b6f88361f48403514059f1f16c8e78d60eec"      # the standard (escrow) gateway
 ARB_DAI_GW = "0xd3b5b60020504bc3489d6949d545893982ba3011"  # L1DaiGateway
@@ -54,6 +61,9 @@ OP_FAKE = addr(0x2003)        # claims remoteToken=USDC and bridge=L2StandardBri
 OP_DAI = addr(0x2004)
 BASE_USDC = addr(0x3001)
 POL_USDC = addr(0x4001)
+POL_USDT = addr(0x4002)
+ARB_USDT0 = addr(0x1004)
+POL_FAKE_USDT = addr(0x4003)
 BEAM_USDC = addr(0x5001)
 PRED_TYPE = "0x8ae85d849167ff996c04040c44924fd364217285e4cad818292c7ac37c0a345b"
 
@@ -64,6 +74,10 @@ def w(n):
 
 def wa(a):
     return "0x" + "0" * 24 + a[2:].lower()
+
+
+def F_wa(a):
+    return wa(a)
 
 
 def arg(data, i):
@@ -229,6 +243,29 @@ class Net:
                 lambda d, b: wa(rev[arg_addr(d, 0)]) if arg_addr(d, 0) in rev else wa("0x" + "0" * 40))
         return pr
 
+    def oft(self, dest, l1, l2, adapter, oft, native=False, peer_back=None, endpoint=None, adapter_peer=None):
+        """An OFT pair: l2.oftContract() = oft (unless native), oft.peers(eth) = adapter,
+        adapter.token() = l1 and adapter.peers(dest) = oft, both on the endpoint."""
+        ep = endpoint or CR.LZ_ENDPOINT
+        if not native:
+            self.fn(dest, l2, CR.S_OFT_CONTRACT, lambda d, b: F_wa(oft))
+            self.fn(dest, oft, CR.S_TOKEN, lambda d, b: F_wa(l2))
+        else:
+            self.fn(dest, l2, CR.S_OFT_CONTRACT, lambda d, b: REVERT)
+            self.fn(dest, l2, CR.S_TOKEN, lambda d, b: F_wa(l2))
+        o = l2 if native else oft
+        back = peer_back or adapter
+        self.fn(dest, o, CR.S_PEERS, lambda d, b: F_wa(back) if arg(d, 0) == CR.LZ_EID["ethereum"] else w(0))
+        self.fn(dest, o, CR.S_ENDPOINT, lambda d, b: F_wa(ep))
+        peers = getattr(self, "_oft_peers", {})
+        peers.setdefault(adapter.lower(), {})[CR.LZ_EID[dest]] = adapter_peer or o
+        self._oft_peers = peers
+        self.fn("ethereum", adapter, CR.S_TOKEN, lambda d, b: F_wa(l1))
+        self.fn("ethereum", adapter, CR.S_ENDPOINT, lambda d, b: F_wa(CR.LZ_ENDPOINT))
+        self.fn("ethereum", adapter, CR.S_PEERS,
+                lambda d, b, a=adapter.lower(): F_wa(peers[a].get(arg(d, 0), "0x" + "0" * 40)))
+        return adapter
+
     def nomad(self, l1, rep, remote=None, domain=None):
         dom = domain or CR.NOMAD_ETH_DOMAIN
         rem = remote or CR.NOMAD_ETH_ROUTER
@@ -270,6 +307,10 @@ class Setup:
         n.token("base", BASE_USDC, 6, 200_000 * 10 ** 6)
         n.token("polygon", POL_USDC, 6, 300_000 * 10 ** 6)
         n.token("moonbeam", BEAM_USDC, 6, 2_000_000 * 10 ** 6)
+        n.token("ethereum", USDT, 6)
+        n.token("polygon", POL_USDT, 6, 700_000 * 10 ** 6)
+        n.token("arbitrum", ARB_USDT0, 6, 800_000 * 10 ** 6)
+        n.token("polygon", POL_FAKE_USDT, 6, 0)
         # bridges
         n.arbitrum(USDC, ARB_USDC)
         n.arbitrum(WBTC, ARB_WBTC)
@@ -280,6 +321,9 @@ class Setup:
         n.op_dai(DAI, OP_DAI)
         n.opstack("base", USDC, BASE_USDC, legacy=True)
         n.polygon(USDC, POL_USDC)
+        n.polygon(USDT, POL_USDT)
+        n.oft("polygon", USDT, POL_USDT, USDT0_ADAPTER, POL_OFT)
+        n.oft("arbitrum", USDT, ARB_USDT0, USDT0_ADAPTER, ARB_OFT)
         n.nomad(USDC, BEAM_USDC)
         # vault balances: everything backed 1:1 except Nomad (drained)
         n.balance("ethereum", USDC, ARB_GW, 1_000_000 * 10 ** 6)
@@ -293,6 +337,9 @@ class Setup:
         n.deposits(CR.BASE_L1_BRIDGE, USDC, BASE_USDC, 200_000 * 10 ** 6)
         n.balance("ethereum", USDC, POL_PRED, 300_000 * 10 ** 6)
         n.balance("ethereum", USDC, CR.NOMAD_ETH_ROUTER, 3_720 * 10 ** 6)
+        # USDT: the PoS predicate holds a sliver, the OFT adapter the rest of what Polygon + Arbitrum carry
+        n.balance("ethereum", USDT, POL_PRED, 5_000 * 10 ** 6)
+        n.balance("ethereum", USDT, USDT0_ADAPTER, 1_495_000 * 10 ** 6)
         n.mine_to(NOW - 900)
 
     # --- calls ------------------------------------------------------------------
@@ -308,7 +355,9 @@ class Setup:
     PAIRS = {"arb_usdc": ("arbitrum", USDC, ARB_USDC), "arb_wbtc": ("arbitrum", WBTC, ARB_WBTC),
              "arb_dai": ("arbitrum", DAI, ARB_DAI), "op_usdc": ("optimism", USDC, OP_USDC),
              "op_dai": ("op_dai", DAI, OP_DAI), "base_usdc": ("base", USDC, BASE_USDC),
-             "pol_usdc": ("polygon", USDC, POL_USDC), "nomad_usdc": ("nomad", USDC, BEAM_USDC)}
+             "pol_usdc": ("polygon", USDC, POL_USDC), "nomad_usdc": ("nomad", USDC, BEAM_USDC),
+             "pol_usdt": ("polygon", USDT, POL_USDT), "oft_pol_usdt": ("oft_polygon", USDT, POL_USDT),
+             "oft_arb_usdt": ("oft_arbitrum", USDT, ARB_USDT0)}
 
     def pair(self, name="arb_usdc", tol=0, label="test pair"):
         k, l1, l2 = self.PAIRS[name]

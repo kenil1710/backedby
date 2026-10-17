@@ -11,7 +11,7 @@ import unittest
 import fixtures as F
 import stub
 import world
-from fixtures import CR, RG, Setup, USDC, WBTC, DAI, GEN, OPERATOR, CHALLENGER, CONTESTER, STRANGER, PATROL, DEPLOYER
+from fixtures import CR, RG, Setup, USDC, USDT, WBTC, DAI, GEN, OPERATOR, CHALLENGER, CONTESTER, STRANGER, PATROL, DEPLOYER
 
 Reverted = world.Reverted
 MIN_STAKE = RG.MODES["DEMO"][5]
@@ -97,9 +97,13 @@ class Register(Base):
         self.assertEqual(p["max_gap_s"], 300)
 
     def test_every_kind_registers(self):
-        for name in Setup.PAIRS:
+        names = [n for n in Setup.PAIRS if not n.startswith("oft_")]
+        for name in names:
             self.s.pair(name)
-        self.assertEqual(self.stats()["pairs"], len(Setup.PAIRS))
+        self.assertEqual(self.stats()["pairs"], len(names))
+        # an OFT pair of its own (adapter as the first vault)
+        a = self.s.auth("oft_arbitrum", USDT, F.ARB_USDT0)["auth_id"]
+        self.assertTrue(self.s.call(self.s.reg, "register_pair", str(a), 0, "USDT0 on Arbitrum")["ok"])
 
     def test_tolerance_bounds(self):
         a = self.s.auth("arbitrum", USDC, F.ARB_USDC)["auth_id"]
@@ -130,7 +134,7 @@ class Register(Base):
     def test_mixed_pairs_refused(self):
         a = self.s.auth("arbitrum", USDC, F.ARB_USDC)["auth_id"]
         b = self.s.auth("arbitrum", WBTC, F.ARB_WBTC)["auth_id"]
-        self.refuses("register_pair", "%d,%d" % (a, b), 0, "x", why="AUTHS_ARE_NOT_ONE_PAIR")
+        self.refuses("register_pair", "%d,%d" % (a, b), 0, "x", why="AUTHS_ARE_NOT_ONE_VAULT")
 
     def test_same_dest_twice_refused(self):
         a = self.s.auth("optimism", USDC, F.OP_USDC)["auth_id"]
@@ -140,7 +144,7 @@ class Register(Base):
     def test_pair_exists(self):
         self.s.pair("arb_usdc")
         a = self.s.auth("arbitrum", USDC, F.ARB_USDC)["auth_id"]
-        self.refuses("register_pair", str(a), 0, "x", why="PAIR_EXISTS_AS_1_ADD_A_DESTINATION_INSTEAD")
+        self.refuses("register_pair", str(a), 0, "x", why="VAULT_ALREADY_IN_PAIR_1_ADD_A_DESTINATION_INSTEAD")
 
     def test_multi_dest(self):
         a = self.s.auth("optimism", USDC, F.OP_USDC)["auth_id"]
@@ -226,14 +230,28 @@ class Destinations(Base):
         c2 = self.s.monitor(pid, self.s.blocks(pid))["check_id"]
         self.assertEqual(self.provisional(c2)["verdict"], "UNDER_BACKED")
 
-    def test_fake_destination_cannot_frame_an_honest_pair(self):
+    def test_lookalike_minting_outside_the_bridge_is_counted(self):
+        # OP_FAKE answers the bridge's getters and has 10^15 units the bridge never minted.
+        # Its holders can submit withdrawals the vault cannot pay: the pair is UNDER_BACKED.
         pid, bid = self.bonded("op_usdc")
         a = self.s.auth("optimism", USDC, F.OP_FAKE, sender=STRANGER)["auth_id"]
         self.s.call(self.s.reg, "add_destination", pid, a, sender=STRANGER)
-        cid = self.s.challenge(bid, self.s.blocks(pid), sender=STRANGER)["check_id"]
+        cid = self.s.monitor(pid, self.s.blocks(pid))["check_id"]
         out = self.provisional(cid)
-        self.assertEqual(out["verdict"], "BACKED")
-        self.assertEqual(self.s.check(cid)["ruling1"]["counted"], [str(500_000 * 10 ** 6), "1"])
+        self.assertEqual(out["verdict"], "UNDER_BACKED")
+        self.assertEqual(self.s.check(cid)["ruling1"]["counted"], [str(500_000 * 10 ** 6), str(10 ** 15)])
+
+    def test_pending_withdrawals_stay_counted(self):
+        # supply dropped (burned on L2) but the bridge still owes the deposits: counted is the ledger
+        n = self.s.net
+        n.supply("optimism", F.OP_USDC, 300_000 * 10 ** 6)
+        pid = self.s.pair("op_usdc")
+        self.s.after_bond()
+        n.balance("ethereum", USDC, CR.OP_L1_BRIDGE, 400_000 * 10 ** 6)
+        cid = self.s.monitor(pid, self.s.blocks(pid))["check_id"]
+        out = self.provisional(cid)
+        self.assertEqual(out["verdict"], "UNDER_BACKED")
+        self.assertEqual(self.s.check(cid)["ruling1"]["counted"], [str(500_000 * 10 ** 6)])
 
     def test_open_check_keeps_its_destinations(self):
         pid = self.s.pair("op_usdc")
@@ -1183,7 +1201,7 @@ class Views(Base):
     def test_check_request_view(self):
         pid, bid, cid = self.challenged()
         r = self.s.view(self.s.reg, "get_check_request", cid)
-        self.assertEqual((r["ok"], r["round"], r["check_id"], r["vault"]), (True, 1, cid, F.ARB_GW))
+        self.assertEqual((r["ok"], r["round"], r["check_id"], r["vaults"]), (True, 1, cid, [F.ARB_GW]))
         self.provisional(cid)
         self.assertEqual(self.s.view(self.s.reg, "get_check_request", cid)["why"], "CHECK_IS_PROVISIONAL")
 
