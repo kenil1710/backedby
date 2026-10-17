@@ -42,21 +42,23 @@ operator can bond that a pair stays backed, anyone can challenge with a stake, a
 
 ## Addresses (GenLayer Studio Dev, chain 61997)
 
-Every contract was deployed from commit `6f9431f901d3b3006b25a93c42954b593abc2307`.
+Every contract was deployed from commit `047d3406d5c78f4cbb1913012bd5df249998fcb5`.
 
 | Contract | Address | Deployed file | sha256 | Constructor |
 |---|---|---|---|---|
-| ChainReader | [`0x0F4ba6e25Deb78B977B71CBf54d13eD263510319`](https://explorer-studio-dev.genlayer.com/address/0x0F4ba6e25Deb78B977B71CBf54d13eD263510319) | `build/ChainReader.py` | `7abbb98cf4823c18` | `[]` |
-| BackedByRegistry | [`0x09b185B68B6d2f27D7d7Be3c4918e4dD0DFe0c6e`](https://explorer-studio-dev.genlayer.com/address/0x09b185B68B6d2f27D7d7Be3c4918e4dD0DFe0c6e) | `build/BackedByRegistry.py` | `4941c5defbb7cf36` | `["CANONICAL", "0x0F4ba6e25Deb78B977B71CBf54d13eD263510319"]` |
-| BackedByRegistryDemo | [`0xBb87c7D651a61041ED3ED7EB8059034634a528a1`](https://explorer-studio-dev.genlayer.com/address/0xBb87c7D651a61041ED3ED7EB8059034634a528a1) | `build/BackedByRegistry.py` | `4941c5defbb7cf36` | `["DEMO", "0x0F4ba6e25Deb78B977B71CBf54d13eD263510319"]` |
-| CollateralGate | [`0xF19f7E68661d2267324277005041B6655be7B58c`](https://explorer-studio-dev.genlayer.com/address/0xF19f7E68661d2267324277005041B6655be7B58c) | `build/CollateralGate.py` | `764bf95b37fc9b73` | `["0x09b185B68B6d2f27D7d7Be3c4918e4dD0DFe0c6e", 86400, 50]` |
-| CollateralGateDemo | [`0xB8b50FE0Ef0CdeF3163fA0a1743ED1558D8484A4`](https://explorer-studio-dev.genlayer.com/address/0xB8b50FE0Ef0CdeF3163fA0a1743ED1558D8484A4) | `build/CollateralGate.py` | `764bf95b37fc9b73` | `["0xBb87c7D651a61041ED3ED7EB8059034634a528a1", 1800, 50]` |
+| ChainReader | [`0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C`](https://explorer-studio-dev.genlayer.com/address/0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C) | `build/ChainReader.py` | `a8d4f3ff0b62e485` | `[]` |
+| BackedByRegistry | [`0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102`](https://explorer-studio-dev.genlayer.com/address/0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102) | `build/BackedByRegistry.py` | `14c42a676e00f96d` | `["CANONICAL", "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C"]` |
+| BackedByRegistryDemo | [`0x0Cf85aC9650f7957D74224561DF6667a769AF20f`](https://explorer-studio-dev.genlayer.com/address/0x0Cf85aC9650f7957D74224561DF6667a769AF20f) | `build/BackedByRegistry.py` | `14c42a676e00f96d` | `["DEMO", "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C"]` |
+| CollateralGate | [`0x78d4Bbfc42Ebc94A18Aee6557079215881bA3aD8`](https://explorer-studio-dev.genlayer.com/address/0x78d4Bbfc42Ebc94A18Aee6557079215881bA3aD8) | `build/CollateralGate.py` | `2f84b3fd462670ea` | `["0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102", 86400, 50]` |
+| CollateralGateDemo | [`0x77F394DD1E2D7226621C37c7F6887D340B4D194F`](https://explorer-studio-dev.genlayer.com/address/0x77F394DD1E2D7226621C37c7F6887D340B4D194F) | `build/CollateralGate.py` | `2f84b3fd462670ea` | `["0x0Cf85aC9650f7957D74224561DF6667a769AF20f", 1800, 50]` |
 
 The canonical registry runs the 6 h contest window and holds the seeded pairs; the demo registry runs a 90 s window
-and holds the [demo run](docs/demo-run.log), drained to 0.
+and holds the [demo run](docs/demo-run.log): every payout in it is proved on chain ([docs/payouts.json](docs/payouts.json))
+and its `eth_getBalance` is 0.
 
-The first deployment (commit `e915d21`, one vault per pair) is retired; its records are kept unchanged in
-[docs/superseded/e915d21](docs/superseded/e915d21/README.md).
+Earlier deployments are retired; their records are kept unchanged: [docs/superseded/e915d21](docs/superseded/e915d21/README.md)
+(one vault per pair) and [docs/superseded/6f9431f](docs/superseded/6f9431f/README.md) (internal transfers that Studio Dev
+skipped, so payouts never arrived; USDT0 read on 3 of its chains).
 
 ## How to verify
 

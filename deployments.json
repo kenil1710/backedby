@@ -5,6 +5,87 @@
   "explorer": "https://explorer-studio-dev.genlayer.com/",
   "contracts": {
     "ChainReader": {
+      "address": "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C",
+      "deploy_tx": "0x93d5af2e95e07e7c86ee1cd291a884797ee077812160affc52475f83b2f9b070",
+      "file": "build/ChainReader.py",
+      "source": "contracts/ChainReader.py",
+      "commit": "047d3406d5c78f4cbb1913012bd5df249998fcb5",
+      "bytes": 50058,
+      "sha256": "a8d4f3ff0b62e485a8546c961db59e44978eb0d24ba96ccd12a34b1bc5b004a7",
+      "constructor_args": [],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T17:19:15.623Z"
+    },
+    "BackedByRegistry": {
+      "address": "0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102",
+      "deploy_tx": "0xeb60615004a4595cf2a32a51fcc5830ca354bc3c2d085aa5fafd1493becbdbae",
+      "file": "build/BackedByRegistry.py",
+      "source": "contracts/BackedByRegistry.py",
+      "commit": "047d3406d5c78f4cbb1913012bd5df249998fcb5",
+      "bytes": 65636,
+      "sha256": "14c42a676e00f96dc686086b2776563f00ab5f6fdc8dcccfcbb6040641a96724",
+      "constructor_args": [
+        "CANONICAL",
+        "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C"
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T17:19:26.145Z",
+      "mode": "CANONICAL"
+    },
+    "BackedByRegistryDemo": {
+      "address": "0x0Cf85aC9650f7957D74224561DF6667a769AF20f",
+      "deploy_tx": "0xde746d3f89db56e60763c97cd6d4a99de1d383607109b51215495ae0b3675cb3",
+      "file": "build/BackedByRegistry.py",
+      "source": "contracts/BackedByRegistry.py",
+      "commit": "047d3406d5c78f4cbb1913012bd5df249998fcb5",
+      "bytes": 65636,
+      "sha256": "14c42a676e00f96dc686086b2776563f00ab5f6fdc8dcccfcbb6040641a96724",
+      "constructor_args": [
+        "DEMO",
+        "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C"
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T17:19:35.973Z",
+      "mode": "DEMO"
+    },
+    "CollateralGate": {
+      "address": "0x78d4Bbfc42Ebc94A18Aee6557079215881bA3aD8",
+      "deploy_tx": "0x3b1e395a50061535480c8352c8588e74d0e5b5dbb8fc18a9733c5f260f28f3d4",
+      "file": "build/CollateralGate.py",
+      "source": "contracts/CollateralGate.py",
+      "commit": "047d3406d5c78f4cbb1913012bd5df249998fcb5",
+      "bytes": 12274,
+      "sha256": "2f84b3fd462670eadab910c2ffa02b704a23b770c158fc7d43ec0cece8808492",
+      "constructor_args": [
+        "0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102",
+        86400,
+        50
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T17:19:42.039Z",
+      "mode": "CANONICAL"
+    },
+    "CollateralGateDemo": {
+      "address": "0x77F394DD1E2D7226621C37c7F6887D340B4D194F",
+      "deploy_tx": "0xc434457da3e9aae66a484c186b722b0c23dd8679968cacbc80f27d4a11eba53f",
+      "file": "build/CollateralGate.py",
+      "source": "contracts/CollateralGate.py",
+      "commit": "047d3406d5c78f4cbb1913012bd5df249998fcb5",
+      "bytes": 12274,
+      "sha256": "2f84b3fd462670eadab910c2ffa02b704a23b770c158fc7d43ec0cece8808492",
+      "constructor_args": [
+        "0x0Cf85aC9650f7957D74224561DF6667a769AF20f",
+        1800,
+        50
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T17:19:48.286Z",
+      "mode": "DEMO"
+    }
+  },
+  "superseded": [
+    {
+      "name": "ChainReader",
       "address": "0x0F4ba6e25Deb78B977B71CBf54d13eD263510319",
       "deploy_tx": "0x98abe4c00c2c76f1cf59881d7d14450bea799adefa91d55f1cea6175bfc44862",
       "file": "build/ChainReader.py",
@@ -14,9 +95,12 @@
       "sha256": "7abbb98cf4823c1859572187784489ab242ed0cead0bc56ac88b001eb94a3a74",
       "constructor_args": [],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
-      "deployed_at": "2026-10-17T06:22:02.430Z"
+      "deployed_at": "2026-10-17T06:22:02.430Z",
+      "superseded_by": "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C",
+      "why": "payouts as external sends; USDT0 judged on every readable chain"
     },
-    "BackedByRegistry": {
+    {
+      "name": "BackedByRegistry",
       "address": "0x09b185B68B6d2f27D7d7Be3c4918e4dD0DFe0c6e",
       "deploy_tx": "0x8554bd972040e34f95987c908bac21ecbd7fa03b158eea833705eb503336020f",
       "file": "build/BackedByRegistry.py",
@@ -30,9 +114,12 @@
       ],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
       "deployed_at": "2026-10-17T06:22:12.124Z",
-      "mode": "CANONICAL"
+      "mode": "CANONICAL",
+      "superseded_by": "0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102",
+      "why": "payouts as external sends; USDT0 judged on every readable chain"
     },
-    "BackedByRegistryDemo": {
+    {
+      "name": "BackedByRegistryDemo",
       "address": "0xBb87c7D651a61041ED3ED7EB8059034634a528a1",
       "deploy_tx": "0xb55407b5d058c9e3caea4b56f38981cb8b6b6face749e3a7049ab8a3dd9223ea",
       "file": "build/BackedByRegistry.py",
@@ -46,9 +133,12 @@
       ],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
       "deployed_at": "2026-10-17T06:22:21.580Z",
-      "mode": "DEMO"
+      "mode": "DEMO",
+      "superseded_by": "0x0Cf85aC9650f7957D74224561DF6667a769AF20f",
+      "why": "payouts as external sends; USDT0 judged on every readable chain"
     },
-    "CollateralGate": {
+    {
+      "name": "CollateralGate",
       "address": "0xF19f7E68661d2267324277005041B6655be7B58c",
       "deploy_tx": "0x313855aa8f8b93d94d65e3141f8d6ddce7de0de501aaf35acfe1a77a223c22a6",
       "file": "build/CollateralGate.py",
@@ -63,9 +153,12 @@
       ],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
       "deployed_at": "2026-10-17T06:22:27.727Z",
-      "mode": "CANONICAL"
+      "mode": "CANONICAL",
+      "superseded_by": "0x78d4Bbfc42Ebc94A18Aee6557079215881bA3aD8",
+      "why": "payouts as external sends; USDT0 judged on every readable chain"
     },
-    "CollateralGateDemo": {
+    {
+      "name": "CollateralGateDemo",
       "address": "0xB8b50FE0Ef0CdeF3163fA0a1743ED1558D8484A4",
       "deploy_tx": "0x852730c86b9db1bf4e79af2093d541fc35ac4373094f034ae1726037925c6c62",
       "file": "build/CollateralGate.py",
@@ -80,7 +173,9 @@
       ],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
       "deployed_at": "2026-10-17T06:22:36.464Z",
-      "mode": "DEMO"
+      "mode": "DEMO",
+      "superseded_by": "0x77F394DD1E2D7226621C37c7F6887D340B4D194F",
+      "why": "payouts as external sends; USDT0 judged on every readable chain"
     }
-  }
+  ]
 }
