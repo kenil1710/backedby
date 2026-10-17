@@ -55,6 +55,9 @@ Every contract was deployed from commit `6f9431f901d3b3006b25a93c42954b593abc230
 The canonical registry runs the 6 h contest window and holds the seeded pairs; the demo registry runs a 90 s window
 and holds the [demo run](docs/demo-run.log), drained to 0.
 
+The first deployment (commit `e915d21`, one vault per pair) is retired; its records are kept unchanged in
+[docs/superseded/e915d21](docs/superseded/e915d21/README.md).
+
 ## How to verify
 
 - **Source.** `node tools/verify_source.mjs` reads each address's code from Studio Dev (`gen_getContractCode`) and
