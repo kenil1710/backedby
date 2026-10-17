@@ -78,9 +78,11 @@
         "arbitrum": 515597840
       },
       "check_id": 4,
-      "status": "OPEN",
-      "verdict1": "",
-      "contest_deadline": 0
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "contest_deadline": 1792241537,
+      "ratio_bps": 10030,
+      "reason": "LOCKED_COVERS_SUPPLY"
     },
     "DAI on OP Mainnet": {
       "kind": "op_dai",
@@ -218,7 +220,166 @@
       "auth_tx": "0x1643bd6b4f06bba5361e097f838dd579320a5586a48ae2948c7dd708e1639aaa",
       "pair_id": 11,
       "register_tx": "0xad99411a5cb19606255a63a6d8dc6f6217dcc9ce7e538797f32e4d16060bca44",
-      "extras_done": true
+      "extras_done": true,
+      "blocks": {
+        "ethereum": 26210754,
+        "polygon": 95677621,
+        "arbitrum": 515611252,
+        "optimism": 158311501
+      },
+      "check_id": 20,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 19916,
+      "contest_deadline": 1792244787,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "USDC.e on OP Mainnet": {
+      "kind": "optimism",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+      "label": "USDC.e on OP Mainnet",
+      "auth_id": 15,
+      "auth_tx": "0x9d29dd7a35236463b6d4d581e121a1ce064967700aec98296e77b7ef23abe6f3",
+      "pair_id": 12,
+      "register_tx": "0x60777e1ad5ae70d23317722ea876dde0ca97762c2c12a8c149051b145c02d574",
+      "blocks": {
+        "ethereum": 26210723,
+        "optimism": 158311315
+      },
+      "check_id": 16,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10002,
+      "contest_deadline": 1792244179,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "WBTC on OP Mainnet": {
+      "kind": "optimism",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+      "label": "WBTC on OP Mainnet",
+      "auth_id": 16,
+      "auth_tx": "0x37a2c830c99cba65d76e3d9df3c2292bc51ab9a76b87e961b9e67a8872402d10",
+      "pair_id": 13,
+      "register_tx": "0xf286fc3772f3cae852c3c3425d7cdf15064219c39965ee8b150a51cfb29e0727",
+      "blocks": {
+        "ethereum": 26210723,
+        "optimism": 158311315
+      },
+      "check_id": 17,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10000,
+      "contest_deadline": 1792244281,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "madUSDC on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9",
+      "label": "madUSDC on Moonbeam (Nomad)",
+      "auth_id": 17,
+      "auth_tx": "0xd23f4eb27a590385d192794a235ad65a1037c4cd0de065428609486474962733",
+      "pair_id": 14,
+      "register_tx": "0x93d0748e8fe68d07981adcd257b2c92010af9b017be74f26506d6812189eb63d",
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "check_id": 21,
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 17,
+      "contest_deadline": 1792244910,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madWETH on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "WETH",
+      "l1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "l2": "0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7",
+      "label": "madWETH on Moonbeam (Nomad)",
+      "auth_id": 18,
+      "auth_tx": "0x86173c08c0d87ae34f3834e4b8d82f91a8c3ffc81dc2d55cbf3e667ab71042ba",
+      "pair_id": 15,
+      "register_tx": "0x56d3d5e49a8a331dcf639969de0027a45f300fb04638b5edeb604ecfabbdae72",
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "check_id": 22,
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 8,
+      "contest_deadline": 1792245097,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madWBTC on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0",
+      "label": "madWBTC on Moonbeam (Nomad)",
+      "auth_id": 19,
+      "auth_tx": "0x192829d090405a5b391603916b7a2a99d7e43389cebffe8ef441a3b921c8c42c",
+      "pair_id": 16,
+      "register_tx": "0x2b535df4a55615ef5077b136b95ef407c013154c777feb0d45342821c2af08af",
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "check_id": 23,
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 0,
+      "contest_deadline": 1792245219,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madUSDT on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "USDT",
+      "l1": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "l2": "0x8e70cd5b4ff3f62659049e74b6649c6603a0e594",
+      "label": "madUSDT on Moonbeam (Nomad)",
+      "auth_id": 20,
+      "auth_tx": "0xe9722fd8ec3713ceec545615bd86e205e57edae73a42d640efe4b29860b8a47b",
+      "pair_id": 17,
+      "register_tx": "0xed3067ee3f4efd363622903a04121cfc8d7a5034770e8318808ad7727497122f",
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "check_id": 24,
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 0,
+      "contest_deadline": 1792245351,
+      "reason": "LOCKED_BELOW_SUPPLY"
+    },
+    "madDAI on Moonbeam (Nomad)": {
+      "kind": "nomad",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0xc234a67a4f840e61ade794be47de455361b52413",
+      "label": "madDAI on Moonbeam (Nomad)",
+      "auth_id": 21,
+      "auth_tx": "0x936c73231340717024323948ef1d1d673a1918ed8969df075400c2d355465da0",
+      "pair_id": 18,
+      "register_tx": "0xb2511bed9130e86aac4675af53ea0e314ae11a73f750e9acac227154297c753b",
+      "blocks": {
+        "ethereum": 25724327,
+        "moonbeam": 16796683
+      },
+      "check_id": 25,
+      "status": "PROVISIONAL",
+      "verdict1": "UNDER_BACKED",
+      "ratio_bps": 0,
+      "contest_deadline": 1792245486,
+      "reason": "LOCKED_BELOW_SUPPLY"
     }
   }
 }
