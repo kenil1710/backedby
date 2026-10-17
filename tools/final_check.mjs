@@ -60,18 +60,23 @@ const addrs = Object.entries(dep.contracts).map(([k, v]) => [k, v.address]);
   for (const f of files) for (const m of readFileSync(root + f, "utf8").matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)) links.add(m[1]);
   const bad = [];
   const list = [...links];
-  for (let i = 0; i < list.length; i += 8) {
-    await Promise.all(list.slice(i, i + 8).map(async (u) => {
-      for (let k = 0; k < 3; k++) {
+  // one host at a time with a pause between requests: explorers throttle bursts from one client
+  const byHost = {};
+  for (const u of list) (byHost[new URL(u).host] ??= []).push(u);
+  await Promise.all(Object.values(byHost).map(async (urls) => {
+    for (const u of urls) {
+      let ok = false, last = "";
+      for (let k = 0; k < 4 && !ok; k++) {
         try {
           const r = await fetch(u, { redirect: "follow", headers: { "user-agent": "Mozilla/5.0 (final_check)" }, signal: AbortSignal.timeout(25_000) });
-          if (r.status === 200) return;
-          if (k === 2) bad.push(`${r.status} ${u}`);
-        } catch (e) { if (k === 2) bad.push(`ERR ${u}`); }
-        await new Promise((res) => setTimeout(res, 2000));
+          ok = r.status === 200; last = String(r.status);
+        } catch { last = "ERR"; }
+        if (!ok) await new Promise((res) => setTimeout(res, 5000 * (k + 1)));
       }
-    }));
-  }
+      if (!ok) bad.push(`${last} ${u}`);
+      await new Promise((res) => setTimeout(res, 1200));
+    }
+  }));
   check("links: every link in README and docs answers 200", bad.length === 0, bad.length ? bad.slice(0, 12).join("; ") : `${list.length} links`);
 }
 

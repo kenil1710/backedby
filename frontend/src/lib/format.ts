@@ -83,7 +83,7 @@ export const CHAIN_LABEL: Record<string, string> = {
 };
 
 export const EXPLORER_HOST: Record<string, string> = {
-  ethereum: "etherscan.io", arbitrum: "arbitrum.blockscout.com", optimism: "optimistic.etherscan.io",
+  ethereum: "etherscan.io", arbitrum: "arbitrum.blockscout.com", optimism: "optimism.blockscout.com",
   base: "basescan.org", polygon: "polygon.blockscout.com", moonbeam: "moonbeam.subscan.io",
 };
 
