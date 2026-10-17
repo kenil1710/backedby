@@ -20,7 +20,8 @@ import { connect, sleep } from "./harness.mjs";
 const REG = "BackedByRegistryDemo";
 const log = (m) => console.log(m);
 const as = (role) => actor({ role, registry: REG, log });
-const seeder = as("seeder"), op = as("operator"), ch = as("challenger"), ct = as("contester"), pt = as("patrol");
+// pairs are registered with the borrower key so the demo can run beside the canonical seed (which signs as seeder)
+const seeder = as("borrower"), op = as("operator"), ch = as("challenger"), ct = as("contester"), pt = as("patrol");
 const dep = deployments().contracts;
 const gate = connect({ address: dep.CollateralGateDemo.address, role: "borrower" });
 const cfg = await seeder.rv("get_config");
@@ -204,7 +205,7 @@ step("15. Unbond and withdraw the surviving bond");
 
 step("16. Everyone claims; each payout is proved on chain; the registry drains to 0");
 const payouts = [];
-for (const role of ["operator", "challenger", "contester", "patrol", "seeder", "deployer"]) {
+for (const role of ["operator", "challenger", "contester", "patrol", "borrower", "deployer"]) {
   const r = await as(role).claimVerified(role === "deployer" ? "treasury" : role);
   if (r) payouts.push(r);
 }
