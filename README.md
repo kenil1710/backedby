@@ -64,7 +64,7 @@ and holds the [demo run](docs/demo-run.log), drained to 0.
   conservation, stuck-state timeouts, the attack round in [docs/ATTACK_REPORT.md](docs/ATTACK_REPORT.md)).
 - **Everything at once.** `node tools/final_check.mjs`, result in [docs/FINAL_CHECK.md](docs/FINAL_CHECK.md).
 - **API.** `/api/backed?pair=<id>` returns the pair's standing as JSON, read from chain; `&format=svg` returns a badge:
-  ![badge](https://backedby-ledger.vercel.app/api/backed?pair=14&format=svg)
+  ![badge](https://backedby-ledger.vercel.app/api/backed?pair=9&format=svg)
 
 ## Scope
 
