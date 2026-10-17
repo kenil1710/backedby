@@ -365,3 +365,26 @@ Details: exec)
   read_check(["0xB136AaB44b83e3408Ef1a421801271dba8Ff1DeD",16,1]) -> ok ACCEPTED 16s tx 0x89870cf6a940ca9087e937f1a18e5e0cede99620e02b7678006e73493fc951df {"key":"0xb136aab44b83e3408ef1a421801271dba8ff1ded|16|1","reason":"","status":"OK"}
   rule([16]) -> ok ACCEPTED 13s tx 0x0efdf002295efbf3f4ec8835cfc26f27e8e8b84d519e6d49a6267eadf4a8585c {"check_id":16,"contestable_until":1792212476,"ok":true,"ratio_bps":10033,"status":"PROVISIONAL","verdict":"BACKED"}
 RESULT pair 14: check 16 PROVISIONAL BACKED ratio_bps 10033 
+
+=== finalize 2026-10-17T04:49:18.441Z
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([14]) -> ok ACCEPTED 14s tx 0xe57932b94baf37984b57ce9832edab9e766bcf797534e738b18815004aeb5887 {"check_id":14,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 4 DAI on OP Mainnet: check 14 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([16]) -> ok ACCEPTED 13s tx 0x817d05162d9bfe8ab88db999761c7781d51b53d39d7e4049fcb638603b88f047 {"check_id":16,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 14 wstETH on Arbitrum: check 16 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([15]) -> ok ACCEPTED 12s tx 0x238c284f57773e54fd3c213c45ce6fae4316017b76e37e659961862ee4abc1a2 {"check_id":15,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 15 USDbC on Base: check 15 FINAL BACKED WINDOW_PASSED
