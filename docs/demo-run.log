@@ -1,3 +1,20 @@
+BackedBy demo run on the DEMO registry (90 s contest window). Every line is a real Studio Dev transaction.
+
+The log holds three appended runs: a first pass (21:58 UTC) cut short when public RPCs throttled Studio's shared
+egress, the full run (22:52 to 00:04 UTC) that resumed from the pairs the first pass registered, and demo_extra.mjs,
+which repeated the one step the throttling had answered instead of the contract.
+
+Paths and where they are in this log:
+  register (4 bridges)                      ## 1     fake pair refused on merit         ## 2 (again)
+  add destination + duplicate refused       ## 3     bond x2                             ## 4
+  challenge INCONCLUSIVE (before the bond)  ## 5     challenge BACKED, contest upheld    ## 7  (check 2)
+  challenge UNDER_BACKED, slash + bounty    ## 8  (check 3)
+  monitoring INCONCLUSIVE (gap 800 s)       ## 9  (check 4)
+  timeout: unread check expires             ## 10 (check 5)
+  monitoring FINAL x3                       ## 11 (checks 6, 7, 8)
+  CollateralGate allow and refuse           ## 12 (allowed BACKED; refused UNDER_BACKED x2, stale, no such pair)
+  unbond + withdraw                         ## 13    claims, ledger 0                    ## 14
+Result: held_now 0, received 0.14 GEN = claimed 0.14 GEN, invariant true.
 
 # Demo run 2026-10-16T21:58:13.850Z on 0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6 (commit e915d21e8a25e35c06baa614b5f234ccaf74b826)
 config: window 90s, read timeout 300s, unbond delay 120s, min bond 50000000000000000, min stake 10000000000000000
@@ -117,3 +134,139 @@ Details: exec)
 
 ## 6. Waiting until finalized blocks exist after the bond started (Ethereum finality is ~15-20 min)  (2026-10-16T22:58:11.472Z)
    ... finalized Ethereum block is at 2026-10-16T22:37:47.000Z, bond started 2026-10-16T22:57:14.000Z
+   ... finalized Ethereum block is at 2026-10-16T22:45:59.000Z, bond started 2026-10-16T22:57:14.000Z
+   ... finalized Ethereum block is at 2026-10-16T22:45:59.000Z, bond started 2026-10-16T22:57:14.000Z
+   ... finalized Ethereum block is at 2026-10-16T22:45:59.000Z, bond started 2026-10-16T22:57:14.000Z
+   ... finalized Ethereum block is at 2026-10-16T22:49:47.000Z, bond started 2026-10-16T22:57:14.000Z
+   ... finalized Ethereum block is at 2026-10-16T22:49:47.000Z, bond started 2026-10-16T22:57:14.000Z
+   ... finalized Ethereum block is at 2026-10-16T22:49:47.000Z, bond started 2026-10-16T22:57:14.000Z
+
+## 7. Challenge -> BACKED, contested, re-read, upheld: the stakes go into the bond  (2026-10-16T23:13:07.452Z)
+  challenge([1,"{\"ethereum\":26208243,\"arbitrum\":515513008}"]) value=10000000000000000 -> ok ACCEPTED 12s tx 0x47af2e6a831c008c8bce1f181256a470c782c6573d8e7038d05f612d734c6bb1 {"check_id":2,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",2,1]) -> ok ACCEPTED 21s tx 0x7b54750f9ae80cffa9f0bcb53a7de685cf2680e0e942835aa819b352633882cb {"key":"0xca8b9d4e3fa93a7a012306fa443d71e9e42a45b6|2|1","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 12s tx 0xc9d563af1a71cc38bbf498f9c075be0d9ac246b1774a6fd0e7244a072fbcc662 {"check_id":2,"contestable_until":1792192522,"ok":true,"ratio_bps":10044,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 2: PROVISIONAL BACKED ratio_bps 10044  
+  contest([2]) value=10000000000000000 -> ok ACCEPTED 9s tx 0xe0abea48dd54f1325587178797ed9a5c3d1bb34a5507b130ed66283beba0a11f {"check_id":2,"ok":true,"reread_by":1792192745}
+   -> check 2: CONTESTED BACKED ratio_bps 10044  
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",2,2]) -> ok ACCEPTED 21s tx 0xefb08da78429a135cf8887ada728368f5cac32838493474f998bb3c68b38798d {"key":"0xca8b9d4e3fa93a7a012306fa443d71e9e42a45b6|2|2","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 13s tx 0xa8e9c5e20c64c2d2e4cdbc6c7f39f1c88a3977ca72bc49803a87bad577ae81f3 {"check_id":2,"ok":true,"payouts":{"bond_in":"20000000000000000","bounty":"0","challenger":"0","contest_lost":"10000000000000000","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 2: FINAL BACKED ratio_bps 10044 LOCKED_COVERS_SUPPLY CONTEST_UPHELD_RULING
+   bond 1: {"amount":"70000000000000000","bond_id":1,"closed_at":0,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":1,"since":1792191413,"slashed":"0","status":"ACTIVE","unbond_at":0,"withdrawable_at":0,"won":"20000000000000000"}
+
+## 8. Challenge -> UNDER_BACKED (Polygon USDT, live), window passes, finalize: bond slashed, bounty paid  (2026-10-16T23:14:49.383Z)
+  challenge([2,"{\"ethereum\":26208245,\"polygon\":95657487}"]) value=10000000000000000 -> ok ACCEPTED 12s tx 0x83e0fbc0c9452e5ba32f9fadabd9e75d9c24794921be135eff022285ebaba0b2 {"check_id":3,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",3,1]) -> ok ACCEPTED 21s tx 0x8fa93bc1152b57a188ba4b1c97a1f73fde9e945db6a25272b8408a6e23aef00b {"key":"0xca8b9d4e3fa93a7a012306fa443d71e9e42a45b6|3|1","reason":"","status":"OK"}
+  rule([3]) -> ok ACCEPTED 12s tx 0xe963ebe9c2456f31c53b15703fd282bca206196c20f4faeb1afac81d4f191345 {"check_id":3,"contestable_until":1792192624,"ok":true,"ratio_bps":64,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+   -> check 3: PROVISIONAL UNDER_BACKED ratio_bps 64  
+   ... waiting 89s (contest window)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([3]) -> ok ACCEPTED 12s tx 0xaa62b84ecca054753b44df1716e01f064a3301a1a1848aa8c550422994c9cf38 {"check_id":3,"ok":true,"payouts":{"bond_in":"0","bounty":"25000000000000000","challenger":"35000000000000000","contest_lost":"0","contest_refund":"0","slash":"50000000000000000","treasury":"25000000000000000"},"status":
+   -> check 3: FINAL UNDER_BACKED ratio_bps 64 LOCKED_BELOW_SUPPLY WINDOW_PASSED
+   payouts {"bond_in":"0","bounty":"25000000000000000","challenger":"35000000000000000","contest_lost":"0","contest_refund":"0","slash":"50000000000000000","treasury":"25000000000000000"}
+   bond 2: {"amount":"0","bond_id":2,"closed_at":1792192636,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":2,"since":1792191426,"slashed":"50000000000000000","status":"SLASHED","unbond_at":0,"withdrawable_at":0,"won":"0"}
+
+## 9. Monitoring INCONCLUSIVE: pins that break the 10-minute gap rule  (2026-10-16T23:17:27.185Z)
+  monitor([4,"{\"ethereum\":26208223,\"optimism\":158295867}"]) -> ok ACCEPTED 66s tx 0x5502055e00f43c5f07ae0d59b491ca11dc57e926afcbc303642ec9e7a9c6b205 {"check_id":4,"ok":true}
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",4,1]) -> ok ACCEPTED 22s tx 0x70fcd7dba6af9f51779a3bfa5b7864fb3fca861174f9250b3a25de47ee55826a {"key":"0xca8b9d4e3fa93a7a012306fa443d71e9e42a45b6|4|1","reason":"","status":"OK"}
+  rule([4]) -> ok ACCEPTED 12s tx 0x160a84b9eb4bca53467262223bcb9df5a04a79f76e0e970cb68653b80e9b31e3 {"check_id":4,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"0"},"reason":"GAP_800S_OVER_600S","status":"INCONCLUSIVE"}
+   -> check 4: INCONCLUSIVE INCONCLUSIVE ratio_bps -1 GAP_800S_OVER_600S READ_PIN
+
+## 10. Timeout: a monitoring check nobody reads expires INCONCLUSIVE  (2026-10-16T23:19:17.572Z)
+  monitor([3,"{\"ethereum\":25724334,\"moonbeam\":16796696}"]) -> ok ACCEPTED 11s tx 0xd5321deb2c1c538fc32af9225906d3908eb0b2927d22cb5406d6e56a13f29b93 {"check_id":5,"ok":true}
+   ... waiting 298s (read deadline)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for expire (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  expire([5]) -> ok ACCEPTED 12s tx 0x8b9fdb9dc9f3b928c48282d032f0f30033fee4b53c63e991c8bb1f950b12b58d {"check_id":5,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"0"},"status":"INCONCLUSIVE"}
+   -> check 5: INCONCLUSIVE INCONCLUSIVE  NO_READING_BEFORE_DEADLINE TIMEOUT_UNREAD
+
+## 11. Monitoring FINAL on three pairs (the gate needs final rulings)  (2026-10-16T23:24:56.930Z)
+  monitor([3,"{\"ethereum\":25724334,\"moonbeam\":16796696}"]) -> ok ACCEPTED 13s tx 0x112b307713e4629671387c03a549f1dc9df270a38c2d65d5fd5a30011d5a4569 {"check_id":6,"ok":true}
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",6,1]) -> ok ACCEPTED 29s tx 0x4a9b6c6d8b04ec08241a1eb112c711c796af7ff0dc382b2e1f4fe1e839e9642b {"key":"0xca8b9d4e3fa93a7a012306fa443d71e9e42a45b6|6|1","reason":"","status":"OK"}
+  rule([6]) -> ok ACCEPTED 13s tx 0x01e67f84440093ae09dae7acdcd19c1660c92f7d1376e81e7db05cdd9bfca1a8 {"check_id":6,"contestable_until":1792193252,"ok":true,"ratio_bps":17,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+   -> check 6: PROVISIONAL UNDER_BACKED ratio_bps 17  
+  monitor([4,"{\"ethereum\":26208295,\"optimism\":158296699}"]) -> ok ACCEPTED 13s tx 0x66ba3fa72ae04215c0bf19ae97a9c7c6bf836c18c080a2fb57303b8442cb2f77 {"check_id":7,"ok":true}
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",7,1]) -> FAILED UNSETTLED 905s tx 0xa1de17cb69f8dab41489b885a3ad8813ed39f11bf8561eea3025a4ae848a0456 revert: never settled in 900s — tx stayed non-terminal
+  ... read attempt 1 did not record, retrying in 20s
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",7,1]) -> FAILED UNSETTLED 903s tx 0x9600e0da5892488756b174dff93f8c135c1e4889fb2a51eb8e051c30bba89d50 revert: never settled in 900s — tx stayed non-terminal
+  rule([7]) -> ok ACCEPTED 13s tx 0x7df1792e5ec79d64291c31664abd62751bf036080d4e468b432cb7eba4c76692 {"check_id":7,"contestable_until":1792195126,"ok":true,"ratio_bps":12062,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 7: PROVISIONAL BACKED ratio_bps 12062  
+  monitor([1,"{\"ethereum\":26208456,\"arbitrum\":515521589}"]) -> ok ACCEPTED 12s tx 0x62bd45c7c9f0af2199d7da6af5868793028b7f191bbdd6749e4bde9b9dee9800 {"check_id":8,"ok":true}
+  read_check(["0xCA8b9d4E3Fa93A7A012306Fa443D71E9e42A45b6",8,1]) -> ok ACCEPTED 15s tx 0xca52ac41eed0f023027ac17cdfa837f8bf23eb48a022766b0da14022afafe57e {"key":"0xca8b9d4e3fa93a7a012306fa443d71e9e42a45b6|8|1","reason":"","status":"OK"}
+  rule([8]) -> ok ACCEPTED 13s tx 0xcef510ffd75a3ea2a03f8f2504ec13dc123e376f9a104d252e948b820b5568eb {"check_id":8,"contestable_until":1792195190,"ok":true,"ratio_bps":10044,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 8: PROVISIONAL BACKED ratio_bps 10044  
+   ... waiting 8s (window of check 6)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([6]) -> ok ACCEPTED 12s tx 0x551f6652835347654ec9c19055382d7e272dca27111d4c0ec602e2d8360c7670 {"check_id":6,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"UNDER_BACKED"}
+   -> check 6: FINAL UNDER_BACKED ratio_bps 17 LOCKED_BELOW_SUPPLY WINDOW_PASSED
+   ... waiting 8s (window of check 7)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([7]) -> ok ACCEPTED 18s tx 0x7d1599c13c1809b4607db1e06293b2894f1f77d76948ade8769006ad2c006a47 {"check_id":7,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 7: FINAL BACKED ratio_bps 12062 LOCKED_COVERS_SUPPLY WINDOW_PASSED
+   ... waiting 42s (window of check 8)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([8]) -> ok ACCEPTED 12s tx 0x147b3eb077726e9247e2737cb0f52ffe59a89779b10e590410c43a53d2a06058 {"check_id":8,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 8: FINAL BACKED ratio_bps 10044 LOCKED_COVERS_SUPPLY WINDOW_PASSED
+
+## 12. CollateralGate: borrow allowed on a fresh BACKED pair, refused on the others  (2026-10-17T00:00:12.345Z)
+   borrow on pair 1 (arb): tx 0x325591ad75348a757d40df2e670e9f04fffa1fe9481d31c05538d0a7fb763ac6 -> "{\"allowed\":true\"attempt_id\":1\"reason\":\"BACKED\"}"
+   borrow on pair 4 (op): tx 0xf819900f78c682f8df3e46732b690ccc067c3f2933207094d9ccdc06551e4b8b -> "{\"allowed\":false\"attempt_id\":2\"reason\":\"STALE_3053S_OVER_1800S\"}"
+   borrow on pair 2 (pol): tx 0x76f5d282d1cb05fd8830d241404b69178e5288cfdce1d700bc50808e953ce627 -> "{\"allowed\":false\"attempt_id\":3\"reason\":\"UNDER_BACKED\"}"
+   borrow on pair 3 (nomad): tx 0x6d736ad31e9f1b3358a1c55d47c7bee6983c724281c596a78c8c3d75e4f20016 -> "{\"allowed\":false\"attempt_id\":4\"reason\":\"UNDER_BACKED\"}"
+   attempts: {"allowed":1,"attempts":[{"allowed":false,"amount":"1000","at":1792195252,"attempt_id":4,"check_id":6,"note":"demo nomad","pair_id":3,"reason":"UNDER_BACKED","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1792195240,"attempt_id":3,"check_id":3,"note":"demo pol","pair_id":2,"reason":"UNDER_BACKED","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1792195228,"attempt_id":2,"check_id":7,"note":"demo op","pair_id":4,"reason":"STALE_3053S_OVER_1800S","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":true,"amount":"1000","at":1792195216,"attempt_id":1,"check_id":8,"note":"demo arb","pair_id":1,"reason":"BACKED","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"}],"refused":3,"total":4}
+
+## 13. Unbond and withdraw the surviving bond  (2026-10-17T00:01:02.055Z)
+  request_unbond([1]) -> ok ACCEPTED 12s tx 0x29770135e144eba1960e71798fbb1c9b5e525e1038850c4e41f6b3567477171f {"bond_id":1,"ok":true,"withdrawable_at":1792195385}
+   ... waiting 119s (unbond delay)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for withdraw_bond (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  withdraw_bond([1]) -> ok ACCEPTED 11s tx 0x18e44142f7607e45586a8938a6aed2d725e173213b27aad37a09700d0e6b94dd {"bond_id":1,"credited":"70000000000000000","ok":true}
+   bond 1: {"amount":"0","bond_id":1,"closed_at":1792195396,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":1,"since":1792191413,"slashed":"0","status":"WITHDRAWN","unbond_at":1792195265,"withdrawable_at":1792195385,"won":"20000000000000000"}
+
+## 14. Everyone claims; the registry drains to 0  (2026-10-17T00:03:26.203Z)
+  claim([]) -> ok ACCEPTED 12s tx 0x39585906230ebee0f399b66414b4ce2f9a3050f45437d9fb6a80d528241f1b02 {"claimed":"70000000000000000","ok":true}
+   operator: {"address":"0x00bb59efe7cd069df92c711ef80908473a36b814","claimable":"0","claimed":"70000000000000000"}
+  claim([]) -> ok ACCEPTED 12s tx 0x46364a32456789e71d7316189ef7721a7b1d6fc604205a179cb87f40a5e60bd6 {"claimed":"45000000000000000","ok":true}
+   challenger: {"address":"0xfe86fc89b5a04d699198d03afe4b0686acf5c0d6","claimable":"0","claimed":"45000000000000000"}
+   contester: {"address":"0xa069b6552559228b73e6829a2c44fed9afe9cb21","claimable":"0","claimed":"0"}
+   patrol: {"address":"0xd646234dc825632b0388e48823c4e48405fa65df","claimable":"0","claimed":"0"}
+   seeder: {"address":"0x14c049216210556810060ee8ea3bc18f3f304276","claimable":"0","claimed":"0"}
+  claim([]) -> ok ACCEPTED 13s tx 0xfdc16ae97a1aed8ee6961e115d396590a01382ad6996841579eee25e5619e032 {"claimed":"25000000000000000","ok":true}
+   treasury: {"address":"0x8c47a9ad90ab7aef4e160d274bb6f0782fb3071e","claimable":"0","claimed":"25000000000000000"}
+   ledger: {"bonds":"0","bonds_recomputed_match":true,"bounties":"25000000000000000","claimable":"0","claimed":"140000000000000000","held_now":"0","invariant_holds":true,"on_chain_balance":"140000000000000000","open_recomputed_match":true,"open_stakes":"0","received":"140000000000000000","slashed":"50000000000000000"}
+
+RESULT demo: held_now 0 (received 140000000000000000 = claimed 140000000000000000), invariant true
+
+## 2 (again). A fake pair is refused on its merits: Circle's native USDC on OP passed off as the bridge's token  (2026-10-17T00:04:25.765Z)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x0b2c639c533813f4aa9d7837caf62653d097ff85"]) -> FAILED ACCEPTED 20s tx 0xdb7593a4ca071f7c08fe93310db5fa413bdcece0629620ba3b129b9f8f508f9e revert: REFUSED: NOT_AUTHENTICATED: REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN
+   -> refused: REFUSED: NOT_AUTHENTICATED: REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN
+
+## 12 (more). CollateralGate refuses a pair that does not exist  (2026-10-17T00:04:46.478Z)
+   borrow on pair 99: tx 0xdff19eaa365d370ad25cfdf438b7fc1fcd9a76d57fee566f1090c47d6d51d086 -> "{\"allowed\":false\"attempt_id\":5\"reason\":\"NO_SUCH_PAIR\"}"
+   ledger after: held_now 0, invariant true
