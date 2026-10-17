@@ -3,7 +3,7 @@
 // checks the two agree.
 export const CHAINS = {
   ethereum: { id: 1, rpcs: ["https://eth-pokt.nodies.app", "https://rpc.mevblocker.io"], explorer: "https://etherscan.io" },
-  arbitrum: { id: 42161, rpcs: ["https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co"], explorer: "https://arbitrum.blockscout.com" },
+  arbitrum: { id: 42161, rpcs: ["https://arb-pokt.nodies.app", "https://arbitrum-one.public.blastapi.io"], explorer: "https://arbitrum.blockscout.com" },
   optimism: { id: 10, rpcs: ["https://mainnet.optimism.io", "https://op-pokt.nodies.app"], explorer: "https://optimism.blockscout.com" },
   base: { id: 8453, rpcs: ["https://base-pokt.nodies.app", "https://base.drpc.org"], explorer: "https://base.blockscout.com" },
   polygon: { id: 137, rpcs: ["https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro"], explorer: "https://polygon.blockscout.com" },

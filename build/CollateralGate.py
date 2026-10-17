@@ -31,7 +31,7 @@ MAX_NOTE = 80
 # "finalized" tag (docs/FEASIBILITY.md).
 CHAINS = {
     "ethereum": (1, ("https://eth-pokt.nodies.app", "https://rpc.mevblocker.io")),
-    "arbitrum": (42161, ("https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co")),
+    "arbitrum": (42161, ("https://arb-pokt.nodies.app", "https://arbitrum-one.public.blastapi.io")),
     "optimism": (10, ("https://mainnet.optimism.io", "https://op-pokt.nodies.app")),
     "base": (8453, ("https://base-pokt.nodies.app", "https://base.drpc.org")),
     "polygon": (137, ("https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro")),

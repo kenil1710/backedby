@@ -134,7 +134,7 @@ only if it is identical to their own.
 | Chain | RPC A | RPC B |
 |---|---|---|
 | Ethereum | eth-pokt.nodies.app | rpc.mevblocker.io |
-| Arbitrum One | arb-pokt.nodies.app | arbitrum.gateway.tenderly.co |
+| Arbitrum One | arb-pokt.nodies.app | arbitrum-one.public.blastapi.io |
 | OP Mainnet | mainnet.optimism.io | op-pokt.nodies.app |
 | Base | base-pokt.nodies.app | base.drpc.org |
 | Polygon PoS | polygon.drpc.org | rpc-mainnet.matic.quiknode.pro |

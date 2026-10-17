@@ -3,7 +3,7 @@
 // every rule; these are only a starting point.
 export const RPCS: Record<string, string[]> = {
   ethereum: ["https://eth-pokt.nodies.app", "https://rpc.mevblocker.io"],
-  arbitrum: ["https://arb-pokt.nodies.app", "https://arbitrum.gateway.tenderly.co"],
+  arbitrum: ["https://arb-pokt.nodies.app", "https://arbitrum-one.public.blastapi.io"],
   optimism: ["https://mainnet.optimism.io", "https://op-pokt.nodies.app"],
   base: ["https://base-pokt.nodies.app", "https://base.drpc.org"],
   polygon: ["https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro"],
