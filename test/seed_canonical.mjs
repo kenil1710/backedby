@@ -15,6 +15,8 @@ export const SEEDS = [
   ["arbitrum", "WBTC", "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f", "WBTC on Arbitrum"],
   ["arbitrum", "DAI", "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1", "DAI on Arbitrum"],
   ["arbitrum", "wstETH", "0x5979d7b546e38e414f7e9822514be443a4800529", "wstETH on Arbitrum"],
+  ["optimism", "USDC", "0x7f5c764cbc14f9669b88837ca1490cca17c31607", "USDC.e on OP Mainnet"],
+  ["optimism", "WBTC", "0x68f180fcce6836688e9084f035309e29bf0a2095", "WBTC on OP Mainnet"],
   ["op_dai", "DAI", "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1", "DAI on OP Mainnet"],
   ["base", "USDC", "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca", "USDbC on Base"],
   ["base", "cbETH", "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22", "cbETH on Base"],
