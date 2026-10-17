@@ -99,7 +99,7 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
   const rules = readFileSync(root + "docs/RULES.md", "utf8");
   const claims = [
     [c.window_s === 21600 && d.window_s === 90, "**6 h** canonical, **90 s** demo"],
-    [c.max_gap_s === 600 && c.kind_max_gap_s.polygon === 300, "**at most 600 s** (300 s for Polygon)"],
+    [c.max_gap_s === 600 && c.kind_max_gap_s.polygon === 300 && c.fast_gap_s === 120, "**at most 600 s** (300 s for Polygon, **120 s**"],
     [c.bounty_bps === 5000, "**50%** of the slash"],
     [c.unbond_delay_s === 86400 && d.unbond_delay_s === 120, "after **24 h** (demo 120 s)"],
     [c.monitor_interval_s === 3600 && d.monitor_interval_s === 30, "**1 h** (demo 30 s)"],
