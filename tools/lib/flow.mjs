@@ -155,7 +155,10 @@ export function actor({ set = "final", role, registry = "BackedByRegistry", log 
       const owed = BigInt((await rv("get_claimable", [payee])).claimable);
       if (owed === 0n) return null;
       const bal = (a) => R.read.getBalance({ address: a });
-      const cb = await bal(regAddr), pb = await bal(payee);
+      // fee refunds of the payee's earlier transactions land when those finalize: wait until its balance holds still
+      let pb = await bal(payee);
+      for (let i = 0; i < 8; i++) { await sleep(15000); const again = await bal(payee); if (again === pb) break; pb = again; }
+      const cb = await bal(regAddr);
       const fees = await payoutFees(R.wallet, { address: regAddr, functionName: "claim", args: [], payee });
       const out = await R.send("claim", [], 0n, { fees });
       log(`  claim() by ${label} ${payee} owed ${owed} -> ${out.ok ? "ok" : "FAILED"} ${out.status} tx ${out.hash}`);

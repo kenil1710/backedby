@@ -169,27 +169,38 @@ let feePolicyEnabled: boolean | null = null;
 
 /**
  * Studio Dev refuses a write that carries no fee. The fee is estimated per
- * call by simulating it; if the simulation fails the generic estimate is used,
- * and claim() (which posts a value transfer) names its recipient so the
- * transfer has an allocation to draw on.
+ * call by simulating it. claim() pays with one external value message, so its
+ * fees must carry an External allocation naming the claimant (the registry's
+ * _send; docs/RULES.md#payouts): if the estimate has none, one is added
+ * (500,000 gas at the locked price plus 20%), and a claim is never sent without it.
  */
+const EXT_GAS = 500_000n;
+type Alloc = { messageType: unknown; recipient: unknown; budget?: unknown };
+const hasPayout = (fees: { messageAllocations?: Alloc[] } | undefined, who: string) =>
+  Boolean(fees?.messageAllocations?.some((a) => Number(a.messageType) === 0 && String(a.recipient).toLowerCase() === who.toLowerCase()
+    && BigInt(String(a.budget ?? 0)) > 0n));
+
 async function feesFor(wallet: ReturnType<typeof getWalletClient>, account: `0x${string}`,
     address: `0x${string}`, functionName: string, args: CalldataEncodable[], value: bigint) {
   if (feePolicyEnabled === null) {
     try { feePolicyEnabled = Boolean((await wallet.getCurrentFeePolicy())?.enabled); } catch { feePolicyEnabled = true; }
   }
   if (!feePolicyEnabled) return undefined;
+  let est: Awaited<ReturnType<typeof wallet.estimateTransactionFeesForWrite>> | null = null;
   try {
-    return await withTimeout(wallet.estimateTransactionFeesForWrite({ address, functionName, args, value }), "fee estimate", 30_000);
+    est = await withTimeout(wallet.estimateTransactionFeesForWrite({ address, functionName, args, value }), "fee estimate", 30_000);
   } catch (e) {
     const refusal = contractRefusal(e);
     if (refusal) throw new Error(refusal);
-    const messageAllocations = functionName === "claim" ? [{
-      messageType: 0, recipient: account, budget: 10n ** 17n,
-      feeParams: encodeExternalMessageFeeParams({ gasLimit: 200_000n, maxGasPrice: 250_000_000n }),
-    }] : undefined;
-    return withTimeout(wallet.estimateTransactionFees(messageAllocations ? { messageAllocations } : {}), "fee estimate", 30_000);
   }
+  if (functionName !== "claim") return est ?? withTimeout(wallet.estimateTransactionFees({}), "fee estimate", 30_000);
+  if (est && hasPayout(est, account)) return est;
+  const price = (BigInt(est?.policy?.receiptGasPrice ?? 250_000_000n) * 12n) / 10n;
+  const messageAllocations = [{ messageType: 0, recipient: account, budget: EXT_GAS * price, onAcceptance: false,
+    feeParams: encodeExternalMessageFeeParams({ gasLimit: EXT_GAS, maxGasPrice: price }) }];
+  const fees = await withTimeout(wallet.estimateTransactionFees({ messageAllocations }), "fee estimate", 30_000);
+  if (!hasPayout(fees, account)) throw new Error("The claim's payout could not be funded; nothing was sent.");
+  return fees;
 }
 
 export interface SendOptions<T> {
