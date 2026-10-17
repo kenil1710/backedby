@@ -66,3 +66,13 @@ export async function pinBlocks(source, dests, { margin = 0 } = {}) {
   const gap = src.timestamp - Math.min(...chains.map((d) => out[d].timestamp));
   return { blocks: out, gap, fins };
 }
+
+/** Pins at a moment in the past: the first source block at or after ts, each
+ *  destination's last block at or before it. */
+export async function pinAt(source, dests, ts) {
+  const chains = [...new Set(dests)];
+  const src = await search(source, await finalized(source), ts, "first_ge");
+  const out = { [source]: src };
+  for (const d of chains) out[d] = await search(d, await finalized(d), src.timestamp, "last_le");
+  return { blocks: out, gap: src.timestamp - Math.min(...chains.map((d) => out[d].timestamp)) };
+}

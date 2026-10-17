@@ -17,18 +17,21 @@ import typing
 #   destination chain (the leader names the lower of the two RPCs' finalized
 #   blocks; a validator accepts it only if it is final on both of its own RPCs
 #   and not more than LEADER_LAG_S older than its own) and reads the bridge's
-#   OWN mapping there, from both RPCs. The pair is recorded only if the
-#   mapping proves it; otherwise the call is refused. What proves a pair, per
-#   bridge, is in `_auth_*` below and in docs/RULES.md.
+#   OWN mapping there, from both RPCs, and records (vault, destination) only if
+#   the mapping proves it; otherwise the call is refused. The vault is always
+#   derived from the mapping, never supplied. What proves it, per bridge
+#   (Arbitrum gateways, OP Stack, OP DAI, Polygon PoS, Nomad, LayerZero OFT),
+#   is in `_auth_*` below and in docs/RULES.md.
 #
 # read_check(registry, check_id, round)
 #   Reads the check request from the registry (a view), then every validator
-#   reads, at the blocks the filer pinned: the block headers, the vault's
+#   reads, at the blocks the filer pinned: the block headers, every vault's
 #   balance of the source token, each destination token's totalSupply, every
-#   token's decimals and, for OP Stack tokens, the L1 bridge's per-pair
-#   deposits. Each value from both RPCs, identical or INCONCLUSIVE. A block
-#   above either RPC's finalized block is INCONCLUSIVE. The reading is stored
-#   under (registry, check, round), once.
+#   token's decimals, the per-token ledger (deposits) of OP Stack bridges, and
+#   every anchor (the bridge-mapping calls recorded at authentication). Each
+#   value from both RPCs, identical or INCONCLUSIVE. A block above either RPC's
+#   finalized block is INCONCLUSIVE. The reading is stored under
+#   (registry, check, round), once.
 #
 # RULES
 #   1. Allowlisted RPCs only, matched exactly (CHAINS). No URL comes from calldata.

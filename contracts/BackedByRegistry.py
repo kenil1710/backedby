@@ -9,19 +9,23 @@ import typing
 
 # BackedByRegistry - is a bridged token actually backed?
 #
-# A PAIR is one bridge vault on Ethereum holding a source token, and the
-# 1..n destination tokens that bridge minted against it. A pair exists only
-# if ChainReader proved it from the bridge's own on-chain mapping, and anyone
-# can add a missing destination with the same proof.
+# A PAIR is one source token on Ethereum, the 1..n vaults there that hold it
+# (balances summed) and the 1..n destination tokens minted against them
+# (supplies summed). Every vault and every destination exists only because
+# ChainReader proved it from the bridge's own on-chain mapping, and anyone can
+# add a missing vault or destination with the same proof.
 #
 # A CHECK pins one finalized block per chain. ChainReader reads the vault's
 # balance and every destination's supply there, from two RPCs per chain.
 # This contract then decides, in code and nothing else:
-#   - source block timestamp >= every destination block timestamp,
-#     and source - oldest destination <= the pair's max gap (600 s; 300 s Polygon);
+#   - source block timestamp >= every destination block timestamp, and
+#     source - oldest destination <= the pair's max gap (600 s; 300 s Polygon;
+#     120 s with a LayerZero OFT vault);
 #   - decimals as frozen at registration;
+#   - every bridge mapping (anchor) unchanged at the pinned blocks;
 #   - normalized locked >= normalized supply * (1 - tolerance_bps / 10000)
-#     -> BACKED, else UNDER_BACKED. Anything unreadable -> INCONCLUSIVE.
+#     -> BACKED, else UNDER_BACKED, where an OP Stack destination counts
+#     max(totalSupply, the bridge's deposits ledger). Unreadable -> INCONCLUSIVE.
 # No model is ever asked anything.
 #
 # BONDS: an operator bonds "this pair stays BACKED" for every block from the

@@ -7,6 +7,8 @@ const au = await a.authenticateP("polygon", L1.USDT, POL);
 const r = await a.register([au.auth_id], 0, "USDT smoke");
 const one = await a.fileReadRule("pos only", async () => a.monitor(r.pair_id, (await a.pins(r.pair_id, 0)).blocks));
 console.log("RESULT pos-only", one.check.status, one.check.verdict1, one.check.ruling1?.ratio_bps, one.check.reason);
+await new Promise((res) => setTimeout(res, Math.max(0, one.check.contest_deadline * 1000 - Date.now()) + 8000));
+await a.finalize(one.check.check_id);
 const v = await a.authenticateP("oft_polygon", L1.USDT, POL);
 await a.send("reg", "add_vault", [r.pair_id, v.auth_id]);
 for (const [k, t] of [["oft_arbitrum", ARB], ["oft_optimism", OP]]) { const x = await a.authenticateP(k, L1.USDT, t); await a.send("reg", "add_destination", [r.pair_id, x.auth_id]); }

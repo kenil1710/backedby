@@ -1,11 +1,9 @@
 /**
- * Seeds the CANONICAL registry with 15 real authenticated pairs from
+ * Seeds the CANONICAL registry with real authenticated pairs from
  * docs/FEASIBILITY.md: authenticate -> register -> monitoring check at freshly
  * pinned blocks -> read -> rule. Each ruling is then contestable for 6 h;
  * test/seed_finalize.mjs finalizes them after. Resumable: progress is kept
  * in docs/seed-canonical.json and every step is checked against contract state.
- * (USDC.e and WBTC on OP Mainnet and cbETH on Base were dropped from the list
- * after their authentications were throttled four passes in a row; see seed-run.log.)
  *   node test/seed_canonical.mjs >> docs/seed-run.log
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -19,10 +17,14 @@ export const SEEDS = [
   ["arbitrum", "wstETH", "0x5979d7b546e38e414f7e9822514be443a4800529", "wstETH on Arbitrum"],
   ["op_dai", "DAI", "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1", "DAI on OP Mainnet"],
   ["base", "USDC", "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca", "USDbC on Base"],
+  ["base", "cbETH", "0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22", "cbETH on Base"],
   ["polygon", "USDC", "0x2791bca1f2de4661ed88a30c99a7a9449aa84174", "USDC.e on Polygon"],
   ["polygon", "WBTC", "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6", "WBTC on Polygon"],
   ["polygon", "DAI", "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063", "DAI on Polygon"],
-  ["polygon", "USDT", "0xc2132d05d31c914a87c6611c10748aeb04b58e8f", "USDT on Polygon"],
+  ["polygon", "USDT", "0xc2132d05d31c914a87c6611c10748aeb04b58e8f", "USDT on Polygon",
+    // minted by the PoS bridge AND by USDT0's LayerZero adapter: both vaults, and the adapter's other readable tokens
+    { vaults: [["oft_polygon", "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]],
+      dests: [["oft_arbitrum", "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"], ["oft_optimism", "0x01bff41798a0bcf287b996046ca68b395dbc1071"]] }],
   ["nomad", "USDC", "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9", "madUSDC on Moonbeam (Nomad)"],
   ["nomad", "WETH", "0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7", "madWETH on Moonbeam (Nomad)"],
   ["nomad", "WBTC", "0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0", "madWBTC on Moonbeam (Nomad)"],
@@ -40,29 +42,41 @@ if (process.argv[1].endsWith("seed_canonical.mjs")) {
   const todo = SEEDS.filter(([, , , label]) => !["PROVISIONAL", "FINAL", "CONTESTED"].includes(st.seeds[label]?.status));
   if (todo.length === 0) break;
   console.log(`\n--- pass ${pass}: ${todo.length} to do`);
-  for (const [kind, sym, l2, label] of todo) {
+  for (const [kind, sym, l2, label, extra] of todo) {
     const k = label;
     const s = (st.seeds[k] ??= { kind, sym, l1: L1[sym], l2, label });
     console.log(`\n== ${label}`);
     if (!s.pair_id) {
-      const au = await a.authenticate(kind, L1[sym], l2);
+      const au = await a.authenticateP(kind, L1[sym], l2);
       if (!au.auth_id) { console.log("  auth failed, skipping for now"); continue; }
       s.auth_id = au.auth_id; s.auth_tx = au.hash;
       const r = await a.register([au.auth_id], 0, label);
       if (!r.pair_id) { console.log("  register failed"); save(); continue; }
       s.pair_id = r.pair_id; s.register_tx = r.hash; save();
     }
-    if (!s.check_id) {
-      const pins = await a.pins(s.pair_id);
-      const m = await a.monitor(s.pair_id, pins.blocks);
-      if (!m.ok) { console.log("  monitor failed"); continue; }
-      s.check_id = m.check_id; s.blocks = pins.blocks; s.monitor_tx = m.hash; save();
+    if (extra && !s.extras_done) {
+      const p = await a.rv("get_pair", [s.pair_id]);
+      for (const [vk, vt] of extra.vaults ?? []) {
+        const au = await a.authenticateP(vk, L1[sym], vt);
+        if (!p.vaults.some((v) => v.vault === (au.ret?.vault ?? ""))) await a.send("reg", "add_vault", [s.pair_id, au.auth_id]);
+      }
+      for (const [dk, dt] of extra.dests ?? []) {
+        if (p.dests.some((d) => d.token === dt)) continue;
+        const au = await a.authenticateP(dk, L1[sym], dt);
+        await a.send("reg", "add_destination", [s.pair_id, au.auth_id]);
+      }
+      const q = await a.rv("get_pair", [s.pair_id]);
+      if (q.vaults.length === 1 + (extra.vaults?.length ?? 0) && q.dests.length === 1 + (extra.dests?.length ?? 0)) { s.extras_done = true; save(); }
+      else { console.log("  extras incomplete, retry next pass"); continue; }
     }
-    let c = await a.check(s.check_id);
-    if (c.status === "OPEN") {
-      const rd = await a.read(s.check_id);
-      s.read_tx = rd.hash ?? s.read_tx;
-      c = await a.rule(s.check_id);
+    let c;
+    if (!s.check_id) {
+      const r = await a.fileReadRule(label, async () => { const pins = await a.pins(s.pair_id); s.blocks = pins.blocks; return a.monitor(s.pair_id, pins.blocks); });
+      if (!r.check) { console.log("  monitor failed"); continue; }
+      c = r.check; s.check_id = c.check_id; save();
+    } else {
+      c = await a.check(s.check_id);
+      if (c.status === "OPEN") { await a.read(s.check_id); c = await a.rule(s.check_id); }
     }
     s.status = c.status; s.verdict1 = c.verdict1; s.ratio_bps = c.ruling1?.ratio_bps; s.contest_deadline = c.contest_deadline;
     s.reason = c.reason || c.ruling1?.reason;
