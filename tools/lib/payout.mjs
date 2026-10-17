@@ -81,7 +81,10 @@ export function payoutDelivered(tx, payee, amount) {
   const [key, e] = effects[0];
   if (e.skipped) return { ok: false, why: `skipped (declaredBudget ${e.declaredBudget}), value credited back to the contract` };
   if (fa.message_effect_delivered?.[key] !== true) return { ok: false, why: "effect not delivered" };
-  return { ok: true, why: "", netFee: big(fa.paid_fee_value) - big(fa.total_refunded) };
+  // the sender paid its deposit, got back the refund and the external send's unused gas reservation
+  const extBack = (fa.external_message_fee_payouts ?? []).filter((x) => lc(x.recipient) === lc(tx.from_address ?? tx.sender ?? payee))
+    .reduce((s, x) => s + big(x.amount), 0n);
+  return { ok: true, why: "", netFee: big(fa.paid_fee_value) - big(fa.total_refunded) - extBack };
 }
 
 /** Balances before/after the claim: the contract lost exactly `amount`; the payee gained `amount - netFee` when it sent the claim itself. */

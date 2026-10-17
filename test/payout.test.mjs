@@ -74,6 +74,14 @@ test("a delivered external send passes, with the sender's net fee", () => {
   assert.equal(r.netFee, 759792000010352n - 508488000009529n);
 });
 
+test("the external send's unused gas comes back to the sender and is not a fee", () => {
+  const tx = structuredClone(delivered);
+  tx.data.fee_accounting.external_message_fee_payouts = [{ amount: "125000000000000", source: "external-execution-remainder", recipient: PAYEE }];
+  assert.equal(payoutDelivered(tx, PAYEE, 10n ** 16n).netFee, 759792000010352n - 508488000009529n - 125000000000000n);
+  tx.data.fee_accounting.external_message_fee_payouts[0].recipient = "0x" + "4".repeat(40);
+  assert.equal(payoutDelivered(tx, PAYEE, 10n ** 16n).netFee, 759792000010352n - 508488000009529n);
+});
+
 test("a skipped transfer fails even though 'delivered' is true", () => {
   const r = payoutDelivered(skipped, PAYEE, 7n * 10n ** 16n);
   assert.equal(r.ok, false);
