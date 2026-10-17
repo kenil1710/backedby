@@ -7,6 +7,9 @@
  *
  * Public RPCs throttle Studio's shared egress in bursts, so every read that
  * comes back transport-inconclusive is refiled after a pause (flow.mjs).
+ *
+ * DEMO_FROM=10 resumes an interrupted run at step 10: pairs and bonds are
+ * found on chain, and a check the run left PROVISIONAL is finalized first.
  */
 import { actor, deployments } from "../tools/lib/flow.mjs";
 import { L1 } from "../tools/lib/bridges.mjs";
@@ -53,6 +56,19 @@ for (const [key, kind, sym, l2, label] of [
   log(`   -> pair ${r.pair_id}: ${label}`);
 }
 
+const FROM = Number(process.env.DEMO_FROM || 0);
+let bA, bB;
+if (FROM > 2) {
+  const bonds = [];
+  for (let id = 1; ; id++) { const b = await op.rv("get_bond", [id]); if (!b.found) break; bonds.push(b); }
+  bA = bonds.find((b) => b.pair_id === P.arb); bB = bonds.find((b) => b.pair_id === P.pol);
+  log(`\n## Resuming at step ${FROM}: bond ${bA.bond_id} on pair ${P.arb}, bond ${bB.bond_id} on pair ${P.pol}  (${new Date().toISOString()})`);
+  for (let id = 1; ; id++) {
+    const c = await pt.check(id);
+    if (!c?.status) break;
+    if (c.status === "PROVISIONAL") { await waitUntil(c.contest_deadline, `window of check ${id}`); show(await pt.finalize(id)); }
+  }
+} else {
 step("2. A fake pair is refused: Circle's native USDC on OP passed off as the bridge's token");
 refusal(await seeder.patiently("fake pair", () => seeder.authenticate("optimism", L1.USDC, "0x0b2c639c533813f4aa9d7837caf62653d097ff85"),
   (o) => !/NOT_AUTHENTICATED/.test(String(o.revertReason)), 8));
@@ -66,8 +82,8 @@ log("   adding the same destination again:");
 refusal(await ct.send("reg", "add_destination", [P.op, (await ct.authenticateP("optimism", L1.USDC, extra)).auth_id]));
 
 step("4. The operator bonds two pairs as registered");
-const bA = await op.bond(P.arb, MIN_BOND);
-const bB = await op.bond(P.pol, MIN_BOND);
+bA = await op.bond(P.arb, MIN_BOND);
+bB = await op.bond(P.pol, MIN_BOND);
 log(`   -> bond ${bA.bond_id} on pair ${P.arb}, bond ${bB.bond_id} on pair ${P.pol} (one vault)`);
 const bondStart = Math.floor(Date.now() / 1000);
 
@@ -126,6 +142,7 @@ step("9. The verdict above was about an incomplete pair: anyone adds the missing
   log(`   locked per vault ${JSON.stringify((await pt.cv("get_reading", [pt.regAddr, r.check_id, 1])).reading?.locked_by_vault)}`);
   await waitUntil(r.contest_deadline, "contest window");
   show(await pt.finalize(r.check_id));
+}
 }
 
 step("10. Monitoring INCONCLUSIVE: pins that break the 10-minute gap rule");
