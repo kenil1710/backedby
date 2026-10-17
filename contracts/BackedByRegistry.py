@@ -44,7 +44,9 @@ import typing
 #   1. Payable methods never raise: a refusal credits the value back as a
 #      claimable balance and returns {"ok": false, ...}.
 #   2. Every check runs before the first write; counters move only after.
-#   3. Payouts are pull-only (claim), zeroed before the transfer is posted.
+#   3. Payouts are pull-only: every bounty, refund, bond withdrawal and
+#      treasury share is credited, and claim() is the one exit. It zeroes the
+#      balance and posts the send (_send) in the same transaction.
 #   4. Ledger: received = bonds + open stakes + claimable + claimed, always.
 #   5. No owner, no setter, no pause.
 
@@ -71,15 +73,17 @@ B_SLASHED = "SLASHED"
 
 KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
          "polygon": "polygon", "nomad": "moonbeam", "oft_polygon": "polygon", "oft_arbitrum": "arbitrum",
-         "oft_optimism": "optimism", "oft_base": "base"}
+         "oft_optimism": "optimism", "oft_base": "base", "oft_mantle": "mantle", "oft_xlayer": "xlayer", "oft_sei": "sei", "oft_flare": "flare", "oft_hedera": "hedera", "oft_unichain": "unichain", "oft_morph": "morph", "oft_ink": "ink", "oft_berachain": "berachain", "oft_hyperevm": "hyperevm", "oft_monad": "monad"}
 DEPOSIT_KINDS = ("optimism", "base")
 MAX_GAP_S = 600
 FAST_GAP_S = 120              # any pair holding a fast-bridge (LayerZero OFT) vault
-KIND_MAX_GAP_S = {"polygon": 300, "oft_polygon": FAST_GAP_S, "oft_arbitrum": FAST_GAP_S,
-                  "oft_optimism": FAST_GAP_S, "oft_base": FAST_GAP_S}
+KIND_MAX_GAP_S = {"polygon": 300}
+for _k in KINDS:
+    if _k.startswith("oft_"):
+        KIND_MAX_GAP_S[_k] = FAST_GAP_S
 MAX_TOLERANCE_BPS = 1000
 BOUNTY_BPS = 5000             # share of a slash paid to the challenger; the rest to the treasury
-MAX_DESTS = 8
+MAX_DESTS = 16
 MAX_VAULTS = 8
 MAX_DECIMALS = 36
 MAX_LABEL = 48
@@ -90,7 +94,7 @@ MAX_PAGE = 50
 # become its latest ruling); the rest are about the filing or the transport
 DATA_REASONS = ("RPC_DISAGREE", "CALL_FAILED", "MALFORMED_ANSWER", "DECIMALS_MISMATCH", "MAPPING_CHANGED",
                 "CONTEST_DISAGREES", "CONTEST_REREAD_INCONCLUSIVE")
-MAX_ANCHORS = 32
+MAX_ANCHORS = 96
 
 def gap_for(kinds: list) -> int:
     g = MAX_GAP_S
@@ -1116,13 +1120,25 @@ class BackedByRegistry(gl.contract.Contract):
         owed = int(self.claimable.get(who, u256(0)))
         if owed <= 0:
             raise gl.vm.UserError("REFUSED: NOTHING_TO_CLAIM")
+        if int(self.balance) < owed:
+            raise gl.vm.UserError("REFUSED: REGISTRY_BALANCE_BELOW_CLAIM")
         # --- writes
         self.claimable[who] = u256(0)
         self.claimable_total = u256(int(self.claimable_total) - owed)
         self.claimed[who] = u256(int(self.claimed.get(who, u256(0))) + owed)
         self.claimed_total = u256(int(self.claimed_total) + owed)
-        gl.chain.Account(Address(who)).emit_transfer(u256(owed))
+        self._send(who, owed)
         return {"ok": True, "claimed": str(owed)}
+
+    def _send(self, who: str, amount: int) -> None:
+        """The only way GEN leaves: an external value message (EthSend) to
+        `who`, applied when this transaction finalizes and paid for by the
+        caller's message allocation. Studio Dev skips an internal
+        emit_transfer (its declared budget is always 0 on the runners it
+        serves) and credits the value back to the contract, so it is never
+        used. Posted in the same transaction that marks the payout claimed: if
+        the send cannot be posted, nothing is marked."""
+        gl.evm.Account(Address(who)).emit_call(u256(amount), b"")
 
     # --- views (storage only) -------------------------------------------------
 

@@ -6,7 +6,8 @@ before:
   * TreeMap[key] on a missing key RAISES KeyError; `.get()` answers None for
     struct maps and the zero value for scalar maps.
   * Structs read out of a TreeMap are REFERENCES: mutating them mutates storage.
-  * Only gl.chain.Account(...).emit_transfer moves value.
+  * Only gl.evm.Account(...).emit_call (an external value message) and
+    gl.chain.Account(...).emit_transfer move value.
   * A consensus round runs the leader, then a validator on gl.vm.Return. A round
     that does not settle raises _Rolled and World.call restores the contract as
     it was before the call: an UNDETERMINED transaction commits NOTHING.
@@ -268,6 +269,21 @@ class _Account:
         BALANCES[key] = BALANCES.get(key, 0) + int(value)
 
 
+class _EvmAccount(_Account):
+    """gl.evm.Account: emit_call(value, data) posts an external message (an
+    EthSend). Studio Dev delivers it when the transaction finalizes (measured
+    by eth_getBalance, docs/RULES.md#payouts); here it delivers at once."""
+
+    def emit_call(self, value, data, /):
+        if int(value) <= 0:
+            raise ValueError("value must be greater than 0")
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError("data must be bytes")
+        key = str(self.address)
+        TRANSFERS.append((key, int(value)))
+        BALANCES[key] = BALANCES.get(key, 0) + int(value)
+
+
 def _proxy_for(address):
     return _Proxy(address)
 
@@ -518,7 +534,7 @@ def _install_stub():
         return fn
     write.payable = _payable
     public.write = write
-    evm = types.SimpleNamespace(contract_interface=_evm_contract_interface)
+    evm = types.SimpleNamespace(contract_interface=_evm_contract_interface, Account=_EvmAccount)
     storage = types.SimpleNamespace(TreeMap=_TreeMap, DynArray=_DynArray,
                                     allow=lambda cls: cls)
     contract_ns = types.SimpleNamespace(Contract=_Contract,

@@ -8,7 +8,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { actor } from "../tools/lib/flow.mjs";
-import { L1 } from "../tools/lib/bridges.mjs";
+import { L1, USDT0_DESTS } from "../tools/lib/bridges.mjs";
 
 export const SEEDS = [
   ["arbitrum", "USDC", "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8", "USDC.e on Arbitrum"],
@@ -26,7 +26,7 @@ export const SEEDS = [
   ["polygon", "USDT", "0xc2132d05d31c914a87c6611c10748aeb04b58e8f", "USDT on Polygon",
     // minted by the PoS bridge AND by USDT0's LayerZero adapter: both vaults, and the adapter's other readable tokens
     { vaults: [["oft_polygon", "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]],
-      dests: [["oft_arbitrum", "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"], ["oft_optimism", "0x01bff41798a0bcf287b996046ca68b395dbc1071"]] }],
+      dests: USDT0_DESTS }],
   ["nomad", "USDC", "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9", "madUSDC on Moonbeam (Nomad)"],
   ["nomad", "WETH", "0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7", "madWETH on Moonbeam (Nomad)"],
   ["nomad", "WBTC", "0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0", "madWBTC on Moonbeam (Nomad)"],
@@ -63,7 +63,7 @@ if (process.argv[1].endsWith("seed_canonical.mjs")) {
         if (!p.vaults.some((v) => v.vault === (au.ret?.vault ?? ""))) await a.send("reg", "add_vault", [s.pair_id, au.auth_id]);
       }
       for (const [dk, dt] of extra.dests ?? []) {
-        if (p.dests.some((d) => d.token === dt)) continue;
+        if (p.dests.some((d) => d.token === dt || d.chain === dk.slice(4))) continue;
         const au = await a.authenticateP(dk, L1[sym], dt);
         await a.send("reg", "add_destination", [s.pair_id, au.auth_id]);
       }

@@ -129,7 +129,7 @@ class Register(Base):
         self.refuses("register_pair", "a,b", 0, "x", why="POSITIVE_INTEGERS")
         self.refuses("register_pair", "0", 0, "x", why="POSITIVE_INTEGERS")
         self.refuses("register_pair", "1,1", 0, "x", why="DUPLICATE_AUTH_ID")
-        self.refuses("register_pair", ",".join(str(i) for i in range(1, 11)), 0, "x", why="DESTINATIONS")
+        self.refuses("register_pair", ",".join(str(i) for i in range(1, RG.MAX_DESTS + 2)), 0, "x", why="DESTINATIONS")
 
     def test_mixed_pairs_refused(self):
         a = self.s.auth("arbitrum", USDC, F.ARB_USDC)["auth_id"]
@@ -207,7 +207,7 @@ class Destinations(Base):
         self.s.net.token("optimism", t, 6, 0)
         self.s.net.opstack("optimism", USDC, t)
         a = self.s.auth("optimism", USDC, t)["auth_id"]
-        self.refuses("add_destination", pid, a, why="PAIR_HAS_8_DESTINATIONS")
+        self.refuses("add_destination", pid, a, why="PAIR_HAS_" + str(RG.MAX_DESTS) + "_DESTINATIONS")
 
     def test_omitted_destination_cannot_hide_supply(self):
         # the vault holds 500k; OP_USDC (500k) is registered, OP_USDC2 (300k, real deposits) was omitted

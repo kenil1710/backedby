@@ -6,6 +6,22 @@
 import { readFileSync } from "node:fs";
 import { connect, returnedJson, sleep } from "../../test/harness.mjs";
 import { pinBlocks } from "./pin.mjs";
+import { payoutFees, payoutDelivered, checkBalances } from "./payout.mjs";
+
+const plain = (x) => JSON.parse(JSON.stringify(x, (k, v) => (typeof v === "bigint" ? v.toString() : v)));
+
+/** Wait until a transaction is FINALIZED (payouts are applied then). */
+export async function finalizedTx(read, hash, timeoutMs = 900_000) {
+  const t0 = Date.now();
+  for (;;) {
+    try {
+      const tx = plain(await read.getTransaction({ hash }));
+      if (["FINALIZED", "CANCELED", "UNDETERMINED"].includes(tx.statusName)) return tx;
+    } catch { /* RPC noise: poll again */ }
+    if (Date.now() - t0 > timeoutMs) return null;
+    await sleep(6000);
+  }
+}
 
 export function deployments(set = "final") {
   return JSON.parse(readFileSync(new URL(set === "final" ? "../../deployments.json" : `../../deployments.${set}.json`, import.meta.url), "utf8"));
@@ -130,5 +146,42 @@ export function actor({ set = "final", role, registry = "BackedByRegistry", log 
       return { ...o, check: await rv("get_check", [cid]) };
     },
     check: (cid) => rv("get_check", [cid]),
+    /** claim() with a funded payout, then proof it arrived: the finalized
+     *  transaction's value effect is delivered and not skipped, the registry's
+     *  eth_getBalance fell by exactly the amount, and the payee's rose by the
+     *  amount less what it paid for the claim. -> a record for docs/payouts.json */
+    async claimVerified(label) {
+      const payee = R.account.address;
+      const owed = BigInt((await rv("get_claimable", [payee])).claimable);
+      if (owed === 0n) return null;
+      const bal = (a) => R.read.getBalance({ address: a });
+      const cb = await bal(regAddr), pb = await bal(payee);
+      const fees = await payoutFees(R.wallet, { address: regAddr, functionName: "claim", args: [], payee });
+      const out = await R.send("claim", [], 0n, { fees });
+      log(`  claim() by ${label} ${payee} owed ${owed} -> ${out.ok ? "ok" : "FAILED"} ${out.status} tx ${out.hash}`);
+      const rec = { label, payee, amount: owed.toString(), tx: out.hash, registry: regAddr };
+      if (!out.ok) return { ...rec, ok: false, why: "claim failed: " + String(out.revertReason).slice(0, 160) };
+      const tx = await finalizedTx(R.read, out.hash);
+      const d = payoutDelivered(tx, payee, owed);
+      let why = d.why, payeeCheck = "";
+      let ca = await bal(regAddr), pa = await bal(payee);
+      if (d.ok) {
+        // the payee's earlier transactions may still be settling their fee refunds: re-measure a few times
+        for (let i = 0; i < 4; i++) {
+          payeeCheck = checkBalances({ contractBefore: cb, contractAfter: ca, payeeBefore: pb, payeeAfter: pa, amount: owed, netFee: d.netFee });
+          if (!payeeCheck) break;
+          await sleep(20000);
+          ca = await bal(regAddr); pa = await bal(payee);
+        }
+        if (cb - ca !== owed) why = `registry eth_getBalance moved by ${ca - cb}, expected -${owed}`;
+      }
+      const ok = d.ok && cb - ca === owed;
+      const r = { ...rec, ok, why, status: tx?.statusName ?? "UNKNOWN", registry_before: cb.toString(), registry_after: ca.toString(),
+        payee_before: pb.toString(), payee_after: pa.toString(), net_fee: d.netFee?.toString() ?? null,
+        payee_delta_matches: d.ok && !payeeCheck, payee_note: payeeCheck };
+      log(`   ${ok ? "DELIVERED" : "NOT DELIVERED"} ${owed} to ${payee}: registry ${cb} -> ${ca}, payee ${pb} -> ${pa}` +
+        ` (net fee ${r.net_fee})${why ? " " + why : ""}${payeeCheck ? " payee: " + payeeCheck : ""}`);
+      return r;
+    },
   };
 }

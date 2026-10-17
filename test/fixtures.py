@@ -18,6 +18,9 @@ REVERT = stub.MockChain.REVERT
 BLOCK_TIME = {"ethereum": 12, "arbitrum": 1, "optimism": 2, "base": 2, "polygon": 2, "moonbeam": 6}
 START = {"ethereum": 26_000_000, "arbitrum": 500_000_000, "optimism": 150_000_000, "base": 50_000_000,
          "polygon": 95_000_000, "moonbeam": 16_000_000}
+for _c in CR.CHAINS:      # the chains that only carry USDT0: 2 s blocks
+    BLOCK_TIME.setdefault(_c, 2)
+    START.setdefault(_c, 10_000_000)
 
 
 def addr(n):
@@ -243,11 +246,17 @@ class Net:
                 lambda d, b: wa(rev[arg_addr(d, 0)]) if arg_addr(d, 0) in rev else wa("0x" + "0" * 40))
         return pr
 
-    def oft(self, dest, l1, l2, adapter, oft, native=False, peer_back=None, endpoint=None, adapter_peer=None):
+    def oft(self, dest, l1, l2, adapter, oft, native=False, peer_back=None, endpoint=None, adapter_peer=None,
+            via_adapter=False):
         """An OFT pair: l2.oftContract() = oft (unless native), oft.peers(eth) = adapter,
-        adapter.token() = l1 and adapter.peers(dest) = oft, both on the endpoint."""
-        ep = endpoint or CR.LZ_ENDPOINT
-        if not native:
+        adapter.token() = l1 and adapter.peers(dest) = oft, both on the endpoint.
+        via_adapter: l2 has no oftContract(); only oft.token() = l2 links them
+        (Hedera's HTS USDT0), so authentication is asked for the OFT."""
+        ep = endpoint or CR.LZ_ENDPOINTS[dest]
+        if via_adapter:
+            self.fn(dest, oft, CR.S_OFT_CONTRACT, lambda d, b: REVERT)
+            self.fn(dest, oft, CR.S_TOKEN, lambda d, b: F_wa(l2))
+        elif not native:
             self.fn(dest, l2, CR.S_OFT_CONTRACT, lambda d, b: F_wa(oft))
             self.fn(dest, oft, CR.S_TOKEN, lambda d, b: F_wa(l2))
         else:

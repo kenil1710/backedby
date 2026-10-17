@@ -12,8 +12,9 @@
  * found on chain, and a check the run left PROVISIONAL is finalized first.
  */
 import { actor, deployments } from "../tools/lib/flow.mjs";
-import { L1 } from "../tools/lib/bridges.mjs";
+import { L1, USDT0_DESTS } from "../tools/lib/bridges.mjs";
 import { pinAt } from "../tools/lib/pin.mjs";
+import { writeFileSync } from "node:fs";
 import { connect, sleep } from "./harness.mjs";
 
 const REG = "BackedByRegistryDemo";
@@ -137,6 +138,12 @@ step("9. The verdict above was about an incomplete pair: anyone adds the missing
   refusal(await ct.send("reg", "add_vault", [P.pol, (await ct.authenticateP("oft_polygon", L1.USDT, USDT_POL)).auth_id]));
   log("   a vault proved only onto a token this pair does not have (USDT0 on Arbitrum):");
   refusal(await ct.send("reg", "add_vault", [P.pol, (await ct.authenticateP("oft_arbitrum", L1.USDT, USDT_ARB)).auth_id]));
+  log("   the adapter backs USDT0 on every chain it has a peer on: anyone adds each destination two RPCs can read");
+  for (const [kind, l2] of USDT0_DESTS) {
+    const d = await ct.authenticateP(kind, L1.USDT, l2);
+    if (d.auth_id) await ct.send("reg", "add_destination", [P.pol, d.auth_id]);
+  }
+  log(`   -> pair ${P.pol} destinations: ${(await ct.rv("get_pair", [P.pol])).dests.map((d) => d.chain).join(", ")}`);
   const r = (await pt.fileReadRule("monitor with both vaults", async () => pt.monitor(P.pol, (await pt.pins(P.pol, 0)).blocks))).check;
   show(r);
   log(`   locked per vault ${JSON.stringify((await pt.cv("get_reading", [pt.regAddr, r.check_id, 1])).reading?.locked_by_vault)}`);
@@ -195,13 +202,18 @@ step("15. Unbond and withdraw the surviving bond");
   log(`   bond ${bA.bond_id}: ${JSON.stringify(await op.rv("get_bond", [bA.bond_id]))}`);
 }
 
-step("16. Everyone claims; the registry drains to 0");
-const addrOf = (role) => connect({ address: dep[REG].address, role }).account.address.toLowerCase();
+step("16. Everyone claims; each payout is proved on chain; the registry drains to 0");
+const payouts = [];
 for (const role of ["operator", "challenger", "contester", "patrol", "seeder", "deployer"]) {
-  const a = as(role);
-  if ((await a.rv("get_claimable", [addrOf(role)])).claimable !== "0") await a.send("reg", "claim", []);
-  log(`   ${role === "deployer" ? "treasury" : role}: ${JSON.stringify(await a.rv("get_claimable", [addrOf(role)]))}`);
+  const r = await as(role).claimVerified(role === "deployer" ? "treasury" : role);
+  if (r) payouts.push(r);
 }
 const L = await pt.rv("get_ledger");
+const held = await connect({ address: dep[REG].address, role: "patrol" }).read.getBalance({ address: dep[REG].address });
 log(`   ledger: ${JSON.stringify(L)}`);
-log(`\nRESULT demo: held_now ${L.held_now} (received ${L.received} = claimed ${L.claimed}), invariant ${L.invariant_holds}`);
+log(`   eth_getBalance(${dep[REG].address}) = ${held}`);
+writeFileSync(new URL("../docs/payouts.json", import.meta.url), JSON.stringify({
+  registry: dep[REG].address, commit: dep[REG].commit, at: new Date().toISOString(), eth_get_balance_after: held.toString(),
+  ledger: L, payouts }, null, 1) + "\n");
+log(`\nRESULT demo: eth_getBalance ${held}, ledger held_now ${L.held_now} (received ${L.received} = claimed ${L.claimed}), ` +
+  `${payouts.filter((p) => p.ok).length}/${payouts.length} payouts delivered, invariant ${L.invariant_holds}`);

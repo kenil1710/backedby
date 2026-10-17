@@ -8,6 +8,17 @@ export const CHAINS = {
   base: { id: 8453, rpcs: ["https://base-pokt.nodies.app", "https://base.drpc.org"], explorer: "https://base.blockscout.com" },
   polygon: { id: 137, rpcs: ["https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro"], explorer: "https://polygon.blockscout.com" },
   moonbeam: { id: 1284, rpcs: ["https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public"], explorer: "https://moonbeam.subscan.io" },
+  mantle: { id: 5000, rpcs: ["https://rpc.mantle.xyz", "https://mantle.drpc.org"], explorer: "https://explorer.mantle.xyz" },
+  xlayer: { id: 196, rpcs: ["https://xlayerrpc.okx.com", "https://xlayer.drpc.org"], explorer: "https://www.oklink.com/xlayer" },
+  sei: { id: 1329, rpcs: ["https://evm-rpc.sei-apis.com", "https://sei.api.pocket.network"], explorer: "https://seitrace.com" },
+  flare: { id: 14, rpcs: ["https://flare-api.flare.network/ext/C/rpc", "https://rpc.ankr.com/flare"], explorer: "https://flare-explorer.flare.network" },
+  hedera: { id: 295, rpcs: ["https://mainnet.hashio.io/api", "https://hedera.linkpool.pro"], explorer: "https://hashscan.io/mainnet" },
+  unichain: { id: 130, rpcs: ["https://mainnet.unichain.org", "https://unichain.drpc.org"], explorer: "https://unichain.blockscout.com" },
+  morph: { id: 2818, rpcs: ["https://rpc.morphl2.io", "https://rpc-quicknode.morphl2.io"], explorer: "https://explorer.morphl2.io" },
+  ink: { id: 57073, rpcs: ["https://rpc-gel.inkonchain.com", "https://ink.drpc.org"], explorer: "https://explorer.inkonchain.com" },
+  berachain: { id: 80094, rpcs: ["https://rpc.berachain.com", "https://berachain.drpc.org"], explorer: "https://berascan.com" },
+  hyperevm: { id: 999, rpcs: ["https://rpc.hyperliquid.xyz/evm", "https://hyperliquid.drpc.org"], explorer: "https://hyperevmscan.io" },
+  monad: { id: 143, rpcs: ["https://rpc.monad.xyz", "https://monad-mainnet-rpc.spidernode.net"], explorer: "https://monadscan.com" },
 };
 
 export const BRIDGE = {
@@ -24,6 +35,27 @@ export const BRIDGE = {
   nomad_beam_router: "0xd3dfd3ede74e0dcebc1aa685e151332857efce2d",
   nomad_eth_domain: 6648936,
 };
+
+// USDT0: every chain where Ethereum's adapter (0x6c96...1dee) has a LayerZero
+// peer and two independent RPCs serve the finalized tag and identical answers
+// (docs/SEEDS.md lists the peers left out and why). Polygon's is the pair's
+// own first destination. Hedera's entry is its OFT: its token() is the native
+// HTS token, which ChainReader derives.
+export const USDT0_DESTS = [
+  ["oft_arbitrum", "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"],
+  ["oft_optimism", "0x01bff41798a0bcf287b996046ca68b395dbc1071"],
+  ["oft_mantle", "0x779ded0c9e1022225f8e0630b35a9b54be713736"],
+  ["oft_xlayer", "0x779ded0c9e1022225f8e0630b35a9b54be713736"],
+  ["oft_sei", "0x9151434b16b9763660705744891fa906f660ecc5"],
+  ["oft_flare", "0xe7cd86e13ac4309349f30b3435a9d337750fc82d"],
+  ["oft_hedera", "0xe3119e23fc2371d1e6b01775ba312035425a53d6"],
+  ["oft_unichain", "0x9151434b16b9763660705744891fa906f660ecc5"],
+  ["oft_morph", "0xe7cd86e13ac4309349f30b3435a9d337750fc82d"],
+  ["oft_ink", "0x0200c29006150606b650577bbe7b6248f58470c1"],
+  ["oft_berachain", "0x779ded0c9e1022225f8e0630b35a9b54be713736"],
+  ["oft_hyperevm", "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb"],
+  ["oft_monad", "0xe7cd86e13ac4309349f30b3435a9d337750fc82d"],
+];
 
 export const L1 = {
   USDC: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",

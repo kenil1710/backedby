@@ -81,8 +81,22 @@ POL_CHILD_MANAGER = "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa"
 NOMAD_ETH_ROUTER = "0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"
 NOMAD_BEAM_ROUTER = "0xd3dfd3ede74e0dcebc1aa685e151332857efce2d"
 NOMAD_ETH_DOMAIN = 6648936        # "eth"
-LZ_ENDPOINT = "0x1a44076050125825900e736c501f859c50fe728c"   # LayerZero EndpointV2, same address on every chain here
-LZ_EID = {"ethereum": 30101, "polygon": 30109, "arbitrum": 30110, "optimism": 30111, "base": 30184}
+LZ_ENDPOINT = "0x1a44076050125825900e736c501f859c50fe728c"   # LayerZero EndpointV2 on Ethereum and most chains
+# chain -> its LayerZero EndpointV2 (read from each USDT0 OFT's endpoint(), docs/FEASIBILITY.md)
+LZ_ENDPOINTS = {"ethereum": LZ_ENDPOINT, "polygon": LZ_ENDPOINT, "arbitrum": LZ_ENDPOINT, "optimism": LZ_ENDPOINT,
+               "base": LZ_ENDPOINT,
+               "mantle": "0x1a44076050125825900e736c501f859c50fe728c",
+               "xlayer": "0x1a44076050125825900e736c501f859c50fe728c",
+               "sei": "0x1a44076050125825900e736c501f859c50fe728c",
+               "flare": "0x1a44076050125825900e736c501f859c50fe728c",
+               "hedera": "0x3a73033c0b1407574c76bdbac67f126f6b4a9aa9",
+               "unichain": "0x6f475642a6e85809b1c36fa62763669b1b48dd5b",
+               "morph": "0x6f475642a6e85809b1c36fa62763669b1b48dd5b",
+               "ink": "0xca29f3a6f966cb2fc0de625f8f325c0c46dbe958",
+               "berachain": "0x6f475642a6e85809b1c36fa62763669b1b48dd5b",
+               "hyperevm": "0x3a73033c0b1407574c76bdbac67f126f6b4a9aa9",
+               "monad": "0x6f475642a6e85809b1c36fa62763669b1b48dd5b"}
+LZ_EID = {"ethereum": 30101, "polygon": 30109, "arbitrum": 30110, "optimism": 30111, "base": 30184, "mantle": 30181, "xlayer": 30274, "sei": 30280, "flare": 30295, "hedera": 30316, "unichain": 30320, "morph": 30322, "ink": 30339, "berachain": 30362, "hyperevm": 30367, "monad": 30390}
 POL_ERC20_TYPE = "0x8ae85d849167ff996c04040c44924fd364217285e4cad818292c7ac37c0a345b"   # keccak256("ERC20")
 # Arbitrum gateways that ESCROW the L1 token (measured: each holds >= the L2
 # supply, docs/FEASIBILITY.md). A gateway that mints on L1 instead of
@@ -94,16 +108,16 @@ ARB_ESCROW_GATEWAYS = {
     "0xcee284f754e854890e311e3280b767f80797180d": "L1USDCGateway",
     "0x0f25c1dc2a9922304f2eac71dca9b07e310e8e5a": "Lido wstETH L1 gateway",
 }
-MAX_ANCHORS = 32
+MAX_ANCHORS = 96
 
 # kind -> destination chain. The source chain is always Ethereum.
 KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
          "polygon": "polygon", "nomad": "moonbeam", "oft_polygon": "polygon", "oft_arbitrum": "arbitrum",
-         "oft_optimism": "optimism", "oft_base": "base"}
+         "oft_optimism": "optimism", "oft_base": "base", "oft_mantle": "mantle", "oft_xlayer": "xlayer", "oft_sei": "sei", "oft_flare": "flare", "oft_hedera": "hedera", "oft_unichain": "unichain", "oft_morph": "morph", "oft_ink": "ink", "oft_berachain": "berachain", "oft_hyperevm": "hyperevm", "oft_monad": "monad"}
 # kinds whose L1 bridge keeps a per-token ledger (deposits(l1, l2)); a
 # destination's supply is counted as max(totalSupply, deposits) - see RULES.md
 DEPOSIT_KINDS = ("optimism", "base")
-MAX_DESTS = 8
+MAX_DESTS = 16
 MAX_VAULTS = 8
 MAX_DECIMALS = 36
 
@@ -121,11 +135,24 @@ CHAINS = {
     "base": (8453, ("https://base-pokt.nodies.app", "https://base.drpc.org")),
     "polygon": (137, ("https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro")),
     "moonbeam": (1284, ("https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public")),
+    "mantle": (5000, ("https://rpc.mantle.xyz", "https://mantle.drpc.org")),
+    "xlayer": (196, ("https://xlayerrpc.okx.com", "https://xlayer.drpc.org")),
+    "sei": (1329, ("https://evm-rpc.sei-apis.com", "https://sei.api.pocket.network")),
+    "flare": (14, ("https://flare-api.flare.network/ext/C/rpc", "https://rpc.ankr.com/flare")),
+    "hedera": (295, ("https://mainnet.hashio.io/api", "https://hedera.linkpool.pro")),
+    "unichain": (130, ("https://mainnet.unichain.org", "https://unichain.drpc.org")),
+    "morph": (2818, ("https://rpc.morphl2.io", "https://rpc-quicknode.morphl2.io")),
+    "ink": (57073, ("https://rpc-gel.inkonchain.com", "https://ink.drpc.org")),
+    "berachain": (80094, ("https://rpc.berachain.com", "https://berachain.drpc.org")),
+    "hyperevm": (999, ("https://rpc.hyperliquid.xyz/evm", "https://hyperliquid.drpc.org")),
+    "monad": (143, ("https://rpc.monad.xyz", "https://monad-mainnet-rpc.spidernode.net")),
 }
 # Largest JSON-RPC batch each endpoint accepts (measured: dRPC's free tier
 # refuses a batch of more than 3).
 RPC_BATCH = {"https://optimism.drpc.org": 3, "https://base.drpc.org": 3, "https://polygon.drpc.org": 3,
-             "https://moonbeam.drpc.org": 3}
+             "https://moonbeam.drpc.org": 3, "https://mantle.drpc.org": 3, "https://xlayer.drpc.org": 3,
+             "https://unichain.drpc.org": 3, "https://ink.drpc.org": 3, "https://berachain.drpc.org": 3,
+             "https://hyperliquid.drpc.org": 3}
 RPC_TRIES = 4
 LEADER_LAG_S = 1800       # a leader-named block may be this much older than a validator's own finalized block
 ZERO = "0x" + "0" * 40
@@ -637,19 +664,32 @@ def _auth_oft(dest: str, l1: str, l2: str, be: int, bd: int) -> dict:
     """LayerZero OFT: the destination token's OFT (its oftContract(), or the
     token itself) has the Ethereum adapter as its peer; the adapter's token()
     is the source token and its peer for this chain is that OFT; both sit on
-    the LayerZero endpoint. The vault is the adapter, derived, never supplied."""
-    d = _q(dest, bd, [[l2, S_OFT_CONTRACT], [l2, S_DECIMALS]])
+    their chain's LayerZero endpoint. The vault is the adapter, derived, never
+    supplied. l2 may also name an OFT adapter whose token() is another
+    contract (Hedera's USDT0 is a native HTS token): that token() is the
+    destination token."""
+    d = _q(dest, bd, [[l2, S_OFT_CONTRACT], [l2, S_TOKEN]])
     oc = _addr_w(d[0])
-    oft = oc if _nonzero(oc) else l2
-    dd = _decimals(d[1])
-    p = _q(dest, bd, [[oft, S_PEERS + _pad(hex(LZ_EID["ethereum"]))], [oft, S_ENDPOINT], [oft, S_TOKEN]])
+    tk = _addr_w(d[1])
+    if _nonzero(oc):
+        oft = oc
+        token = l2
+    elif _nonzero(tk) and tk != l2:
+        oft = l2
+        token = tk
+    else:
+        oft = l2
+        token = l2
+    ep = LZ_ENDPOINTS[dest]
+    p = _q(dest, bd, [[oft, S_PEERS + _pad(hex(LZ_EID["ethereum"]))], [oft, S_ENDPOINT], [oft, S_TOKEN], [token, S_DECIMALS]])
     adapter = _addr_w(p[0])
     if not _nonzero(adapter):
         raise Refuse("OFT_HAS_NO_ETHEREUM_PEER")
-    if _addr_w(p[1]) != LZ_ENDPOINT:
+    if _addr_w(p[1]) != ep:
         raise Refuse("OFT_NOT_ON_THE_LAYERZERO_ENDPOINT")
-    if oft != l2 and _addr_w(p[2]) != l2:
+    if oft != token and _addr_w(p[2]) != token:
         raise Refuse("OFT_TOKEN_IS_NOT_THE_DESTINATION_TOKEN")
+    dd = _decimals(p[3])
     e = _q(SOURCE_CHAIN, be, [[adapter, S_TOKEN], [adapter, S_ENDPOINT], [adapter, S_PEERS + _pad(hex(LZ_EID[dest]))],
                              [l1, S_DECIMALS]])
     if _addr_w(e[0]) != l1:
@@ -658,16 +698,19 @@ def _auth_oft(dest: str, l1: str, l2: str, be: int, bd: int) -> dict:
         raise Refuse("ADAPTER_NOT_ON_THE_LAYERZERO_ENDPOINT")
     if _addr_w(e[2]) != oft:
         raise Refuse("ADAPTER_PEER_IS_NOT_THE_DESTINATION_OFT")
-    proof = ["destination oftContract()=" + oft, "OFT.peers(Ethereum)=" + adapter, "OFT.endpoint()=" + LZ_ENDPOINT,
+    proof = ["destination OFT=" + oft, "OFT.peers(Ethereum)=" + adapter, "OFT.endpoint()=" + ep,
              "adapter.token()=" + l1, "adapter.peers(" + dest + ")=" + oft]
+    if oft != token:
+        proof.append("OFT.token()=" + token)
     anchors = [[SOURCE_CHAIN, adapter, S_TOKEN, _aw(l1)],
                [SOURCE_CHAIN, adapter, S_PEERS + _pad(hex(LZ_EID[dest])), _aw(oft)],
                [dest, oft, S_PEERS + _pad(hex(LZ_EID["ethereum"])), _aw(adapter)]]
-    if oft != l2:
-        anchors.append([dest, l2, S_OFT_CONTRACT, _aw(oft)])
-        anchors.append([dest, oft, S_TOKEN, _aw(l2)])
+    if oft != token:
+        if _nonzero(oc):
+            anchors.append([dest, token, S_OFT_CONTRACT, _aw(oft)])
+        anchors.append([dest, oft, S_TOKEN, _aw(token)])
     return {"vault": adapter, "source_decimals": _decimals(e[3]), "dest_decimals": dd, "proof": proof,
-            "anchors": anchors}
+            "anchors": anchors, "dest_token": token}
 
 
 def pin_final(chain: str, block: int) -> dict:
@@ -1004,14 +1047,15 @@ class ChainReader(gl.contract.Contract):
         aid = int(self.n_auth) + 1
         self.auths[u64(aid)] = Auth(
             auth_id=u64(aid), kind=k, source_chain=SOURCE_CHAIN, vault=a["vault"], source_token=l1,
-            dest_chain=KINDS[k], dest_token=l2, source_decimals=u64(int(a["source_decimals"])),
+            dest_chain=KINDS[k], dest_token=a.get("dest_token", l2), source_decimals=u64(int(a["source_decimals"])),
             dest_decimals=u64(int(a["dest_decimals"])), source_block=u64(int(a["source_block"]["number"])),
             source_time=u64(int(a["source_block"]["timestamp"])), dest_block=u64(int(a["dest_block"]["number"])),
             dest_time=u64(int(a["dest_block"]["timestamp"])), proof_json=_canon(a["proof"]),
             anchors_json=_canon(a["anchors"]), read_at=u64(now),
             reader=gl.message.sender_address.as_hex.lower())
         self.n_auth = u64(aid)
-        return {"auth_id": aid, "vault": a["vault"], "source_decimals": int(a["source_decimals"]),
+        return {"auth_id": aid, "vault": a["vault"], "dest_token": a.get("dest_token", l2),
+                "source_decimals": int(a["source_decimals"]),
                 "dest_decimals": int(a["dest_decimals"])}
 
     @gl.public.write
@@ -1101,6 +1145,6 @@ class ChainReader(gl.contract.Contract):
         return {"version": VERSION, "contract": "ChainReader", "source_chain": SOURCE_CHAIN,
                 "chains": {k: {"chain_id": CHAINS[k][0], "rpcs": list(CHAINS[k][1])} for k in CHAINS},
                 "kinds": KINDS, "deposit_kinds": list(DEPOSIT_KINDS), "leader_lag_s": LEADER_LAG_S,
-                "layerzero_endpoint": LZ_ENDPOINT, "layerzero_eids": LZ_EID,
+                "layerzero_endpoint": LZ_ENDPOINT, "layerzero_endpoints": LZ_ENDPOINTS, "layerzero_eids": LZ_EID,
                 "arbitrum_escrow_gateways": ARB_ESCROW_GATEWAYS, "polygon_erc20_type": POL_ERC20_TYPE,
                 "auths": int(self.n_auth), "readings": int(self.n_readings)}

@@ -121,7 +121,8 @@ class Safety(unittest.TestCase):
         stub_mod = __import__("fixtures").CR
         allowed = {u for c in stub_mod.CHAINS.values() for u in c[1]}
         self.assertTrue(set(urls) <= allowed, set(urls) - allowed)
-        self.assertEqual(len(allowed), 12)
+        self.assertEqual(len(allowed), 2 * len(stub_mod.CHAINS))
+        self.assertEqual(len(stub_mod.CHAINS), 17)
 
     def test_no_owner_or_setter(self):
         for n in NAMES:
@@ -131,9 +132,10 @@ class Safety(unittest.TestCase):
 
     def test_only_claim_moves_value(self):
         t = src("BackedByRegistry")
-        self.assertEqual(t.count("emit_transfer"), 1)
+        self.assertEqual(t.count(".emit_call("), 1)
         for n in ("ChainReader", "CollateralGate"):
-            self.assertNotIn("emit_transfer", src(n))
+            self.assertNotIn(".emit_call(", src(n))
+            self.assertNotIn(".emit_transfer(", src(n))
 
 
 class Consistency(unittest.TestCase):

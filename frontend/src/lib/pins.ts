@@ -8,6 +8,17 @@ export const RPCS: Record<string, string[]> = {
   base: ["https://base-pokt.nodies.app", "https://base.drpc.org"],
   polygon: ["https://polygon.drpc.org", "https://rpc-mainnet.matic.quiknode.pro"],
   moonbeam: ["https://moonbeam.drpc.org", "https://moonbeam.api.onfinality.io/public"],
+  mantle: ["https://rpc.mantle.xyz", "https://mantle.drpc.org"],
+  xlayer: ["https://xlayerrpc.okx.com", "https://xlayer.drpc.org"],
+  sei: ["https://evm-rpc.sei-apis.com", "https://sei.api.pocket.network"],
+  flare: ["https://flare-api.flare.network/ext/C/rpc", "https://rpc.ankr.com/flare"],
+  hedera: ["https://mainnet.hashio.io/api", "https://hedera.linkpool.pro"],
+  unichain: ["https://mainnet.unichain.org", "https://unichain.drpc.org"],
+  morph: ["https://rpc.morphl2.io", "https://rpc-quicknode.morphl2.io"],
+  ink: ["https://rpc-gel.inkonchain.com", "https://ink.drpc.org"],
+  berachain: ["https://rpc.berachain.com", "https://berachain.drpc.org"],
+  hyperevm: ["https://rpc.hyperliquid.xyz/evm", "https://hyperliquid.drpc.org"],
+  monad: ["https://rpc.monad.xyz", "https://monad-mainnet-rpc.spidernode.net"],
 };
 
 type Blk = { number: number; timestamp: number };

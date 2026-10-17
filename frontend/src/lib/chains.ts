@@ -1,12 +1,34 @@
 // Display names and the known tokens, for labels only. Every number comes from the contracts.
 export const CHAIN_NAME: Record<string, string> = {
   ethereum: "Ethereum", arbitrum: "Arbitrum One", optimism: "OP Mainnet", base: "Base", polygon: "Polygon PoS", moonbeam: "Moonbeam",
+  mantle: "Mantle",
+  xlayer: "X Layer",
+  sei: "Sei",
+  flare: "Flare",
+  hedera: "Hedera",
+  unichain: "Unichain",
+  morph: "Morph",
+  ink: "Ink",
+  berachain: "Berachain",
+  hyperevm: "HyperEVM",
+  monad: "Monad",
 };
 export const KIND_NAME: Record<string, string> = {
   arbitrum: "Arbitrum canonical bridge", optimism: "OP Standard Bridge", base: "Base Standard Bridge",
   op_dai: "OP DAI bridge", polygon: "Polygon PoS bridge", nomad: "Nomad",
   oft_polygon: "LayerZero OFT (Polygon)", oft_arbitrum: "LayerZero OFT (Arbitrum)", oft_optimism: "LayerZero OFT (OP)",
   oft_base: "LayerZero OFT (Base)",
+  oft_mantle: "LayerZero OFT (Mantle)",
+  oft_xlayer: "LayerZero OFT (X Layer)",
+  oft_sei: "LayerZero OFT (Sei)",
+  oft_flare: "LayerZero OFT (Flare)",
+  oft_hedera: "LayerZero OFT (Hedera)",
+  oft_unichain: "LayerZero OFT (Unichain)",
+  oft_morph: "LayerZero OFT (Morph)",
+  oft_ink: "LayerZero OFT (Ink)",
+  oft_berachain: "LayerZero OFT (Berachain)",
+  oft_hyperevm: "LayerZero OFT (HyperEVM)",
+  oft_monad: "LayerZero OFT (Monad)",
 };
 export const TOKEN_SYMBOL: Record<string, string> = {
   "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": "USDC", "0xdac17f958d2ee523a2206206994597c13d831ec7": "USDT",

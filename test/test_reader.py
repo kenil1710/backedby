@@ -504,7 +504,9 @@ class Read(Base):
 
     def test_config(self):
         c = self.s.view(self.s.reader, "get_config")
-        self.assertEqual(sorted(c["chains"]), sorted(["ethereum", "arbitrum", "optimism", "base", "polygon", "moonbeam"]))
+        self.assertEqual(sorted(c["chains"]), sorted(["ethereum", "arbitrum", "optimism", "base", "polygon", "moonbeam", "mantle",
+                                                     "xlayer", "sei", "flare", "hedera", "unichain", "morph", "ink",
+                                                     "berachain", "hyperevm", "monad"]))
         for ch in c["chains"].values():
             self.assertEqual(len(ch["rpcs"]), 2)
             self.assertNotEqual(ch["rpcs"][0], ch["rpcs"][1])

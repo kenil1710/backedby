@@ -80,11 +80,33 @@ export function durationText(seconds: number): string {
 
 export const CHAIN_LABEL: Record<string, string> = {
   ethereum: "Ethereum", arbitrum: "Arbitrum", optimism: "Optimism", base: "Base", polygon: "Polygon",
+  mantle: "Mantle",
+  xlayer: "X Layer",
+  sei: "Sei",
+  flare: "Flare",
+  hedera: "Hedera",
+  unichain: "Unichain",
+  morph: "Morph",
+  ink: "Ink",
+  berachain: "Berachain",
+  hyperevm: "HyperEVM",
+  monad: "Monad",
 };
 
 export const EXPLORER_HOST: Record<string, string> = {
   ethereum: "etherscan.io", arbitrum: "arbitrum.blockscout.com", optimism: "optimism.blockscout.com",
   base: "base.blockscout.com", polygon: "polygon.blockscout.com", moonbeam: "moonbeam.subscan.io",
+  mantle: "explorer.mantle.xyz",
+  xlayer: "www.oklink.com/xlayer",
+  sei: "seitrace.com",
+  flare: "flare-explorer.flare.network",
+  hedera: "hashscan.io/mainnet",
+  unichain: "unichain.blockscout.com",
+  morph: "explorer.morphl2.io",
+  ink: "explorer.inkonchain.com",
+  berachain: "berascan.com",
+  hyperevm: "hyperevmscan.io",
+  monad: "monadscan.com",
 };
 
 /** A token holder's balance page: the explorer's own view of one read. */
@@ -92,7 +114,7 @@ export function holderUrl(chain: string, token: string, holder: string): string 
   return `https://${EXPLORER_HOST[chain] ?? EXPLORER_HOST.ethereum}/token/${token}?a=${holder}`;
 }
 
-/** A block explorer link on one of the six chains. */
+/** A block explorer link on one of the chains BackedBy reads. */
 export function chainUrl(chain: string, kind: "address" | "tx" | "block", value: string | number): string {
   const host = EXPLORER_HOST[chain] ?? EXPLORER_HOST.ethereum;
   const k = chain === "moonbeam" && kind === "address" ? "account" : kind;
