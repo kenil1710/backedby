@@ -5,6 +5,8 @@ export const CHAIN_NAME: Record<string, string> = {
 export const KIND_NAME: Record<string, string> = {
   arbitrum: "Arbitrum canonical bridge", optimism: "OP Standard Bridge", base: "Base Standard Bridge",
   op_dai: "OP DAI bridge", polygon: "Polygon PoS bridge", nomad: "Nomad",
+  oft_polygon: "LayerZero OFT (Polygon)", oft_arbitrum: "LayerZero OFT (Arbitrum)", oft_optimism: "LayerZero OFT (OP)",
+  oft_base: "LayerZero OFT (Base)",
 };
 export const TOKEN_SYMBOL: Record<string, string> = {
   "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": "USDC", "0xdac17f958d2ee523a2206206994597c13d831ec7": "USDT",

@@ -25,7 +25,7 @@ export default function Docs() {
     ["Ruled monitoring checks, at most one per pair per", (c) => durationText(c.monitor_interval_s)],
     ["Minimum stake (challenge, contest)", (c) => `${formatGen(c.min_stake, 3)} GEN`],
     ["Minimum bond", (c) => `${formatGen(c.min_bond, 3)} GEN`],
-    ["Max gap between pinned blocks", (c) => `${c.max_gap_s} s (Polygon ${c.kind_max_gap_s.polygon} s)`],
+    ["Max gap between pinned blocks", (c) => `${c.max_gap_s} s (Polygon ${c.kind_max_gap_s.polygon} s, fast bridges ${c.fast_gap_s} s)`],
     ["Max tolerance a pair can freeze", (c) => `${c.max_tolerance_bps} bps`],
     ["Challenger's share of a slash", (c) => `${c.bounty_bps / 100}% (rest to the treasury)`],
     ["Authentication must be fresher than", (c) => durationText(c.auth_max_age_s)],
@@ -54,16 +54,20 @@ export default function Docs() {
       </Panel>
 
       <H>1. A pair exists only if the bridge says so</H>
-      <P>A pair is a vault on Ethereum holding a source token, plus the destination tokens that bridge minted against it. ChainReader
-        proves it from the bridge&apos;s own mapping, read on both chains from both RPCs, before anything is recorded. Anything else is refused.</P>
+      <P>A pair is one source token on Ethereum, the vaults there that hold it (their balances are summed), and the destination
+        tokens minted against them (their supplies are summed). ChainReader proves every vault and every destination from the
+        bridge&apos;s own mapping, read on both chains from both RPCs, before anything is recorded. Anything else is refused.</P>
       <ul className="mt-3 max-w-3xl list-disc space-y-1.5 pl-5 text-[14.5px] text-ink-2">
         <li><b className="text-ink">{KIND_NAME.arbitrum}</b>: L1GatewayRouter <Code>getGateway</Code> and <Code>calculateL2TokenAddress</Code>, and the L2 router must agree; the gateway must be one of the escrow gateways{reader ? ` (${Object.values(reader.arbitrum_escrow_gateways).join(", ")})` : ""}; the vault is the gateway, or its <Code>l1Escrow()</Code>.</li>
-        <li><b className="text-ink">{KIND_NAME.optimism}, {KIND_NAME.base}</b>: the L2 token&apos;s <Code>remoteToken()</Code> is the source token and its <Code>bridge()</Code> is <Code>0x4200…0010</Code>; the vault is that chain&apos;s L1StandardBridge. Its supply counts only up to the bridge&apos;s own <Code>deposits(l1, l2)</Code>, the most the bridge would ever release for it.</li>
+        <li><b className="text-ink">{KIND_NAME.optimism}, {KIND_NAME.base}</b>: the L2 token&apos;s <Code>remoteToken()</Code> is the source token and its <Code>bridge()</Code> is <Code>0x4200…0010</Code>; the vault is that chain&apos;s L1StandardBridge. It counts as the larger of its supply and the bridge&apos;s own ledger <Code>deposits(l1, l2)</Code>, so neither unpaid withdrawals nor tokens minted outside the bridge can hide.</li>
         <li><b className="text-ink">{KIND_NAME.op_dai}</b>: the L1 and L2 DAI bridges name the same tokens and each other; the vault is <Code>escrow()</Code>.</li>
         <li><b className="text-ink">{KIND_NAME.polygon}</b>: RootChainManager <Code>rootToChildToken</Code>, ChildChainManager <Code>childToRootToken</Code> pointing back, type ERC20; the vault is the ERC20 predicate.</li>
+        <li><b className="text-ink">LayerZero OFT</b> (for example USDT0): the destination token&apos;s <Code>oftContract()</Code> has the Ethereum adapter as its peer and the adapter&apos;s <Code>token()</Code> is the source token, its peer for that chain is the same OFT, both on the LayerZero endpoint. The vault is that adapter, derived from the token, never supplied.</li>
         <li><b className="text-ink">{KIND_NAME.nomad}</b>: the Moonbeam TokenRegistry maps the representation to the Ethereum token both ways, the Moonbeam router&apos;s remote for Ethereum is the Ethereum BridgeRouter (the vault), and the token is local on Ethereum.</li>
       </ul>
-      <P>Anyone can add a destination a pair is missing, with the same proof, so an operator cannot hide supply by leaving one out.
+      <P>Anyone can add a destination or a vault a pair is missing, with the same proof, so an operator cannot hide supply by leaving
+        a token out, and a token with a second mint path (Polygon&apos;s USDT, minted by the PoS bridge and by USDT0) is judged against
+        every vault that backs it. A check uses the vaults and destinations the pair had when it was filed.
         Each authentication also records its mapping calls and answers; every check re-reads them at its own blocks, and any change is
         INCONCLUSIVE rather than a slash. Tolerance is frozen per pair at registration and is part of the pair&apos;s identity, so anyone
         can register a stricter variant.</P>
@@ -71,7 +75,7 @@ export default function Docs() {
       <H>2. One finalized block per chain, source last</H>
       <P>A check pins a block on Ethereum and on each destination chain. Both must be at or below the finalized block on both RPCs.
         The Ethereum (locked) block&apos;s timestamp must be at or after every destination block&apos;s, and at most the pair&apos;s max gap later
-        than the oldest. With that order, a deposit is always locked before it is minted, so one in flight shows up on the locked side
+        than the oldest (120 s once a pair holds a fast-bridge vault). With that order, a deposit is always locked before it is minted, so one in flight shows up on the locked side
         only; a withdrawal is burned before it is released, and every supported bridge takes longer than the gap to release, so one in
         flight shows up as removed from supply only. In-flight transfers can only ever look over-backed, never under.</P>
 

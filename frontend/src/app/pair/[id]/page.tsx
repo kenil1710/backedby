@@ -33,7 +33,7 @@ export default function PairPage({ params }: { params: Promise<{ id: string }> }
         <div>
           <h1 className="wide text-[28px] font-semibold tracking-tight sm:text-[34px]">{p.label || `Pair ${p.pair_id}`}</h1>
           <p className="mt-1 text-[14px] text-ink-2">
-            {symbolOf(p.source_token)} locked on Ethereum by the {KIND_NAME[p.kind] ?? p.kind}, minted on {destChains.map((c) => CHAIN_NAME[c] ?? c).join(", ")}.
+            {symbolOf(p.source_token)} locked on Ethereum by {p.vaults.map((v) => KIND_NAME[v.kind] ?? v.kind).join(" and ")}, minted on {destChains.map((c) => CHAIN_NAME[c] ?? c).join(", ")}.
             Pair <span className="num">{p.pair_id}</span>.
           </p>
         </div>
@@ -64,7 +64,10 @@ export default function PairPage({ params }: { params: Promise<{ id: string }> }
             <dl>
               <KV k="Tolerance"><span className="num">{p.tolerance_bps} bps</span></KV>
               <KV k="Max gap"><span className="num">{p.max_gap_s} s</span></KV>
-              <KV k="Vault"><Ext href={chainUrl("ethereum", "address", p.vault)}><span className="num">{shortAddress(p.vault, 6)}</span></Ext></KV>
+              {p.vaults.map((v) => (
+                <KV key={v.vault} k="Vault"><Ext href={chainUrl("ethereum", "address", v.vault)}><span className="num">{shortAddress(v.vault, 6)}</span></Ext>{" "}
+                  <span className="text-[12.5px] text-ink-3">{KIND_NAME[v.kind] ?? v.kind} · auth {v.auth_id}</span></KV>
+              ))}
               <KV k="Source token"><Ext href={chainUrl("ethereum", "address", p.source_token)}>{symbolOf(p.source_token)}</Ext> <span className="num text-ink-3">{p.source_decimals} dec</span></KV>
               {p.dests.map((d) => (
                 <KV key={d.token} k={`On ${CHAIN_NAME[d.chain] ?? d.chain}`}>

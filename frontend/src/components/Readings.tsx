@@ -3,7 +3,7 @@
 /** Both sides of one reading: block, time, the value, and an explorer link for every read. */
 import useSWR from "swr";
 import { getReading } from "@/lib/contract";
-import { CHAIN_NAME, symbolOf } from "@/lib/chains";
+import { CHAIN_NAME, KIND_NAME, symbolOf } from "@/lib/chains";
 import { absoluteTime, chainUrl, formatUnits, holderUrl, shortAddress } from "@/lib/format";
 import { selName } from "@/lib/selectors";
 import type { Check, Pair } from "@/lib/types";
@@ -16,16 +16,22 @@ export function Readings({ pair, check, round = 1 }: { pair: Pair; check: Check;
   const ruling = round === 2 ? check.ruling2 : check.ruling1;
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Panel title="Locked on Ethereum" aside={`vault ${shortAddress(pair.vault)}`}>
+      <Panel title="Locked on Ethereum" aside={`${check.vaults.length} vault${check.vaults.length > 1 ? "s" : ""}, summed`}>
         <dl>
           <Row k="Block">{src ? <Ext href={chainUrl("ethereum", "block", src.number)}><span className="num">{src.number}</span></Ext> : <span className="num">{check.blocks.ethereum}</span>}</Row>
           <Row k="Timestamp">{src ? <span className="num">{absoluteTime(src.timestamp)}</span> : "not read yet"}</Row>
-          <Row k="Vault"><Ext href={chainUrl("ethereum", "address", pair.vault)}><span className="num">{shortAddress(pair.vault, 6)}</span></Ext></Row>
-          <Row k={`${symbolOf(pair.source_token)} held`}>
-            {r?.status === "OK" ? (
-              <Ext href={holderUrl("ethereum", pair.source_token, pair.vault)}><span className="num">{formatUnits(r.locked, r.source_decimals, 2)}</span></Ext>
-            ) : "-"}
-          </Row>
+          {check.vaults.map((v, i) => {
+            const kind = pair.vaults?.find((x) => x.vault === v)?.kind;
+            return (
+              <Row key={v} k={<span>Vault <Ext href={chainUrl("ethereum", "address", v)}><span className="num">{shortAddress(v)}</span></Ext>{kind ? <span className="block text-[12px] text-ink-3">{KIND_NAME[kind] ?? kind}</span> : null}</span>}>
+                {r?.status === "OK" ? <Ext href={holderUrl("ethereum", pair.source_token, v)}><span className="num">{formatUnits(r.locked_by_vault[i], r.source_decimals, 2)}</span></Ext> : "-"}
+                <span className="text-ink-3"> {symbolOf(pair.source_token)}</span>
+              </Row>
+            );
+          })}
+          {r?.status === "OK" && check.vaults.length > 1 && (
+            <Row k="Locked, total"><span className="num">{formatUnits(r.locked_by_vault.reduce((a, b) => (BigInt(a) + BigInt(b)).toString(), "0"), r.source_decimals, 2)}</span></Row>
+          )}
           <Row k="Decimals"><span className="num">{r?.source_decimals ?? pair.source_decimals}</span> <span className="text-ink-3">(frozen {pair.source_decimals})</span></Row>
         </dl>
       </Panel>
@@ -42,14 +48,14 @@ export function Readings({ pair, check, round = 1 }: { pair: Pair; check: Check;
             return (
               <Row key={d.token} k={<Ext href={chainUrl(d.chain, "address", d.token)}><span className="num">{shortAddress(d.token)}</span></Ext>}>
                 {got ? <span className="num">{formatUnits(got.supply, got.decimals, 2)}</span> : "-"}
-                {got?.deposits ? <span className="block text-[12.5px] text-ink-3">bridge deposits for it: <span className="num">{formatUnits(got.deposits, r!.source_decimals, 2)}</span>; counted {ruling?.counted?.[i] ? formatUnits(ruling.counted[i], got.decimals, 2) : "-"}</span> : null}
+                {got?.deposits ? <span className="block text-[12.5px] text-ink-3">bridge ledger (deposits): <span className="num">{formatUnits(got.deposits, r!.source_decimals, 2)}</span>; counted, the larger: {ruling?.counted?.[i] ? formatUnits(ruling.counted[i], got.decimals, 2) : "-"}</span> : null}
               </Row>
             );
           })}
           {src && r?.blocks && (
             <Row k="Gap">
               <span className="num">{src.timestamp - Math.min(...Object.entries(r.blocks).filter(([c]) => c !== "ethereum").map(([, b]) => b.timestamp))} s</span>
-              <span className="text-ink-3"> (max {pair.max_gap_s} s; source at or after every destination)</span>
+              <span className="text-ink-3"> (max {check.max_gap_s} s; source at or after every destination)</span>
             </Row>
           )}
         </dl>

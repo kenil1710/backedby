@@ -50,7 +50,7 @@ export async function GET(req: Request) {
     const [p, latest, g] = await Promise.all([view(reg, "get_pair", [pair]), view(reg, "get_latest", [pair]), view(gate, "is_backed", [pair, now])]);
     if (!p.found) return Response.json({ error: "no such pair" }, { status: 404 });
     const body = {
-      pair, registry: reg, label: p.label, kind: p.kind, vault: p.vault, source_token: p.source_token, destinations: p.dests,
+      pair, registry: reg, label: p.label, kind: p.kind, vaults: p.vaults, source_token: p.source_token, destinations: p.dests,
       tolerance_bps: p.tolerance_bps, latest: latest.found ? { check_id: latest.check_id, verdict: latest.verdict, status: latest.status, ratio_bps: latest.ratio_bps, pinned_source_time: latest.source_time, final_at: latest.final_at, reason: latest.reason } : null,
       gate: { contract: gate, backed: g.backed, reason: g.reason, max_age_s: g.max_age_s }, read_at: now,
       page: `${u.origin}/pair/${pair}`,

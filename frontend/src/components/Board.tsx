@@ -60,7 +60,7 @@ export function Board() {
                   <div className="min-w-0">
                     <div className="truncate text-[15px] font-medium">{p.label || `${symbolOf(p.source_token)} pair ${p.pair_id}`}</div>
                     <div className="truncate text-[12.5px] text-ink-3">
-                      {symbolOf(p.source_token)} on Ethereum, {p.dests.length > 1 ? `${p.dests.length} tokens on ` : ""}{CHAIN_NAME[d?.chain] ?? d?.chain} · {KIND_NAME[p.kind] ?? p.kind}
+                      {symbolOf(p.source_token)} on Ethereum{p.vaults.length > 1 ? ` in ${p.vaults.length} vaults` : ""}, {p.dests.length > 1 ? `${p.dests.length} tokens on ${[...new Set(p.dests.map((x) => CHAIN_NAME[x.chain] ?? x.chain))].join(", ")}` : CHAIN_NAME[d?.chain] ?? d?.chain} · {p.vaults.map((v) => KIND_NAME[v.kind] ?? v.kind).join(" + ")}
                       {p.tolerance_bps > 0 ? ` · ${p.tolerance_bps} bps tolerance` : ""}
                     </div>
                   </div>
