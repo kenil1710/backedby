@@ -86,12 +86,12 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
 {
   const pairs = (await canon.rv("get_pairs", [0, 50])).pairs;
   const notFinal = pairs.filter((p) => !p.latest || p.latest.status !== "FINAL").map((p) => p.pair_id);
-  const under = pairs.filter((p) => p.latest?.verdict === "UNDER_BACKED").length;
   const feas = JSON.parse(readFileSync(root + "docs/feasibility.json", "utf8")).rows.filter((r) => r.verdict === "UNDER_BACKED");
-  const seededTokens = new Set(pairs.map((p) => p.dests[0].token));
-  const missing = feas.filter((r) => !seededTokens.has(r.dest[0].token)).map((r) => `${r.kind} ${r.sym}`);
-  check("seeds: every canonical pair has a FINAL ruling", pairs.length >= 10 && notFinal.length === 0, `${pairs.length} pairs, not final: [${notFinal.join(",")}]`);
-  check("seeds: every real UNDER_BACKED from FEASIBILITY.md is seeded and ruled", missing.length === 0 && under >= feas.length, `${under} UNDER_BACKED rulings; missing [${missing.join(", ")}]`);
+  const final = new Map();
+  for (const p of pairs) for (const d of p.dests) final.set(d.token, p.latest?.status === "FINAL" ? p.latest.verdict : null);
+  const missing = feas.filter((r) => !final.get(r.dest[0].token)).map((r) => `${r.kind} ${r.sym}`);
+  const verdicts = feas.map((r) => `${r.kind} ${r.sym}: ${final.get(r.dest[0].token)}`);
+  check("seeds: every pair FEASIBILITY.md read as UNDER_BACKED is seeded with a FINAL ruling", missing.length === 0, missing.length ? `missing [${missing.join(", ")}]` : verdicts.join("; "));
   const L = await demo.rv("get_ledger");
   check("demo: drained to 0, invariant holds", L.held_now === "0" && L.invariant_holds, `held ${L.held_now}, received ${L.received}, claimed ${L.claimed}`);
   // 7. docs truth

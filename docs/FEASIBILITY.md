@@ -5,7 +5,7 @@ Read on 2026-10-16 21:49 UTC with plain JSON-RPC (`node tools/feasibility.mjs`, 
 at one pinned finalized block per chain, sent to **two RPCs run by different operators**, and kept only when both
 answered byte-for-byte the same.
 
-**Result: 36 pairs authenticated and readable, 6 real UNDER_BACKED, 3 refused.**
+**Result: 36 pairs authenticated and readable, 6 read UNDER_BACKED at this step (5 real; Polygon USDT was a one-vault artifact, see below), 3 refused.**
 Both RPCs agreed on every value of every authenticated pair: yes.
 
 ## RPCs (two per chain)
@@ -16,7 +16,7 @@ Both RPCs agreed on every value of every authenticated pair: yes.
 | arbitrum | https://arb-pokt.nodies.app | https://arbitrum.gateway.tenderly.co | both serve state 72 h+ back |
 | optimism | https://mainnet.optimism.io | https://optimism.drpc.org | both serve state 72 h+ back |
 | base | https://base-pokt.nodies.app | https://base.drpc.org | both serve state 72 h+ back |
-| polygon | https://polygon.drpc.org | https://polygon.gateway.tenderly.co | both serve state 72 h+ back |
+| polygon | https://polygon.drpc.org | https://rpc-mainnet.matic.quiknode.pro | both serve state 72 h+ back |
 | moonbeam | https://moonbeam.drpc.org | https://moonbeam.api.onfinality.io/public | both serve state 72 h+ back |
 
 Probed and rejected (no archive state, key required, batch refused, or down): mainnet.base.org (answers from a laptop but
@@ -122,12 +122,14 @@ Ratio = locked / summed destination supply, both normalized to 18 decimals. Verd
 - **nomad DAI**: 0.00 locked against 510,151.43 outstanding (ratio 0.000000).
 
 The five Nomad rows are the August 2022 exploit: the Ethereum BridgeRouter was drained, and the Moonbeam
-representations kept circulating with almost nothing behind them. Polygon USDT is not an exploit: its child token on
-Polygon is now also minted by USDT0's LayerZero adapter, so most of its supply is no longer locked in the PoS
-bridge's ERC20Predicate. By the rule BackedBy enforces (the canonical vault against the canonical token's supply) it is
-UNDER_BACKED, and the contract will say so; the README explains why that is the honest reading.
+representations kept circulating with almost nothing behind them.
+
+**Polygon USDT is not under-backed.** This step read it against one vault, the PoS bridge's ERC20Predicate. Polygon's
+USDT also has a second mint path, USDT0's LayerZero adapter on Ethereum, which locks the USDT for everything it mints.
+Pairs now hold every vault that backs their tokens (docs/RULES.md); with both vaults the canonical USDT pair is BACKED
+(docs/SEEDS.md). The 0.64% row above is kept as the measurement that exposed the one-vault flaw.
 
 ## Decision
 
-Feasible: 36 readable pairs (need 10+), 6 real UNDER_BACKED (need 1+). Continue with all six bridge
+Feasible: 36 readable pairs (need 10+), 5 real UNDER_BACKED (need 1+; the sixth row, Polygon USDT, was a one-vault artifact). Continue with all six bridge
 kinds; seed the canonical registry with a mix of BACKED pairs and every UNDER_BACKED one.

@@ -44,16 +44,20 @@ ChainReader from two RPCs per chain, ruled by code, and finalized after its 6 h 
 **${pairs.length} pairs; ${final} FINAL rulings: ${backed} BACKED, ${under} UNDER_BACKED.** Latest contest window ends
 ${latestEnd ? new Date(latestEnd * 1000).toISOString().replace(".000Z", "Z") : "-"}.
 
-| Pair | Bridge | Check | Status | Ruling | Ratio | Locked (Ethereum) | Supply (destination) | Ethereum block | Destination block |
+| Pair | Vaults | Check | Status | Ruling | Ratio | Locked (Ethereum, per vault) | Supply (per destination) | Ethereum block | Destination blocks |
 |---|---|---|---|---|---|---|---|---|---|
 `;
 for (const { p, c, rd, d, v } of rows) {
-  const sb = rd?.blocks?.ethereum, db = rd?.blocks?.[d.chain];
-  md += `| [${p.pair_id}. ${p.label}](${SITE}/pair/${p.pair_id}) | ${p.kind} | ${c ? `[#${c.check_id}](${SITE}/check/${c.check_id})` : "-"} | ${c?.status ?? "-"} | **${v}** | ${c?.ruling1 && c.ruling1.ratio_bps >= 0 ? (c.ruling1.ratio_bps / 100).toFixed(2) + "%" : "-"} | `
-    + (rd?.status === "OK" ? `[${fmt(rd.locked, rd.source_decimals)} ${SYM[p.source_token] ?? ""}](${CHAINS.ethereum.explorer}/token/${p.source_token}?a=${p.vault}) in [${short(p.vault)}](${ex("ethereum", "address", p.vault)})` : "-") + " | "
-    + (rd?.status === "OK" ? `[${fmt(rd.dests[0].supply, rd.dests[0].decimals)}](${ex(d.chain, "token", d.token)}) of [${short(d.token)}](${ex(d.chain, "address", d.token)})${rd.dests[0].deposits ? ` (deposits ${fmt(rd.dests[0].deposits, rd.source_decimals)})` : ""}` : "-") + " | "
-    + (sb ? `[${sb.number}](${ex("ethereum", "block", sb.number)}) ${iso(sb.timestamp)}` : "-") + " | "
-    + (db ? `[${db.number}](${ex(d.chain, "block", db.number)}) ${iso(db.timestamp)}` : "-") + " |\n";
+  const sb = rd?.blocks?.ethereum;
+  const lockedCell = rd?.status === "OK"
+    ? p.vaults.map((x, i) => `[${fmt(rd.locked_by_vault[i], rd.source_decimals)} ${SYM[p.source_token] ?? ""}](${CHAINS.ethereum.explorer}/token/${p.source_token}?a=${x.vault}) in [${short(x.vault)}](${ex("ethereum", "address", x.vault)}) (${x.kind})`).join("<br>")
+    : "-";
+  const supplyCell = rd?.status === "OK"
+    ? rd.dests.map((y) => `[${fmt(y.supply, y.decimals)}](${ex(y.chain, "token", y.token)}) of [${short(y.token)}](${ex(y.chain, "address", y.token)}) on ${y.chain}${y.deposits ? ` (bridge ledger ${fmt(y.deposits, rd.source_decimals)})` : ""}`).join("<br>")
+    : "-";
+  const destBlocks = rd?.blocks ? Object.entries(rd.blocks).filter(([k]) => k !== "ethereum").map(([k, bl]) => `[${bl.number}](${ex(k, "block", bl.number)}) ${k} ${iso(bl.timestamp)}`).join("<br>") : "-";
+  md += `| [${p.pair_id}. ${p.label}](${SITE}/pair/${p.pair_id}) | ${p.vaults.map((x) => x.kind).join(" + ")} | ${c ? `[#${c.check_id}](${SITE}/check/${c.check_id})` : "-"} | ${c?.status ?? "-"} | **${v}** | ${c?.ruling1 && c.ruling1.ratio_bps >= 0 ? (c.ruling1.ratio_bps / 100).toFixed(2) + "%" : "-"} | ${lockedCell} | ${supplyCell} | `
+    + (sb ? `[${sb.number}](${ex("ethereum", "block", sb.number)}) ${iso(sb.timestamp)}` : "-") + ` | ${destBlocks} |\n`;
 }
 md += `
 ## Notes
@@ -61,10 +65,13 @@ md += `
 - **Nomad (5 pairs, UNDER_BACKED).** The Ethereum BridgeRouter was drained in the August 2022 exploit; the Moonbeam
   representations still circulate. Moonbeam has produced no block since 2026-08-10, so the pinned blocks are its last
   finalized block and the first Ethereum block after it; the gap rule holds (seconds).
-- **USDT on Polygon (UNDER_BACKED).** The PoS bridge's ERC20Predicate holds a small fraction of the child token's
-  supply, because Polygon's USDT is now also minted through USDT0's LayerZero adapter. By the rule BackedBy enforces
-  (the canonical vault against the canonical token's supply) the PoS bridge does not back it; nothing here says USDT0
-  is unbacked.
+- **USDT on Polygon (two vaults).** Polygon's USDT is minted by the PoS bridge (ERC20Predicate) and by USDT0's
+  LayerZero adapter, so the pair holds both vaults, and its destinations are USDT0 on Polygon, Arbitrum and OP
+  Mainnet, every chain BackedBy reads where the adapter has a peer. The adapter also backs USDT0 on chains BackedBy
+  does not read, so this ratio leaves that supply out. The first deployment read this pair against the predicate
+  alone and called it UNDER_BACKED at 0.64%; that record is in docs/superseded/e915d21/.
+- **OP and Base** pairs count the larger of supply and the bridge's own \`deposits\` ledger, so their ratio is the
+  vault against what the bridge itself says it owes; several match it to the wei.
 - **Over-backing** (for example OP Mainnet USDC.e, Base USDbC, OP DAI): the vault holds more than the counted supply.
   BackedBy reports the ratio and does not guess why; a vault can hold more than it owes, never less, and stay BACKED.
 - Every number above is also on the pair's page with the bridge-mapping anchors that were re-read at the same blocks.

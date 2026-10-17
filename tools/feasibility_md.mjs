@@ -21,7 +21,7 @@ Read on ${doc.started.slice(0, 16).replace("T", " ")} UTC with plain JSON-RPC (\
 at one pinned finalized block per chain, sent to **two RPCs run by different operators**, and kept only when both
 answered byte-for-byte the same.
 
-**Result: ${ok.length} pairs authenticated and readable, ${under.length} real UNDER_BACKED, ${doc.rows.length - ok.length} refused.**
+**Result: ${ok.length} pairs authenticated and readable, ${under.length} read UNDER_BACKED at this step (5 real; Polygon USDT was a one-vault artifact, see below), ${doc.rows.length - ok.length} refused.**
 Both RPCs agreed on every value of every authenticated pair: ${ok.every((r) => r.agree) ? "yes" : "NO"}.
 
 ## RPCs (two per chain)
@@ -92,14 +92,16 @@ ${doc.rows.filter((r) => !r.ok).map((r) => `| ${r.kind} | ${r.sym} | ${r.fake ??
 ${under.map((r) => `- **${r.kind} ${r.sym}**: ${fmt(r.locked, r.source_decimals)} locked against ${fmt(r.dest[0].supply, r.dest[0].decimals)} outstanding (ratio ${r.ratio.toFixed(6)}).`).join("\n")}
 
 The five Nomad rows are the August 2022 exploit: the Ethereum BridgeRouter was drained, and the Moonbeam
-representations kept circulating with almost nothing behind them. Polygon USDT is not an exploit: its child token on
-Polygon is now also minted by USDT0's LayerZero adapter, so most of its supply is no longer locked in the PoS
-bridge's ERC20Predicate. By the rule BackedBy enforces (the canonical vault against the canonical token's supply) it is
-UNDER_BACKED, and the contract will say so; the README explains why that is the honest reading.
+representations kept circulating with almost nothing behind them.
+
+**Polygon USDT is not under-backed.** This step read it against one vault, the PoS bridge's ERC20Predicate. Polygon's
+USDT also has a second mint path, USDT0's LayerZero adapter on Ethereum, which locks the USDT for everything it mints.
+Pairs now hold every vault that backs their tokens (docs/RULES.md); with both vaults the canonical USDT pair is BACKED
+(docs/SEEDS.md). The 0.64% row above is kept as the measurement that exposed the one-vault flaw.
 
 ## Decision
 
-Feasible: ${ok.length} readable pairs (need 10+), ${under.length} real UNDER_BACKED (need 1+). Continue with all six bridge
+Feasible: ${ok.length} readable pairs (need 10+), ${under.length - 1} real UNDER_BACKED (need 1+; the sixth row, Polygon USDT, was a one-vault artifact). Continue with all six bridge
 kinds; seed the canonical registry with a mix of BACKED pairs and every UNDER_BACKED one.
 `;
 writeFileSync(new URL("../docs/FEASIBILITY.md", import.meta.url), md);
