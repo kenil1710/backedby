@@ -63,7 +63,7 @@ for (const { p, c, rd, d, v } of rows) {
 // --- shared vaults: every vault, which destinations it backs, and what was checked for more -----------------
 // Each value below is read from BOTH Ethereum RPCs at one finalized block and must be identical.
 const [ra, rb] = CHAINS.ethereum.rpcs;
-const again = async (f) => { for (let i = 0; ; i++) { try { return await f(); } catch (e) { if (i === 4) throw e; await new Promise((r) => setTimeout(r, 3000 * (i + 1))); } } };
+const again = async (f) => { for (let i = 0; ; i++) { try { return await f(); } catch (e) { if (i === 9) throw e; await new Promise((r) => setTimeout(r, 10000 * (i + 1))); } } };
 const fin = parseInt((await again(() => block(ra, "finalized"))).number, 16) - 5;
 async function both(to, data) {
   const [x, y] = await Promise.all([again(() => call(ra, to, data, fin)), again(() => call(rb, to, data, fin))]);

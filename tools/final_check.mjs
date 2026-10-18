@@ -63,7 +63,7 @@ const addrs = Object.entries(dep.contracts).map(([k, v]) => [k, v.address]);
   const files = ["README.md", ...readdirSync(root + "docs").filter((f) => f.endsWith(".md") && f !== "FINAL_CHECK.md").map((f) => "docs/" + f)];
   const links = new Set();
   for (const f of files) for (const m of readFileSync(root + f, "utf8").matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)) links.add(m[1]);
-  const bad = [];
+  const bad = [], shown = [];
   const list = [...links];
   // one host at a time with a pause between requests: explorers throttle bursts from one client
   const byHost = {};
@@ -75,6 +75,11 @@ const addrs = Object.entries(dep.contracts).map(([k, v]) => [k, v.address]);
         try {
           const r = await fetch(u, { redirect: "follow", headers: { "user-agent": "Mozilla/5.0 (final_check)" }, signal: AbortSignal.timeout(25_000) });
           ok = r.status === 200; last = String(r.status);
+          // pages that exist but cannot answer a script: a Cloudflare browser challenge (Etherscan-family
+          // explorers), and HashScan, a client-rendered app whose host serves its shell with 404 on deep paths
+          const body = ok ? "" : await r.text();
+          if (!ok && r.status === 403 && r.headers.get("cf-mitigated") === "challenge") { ok = true; shown.push(`${new URL(u).host} (Cloudflare challenge)`); }
+          if (!ok && r.status === 404 && new URL(u).host === "hashscan.io" && body.includes("Hedera Mirror Node Explorer")) { ok = true; shown.push("hashscan.io (app shell)"); }
         } catch { last = "ERR"; }
         if (!ok) await new Promise((res) => setTimeout(res, 5000 * (k + 1)));
       }
@@ -82,7 +87,7 @@ const addrs = Object.entries(dep.contracts).map(([k, v]) => [k, v.address]);
       await new Promise((res) => setTimeout(res, 1200));
     }
   }));
-  check("links: every link in README and docs answers 200", bad.length === 0, bad.length ? bad.slice(0, 12).join("; ") : `${list.length} links`);
+  check("links: every link in README and docs answers 200 (or a browser-only page: Cloudflare challenge, HashScan app shell)", bad.length === 0, bad.length ? bad.slice(0, 12).join("; ") : `${list.length} links` + (shown.length ? `; browser-only: ${[...new Set(shown)].join(", ")}` : ""));
 }
 
 // 4. seeds and 5. demo

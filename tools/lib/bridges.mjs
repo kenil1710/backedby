@@ -77,5 +77,7 @@ export const L1 = {
 export function explorerLink(chain, kind, value) {
   const base = CHAINS[chain].explorer;
   if (chain === "moonbeam") kind = { address: "account", token: "erc20_token" }[kind] ?? kind;
+  // HashScan names HTS tokens and accounts by entity id: long-zero 0x…9ce723 is 0.0.10282787
+  if (chain === "hedera" && kind !== "block" && /^0x0{24}/i.test(value)) { kind = "token"; value = "0.0." + BigInt(value); }
   return `${base}/${kind}/${value}`;
 }

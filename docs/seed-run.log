@@ -229,3 +229,192 @@ RESULT madUSDT on Moonbeam (Nomad): check 20 PROVISIONAL UNDER_BACKED ratio_bps 
   read_check(["0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102",21,1]) -> ok ACCEPTED 26s tx 0xfd223639403affd24a93013e26bdd78d6364fda276869b4948a5cf1ad1ee7398 {"key":"0x66ba2ff893f5faaf21f000286a5e34bbdb9c8102|21|1","reason":"","status":"OK"}
   rule([21]) -> ok ACCEPTED 16s tx 0xa3f5e831b8d95fbe5919ef79a7853163e2345731369bbe95265b15f9c0314e33 {"check_id":21,"contestable_until":1792284059,"ok":true,"ratio_bps":0,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
 RESULT madDAI on Moonbeam (Nomad): check 21 PROVISIONAL UNDER_BACKED ratio_bps 0 
+
+=== finalize 2026-10-18T00:43:36.295Z
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([2]) -> ok ACCEPTED 46s tx 0xde5b463c1bb215d0d5a86bb2d087eb27e63cd5a62a884d14d079655c7679462c {"check_id":2,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 1 USDC.e on Arbitrum: check 2 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([4]) -> ok ACCEPTED 14s tx 0x2d49ddc5b64e6a93ed14610c0bb86b175a4f26743d2da4a83d864b16881093a2 {"check_id":4,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 2 WBTC on Arbitrum: check 4 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([6]) -> ok ACCEPTED 13s tx 0xa546c1b73331b2ff9ae89765ccb8e39d0aa73693a06690df87b77ae3506f7f98 {"check_id":6,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 3 DAI on Arbitrum: check 6 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([7]) -> ok ACCEPTED 15s tx 0xd1283d9d6f9c102653678b5bb166af9bb8300aa279026ed0883391b1598caaa2 {"check_id":7,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 4 wstETH on Arbitrum: check 7 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([8]) -> ok ACCEPTED 14s tx 0xe89c4104c3b1d6948d73f9b28bb371890e7961e4efdf35bfc67db2b04b31d855 {"check_id":8,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 5 USDC.e on OP Mainnet: check 8 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([9]) -> ok ACCEPTED 15s tx 0xa7da32cad28929e2ab9df704fe5657076d7f74a9547dce5b23b3412df99984a2 {"check_id":9,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 6 WBTC on OP Mainnet: check 9 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([10]) -> ok ACCEPTED 14s tx 0xd34405878efc7c6a3dcf57417057185bf77183849f81e1826fbc2824e5685b83 {"check_id":10,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 7 DAI on OP Mainnet: check 10 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([11]) -> ok ACCEPTED 12s tx 0x90f4b96a9406872b26c8c5559c80eb8e2d36f7d37606de50dc6956923ac95dcb {"check_id":11,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 8 USDbC on Base: check 11 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([12]) -> ok ACCEPTED 12s tx 0xab70202be5237b57c4371c6a232754e248e99241abf6a1310fbcc131ed7e0f54 {"check_id":12,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 9 cbETH on Base: check 12 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([13]) -> ok ACCEPTED 14s tx 0x5f217e4588b681ba2f20a6f3ba848b4ba3eb91f0aa38750f5957a2f83376bb40 {"check_id":13,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 10 USDC.e on Polygon: check 13 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([14]) -> ok ACCEPTED 14s tx 0xfb5659bb087e9c7e33eb6854d878445ca430253246e318cb3f306246619f46e2 {"check_id":14,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 11 WBTC on Polygon: check 14 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([15]) -> ok ACCEPTED 14s tx 0x19d65f2c2219a3c00d3671d92063c7f1fe7c0efa6b35b642cbd038537140dff4 {"check_id":15,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 12 DAI on Polygon: check 15 FINAL BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+  … finalize fee attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize fee attempt 2 hit transient RPC noise, waiting 4s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … write fee simulation failed for finalize (An unknown RPC error occurred.
+
+Details: Unexpected token '<', "<html>
+<h"... is not valid JSON
+Ver)
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize fee attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize fee attempt 2 hit transient RPC noise, waiting 4s
+GenLayer RPC error (sim_getFeeConfig): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … fee estimate unavailable (An unknown RPC error occurred.
+
+Details: Unexpected token '<', "<html>
+<h"... i), using node default
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize attempt 2 hit transient RPC noise, waiting 8s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize attempt 3 hit transient RPC noise, waiting 12s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize attempt 4 hit transient RPC noise, waiting 16s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … finalize attempt 5 hit transient RPC noise, waiting 20s
+GenLayer RPC error (eth_getTransactionCount): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  finalize([16]) -> FAILED UNSETTLED 144s tx null revert: submit failed — An unknown RPC error occurred.
+
+Details: Unexpected token '<', "<html>
+<h"... is not valid JSON
+Version: viem@2.57.7
+GenLayer RPC error (gen_call): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … get_check attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (gen_call): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … get_check attempt 2 hit transient RPC noise, waiting 8s
+GenLayer RPC error (gen_call): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … get_check attempt 3 hit transient RPC noise, waiting 12s
+GenLayer RPC error (gen_call): Unexpected token '<', "<html>
+<h"... is not valid JSON
+  … get_check attempt 4 hit transient RPC noise, waiting 16s
+FINAL pair 13 USDT on Polygon: check 16 PROVISIONAL  
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([17]) -> ok ACCEPTED 15s tx 0x86fd646ede5da6e92cfff23dadc6f37233354c6c3e71f326c27f2ee875c6f2f7 {"check_id":17,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"UNDER_BACKED"}
+FINAL pair 14 madUSDC on Moonbeam (Nomad): check 17 FINAL UNDER_BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([18]) -> ok ACCEPTED 14s tx 0x180e58d292094a52fca6ee387fe2593c4b6e2463fe26deca1db68680583babd4 {"check_id":18,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"UNDER_BACKED"}
+FINAL pair 15 madWETH on Moonbeam (Nomad): check 18 FINAL UNDER_BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([19]) -> ok ACCEPTED 14s tx 0xa9078ed4929fea5e6822b70a84640f9f66481bc49f3711dde2099ac33074d6ef {"check_id":19,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"UNDER_BACKED"}
+FINAL pair 16 madWBTC on Moonbeam (Nomad): check 19 FINAL UNDER_BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([20]) -> ok ACCEPTED 14s tx 0x1d392e96a7428a341cbd1ef5a9c7f2fdef4fdb18d7d19ac4a49364128cf99750 {"check_id":20,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"UNDER_BACKED"}
+FINAL pair 17 madUSDT on Moonbeam (Nomad): check 20 FINAL UNDER_BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([21]) -> ok ACCEPTED 14s tx 0x61716f6e41a48bf96d095f8b192bdade0f8710456d5edb56bcd95c5b111fcb9d {"check_id":21,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"UNDER_BACKED"}
+FINAL pair 18 madDAI on Moonbeam (Nomad): check 21 FINAL UNDER_BACKED WINDOW_PASSED
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([16]) -> ok ACCEPTED 14s tx 0xb0b520513d08ca57560fbb0af0dc021b8bd0664ac5e1d93bf65cb602726230cd {"check_id":16,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+FINAL pair 13 USDT on Polygon: check 16 FINAL BACKED WINDOW_PASSED
+
+=== finalize 2026-10-18T00:52:04.271Z
