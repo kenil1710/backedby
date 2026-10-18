@@ -6,6 +6,7 @@
 import { createClient } from "genlayer-js";
 import { studioDevnet } from "genlayer-js/chains";
 import { ADDR } from "@/lib/deployments";
+import { displayLabel } from "@/lib/labels";
 
 export const dynamic = "force-dynamic";
 const client = createClient({ chain: studioDevnet });
@@ -50,7 +51,7 @@ export async function GET(req: Request) {
     const [p, latest, g] = await Promise.all([view(reg, "get_pair", [pair]), view(reg, "get_latest", [pair]), view(gate, "is_backed", [pair, now])]);
     if (!p.found) return Response.json({ error: "no such pair" }, { status: 404 });
     const body = {
-      pair, registry: reg, label: p.label, kind: p.kind, vaults: p.vaults, source_token: p.source_token, destinations: p.dests,
+      pair, registry: reg, label: displayLabel(reg, pair, p.label), kind: p.kind, vaults: p.vaults, source_token: p.source_token, destinations: p.dests,
       tolerance_bps: p.tolerance_bps, latest: latest.found ? { check_id: latest.check_id, verdict: latest.verdict, status: latest.status, ratio_bps: latest.ratio_bps, pinned_source_time: latest.source_time, final_at: latest.final_at, reason: latest.reason } : null,
       gate: { contract: gate, backed: g.backed, reason: g.reason, max_age_s: g.max_age_s }, read_at: now,
       page: `${u.origin}/pair/${pair}`,
@@ -58,7 +59,7 @@ export async function GET(req: Request) {
     if (u.searchParams.get("format") === "svg") {
       const v = latest.found ? latest.verdict : "NOT CHECKED";
       const text = latest.found && latest.ratio_bps >= 0 ? `${v.replace("_", "-").toLowerCase()} ${(latest.ratio_bps / 100).toFixed(1)}%` : v.toLowerCase();
-      return new Response(badge(`backedby ${p.label}`.slice(0, 40), text, COLOR[v] ?? "#6f7883"),
+      return new Response(badge(`backedby ${displayLabel(reg, pair, p.label)}`.slice(0, 40), text, COLOR[v] ?? "#6f7883"),
         { headers: { "content-type": "image/svg+xml", "cache-control": "public, s-maxage=120" } });
     }
     return Response.json(body, { headers: { "cache-control": "public, s-maxage=60" } });

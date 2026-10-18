@@ -1,6 +1,6 @@
 # Final check
 
-`node tools/final_check.mjs` on 2026-10-18 01:28 UTC at HEAD `de1bfeb027`
+`node tools/final_check.mjs` on 2026-10-18 06:04 UTC at HEAD `5136a8f706`
 (contracts deployed from `047d3406d5`).
 
 **14/14 PASS.**
@@ -10,7 +10,7 @@
 | 1 | source: on-chain code byte-identical to build files at the deploy commit | PASS | all deployments from one commit: 047d3406d5c78f4cbb1913012bd5df249998fcb5 |
 | 2 | source: build/ is current with contracts/ | PASS | tools/build.py --check |
 | 3 | addresses: consistent across README, docs, site and tools | PASS | 5 contracts |
-| 4 | links: every link in README and docs answers 200 | PASS | 197 links; browser-only: hyperevmscan.io (Cloudflare challenge), hashscan.io (app shell), berascan.com (Cloudflare challenge), explorer.mantle.xyz (Cloudflare challenge), monadscan.com (Cloudflare challenge) |
+| 4 | links: every link in README and docs answers 200 (or a browser-only page: Cloudflare challenge, HashScan app shell) | PASS | 197 links; browser-only: hashscan.io (app shell), berascan.com (Cloudflare challenge), hyperevmscan.io (Cloudflare challenge), monadscan.com (Cloudflare challenge), explorer.mantle.xyz (Cloudflare challenge) |
 | 5 | seeds: the USDT0 adapter's pair lists every destination two RPCs can read | PASS | pair 13: 14 destinations, FINAL BACKED |
 | 6 | seeds: every pair FEASIBILITY.md read as UNDER_BACKED is seeded with a FINAL ruling | PASS | polygon USDT: BACKED; nomad USDC: UNDER_BACKED; nomad WETH: UNDER_BACKED; nomad WBTC: UNDER_BACKED; nomad USDT: UNDER_BACKED; nomad DAI: UNDER_BACKED |
 | 7 | demo: drained to 0 by eth_getBalance, ledger agrees, invariant holds | PASS | eth_getBalance 0 wei, ledger held 0, received 150000000000000000, claimed 150000000000000000 |

@@ -1,0 +1,4 @@
+{
+  "_": "Display names that replace the label stored on chain at register_pair (stored labels cannot be changed). Keyed by registry address, then pair id.",
+  "0x66ba2ff893f5faaf21f000286a5e34bbdb9c8102": { "13": "USDT0 (14 destination chains)" }
+}

@@ -21,7 +21,9 @@ const fmt = (raw, d) => {
 };
 const iso = (t) => new Date(t * 1000).toISOString().slice(0, 16).replace("T", " ");
 const reg = a.regAddr;
-const pairs = (await a.rv("get_pairs", [0, 50])).pairs;
+// display names from the site's labels.json (the label stored at register_pair cannot be changed)
+const LABELS = JSON.parse(readFileSync(new URL("../frontend/src/lib/labels.json", import.meta.url), "utf8"))[reg.toLowerCase()] ?? {};
+const pairs = (await a.rv("get_pairs", [0, 50])).pairs.map((p) => ({ ...p, label: LABELS[p.pair_id] ?? p.label }));
 const rows = [];
 let final = 0, under = 0, backed = 0, latestEnd = 0;
 for (const p of pairs) {
@@ -154,7 +156,7 @@ ${escrowLines.join("\n")}
 - **Nomad (5 pairs, UNDER_BACKED).** The Ethereum BridgeRouter was drained in the August 2022 exploit; the Moonbeam
   representations still circulate. Moonbeam has produced no block since 2026-08-10, so the pinned blocks are its last
   finalized block and the first Ethereum block after it; the gap rule holds (seconds).
-- **USDT on Polygon (two vaults, ${usdtPair ? usdtPair.dests.length : "-"} destinations).** Polygon's USDT is minted by the PoS bridge
+- **USDT0 (pair 13: two vaults, ${usdtPair ? usdtPair.dests.length : "-"} destinations).** Polygon's USDT is minted by the PoS bridge
   (ERC20Predicate) and by USDT0's LayerZero adapter, so the pair holds both vaults and every USDT0 destination listed
   above. The first deployment read it against the predicate alone (UNDER_BACKED at 0.64%, docs/superseded/e915d21/);
   the second against Polygon, Arbitrum and OP Mainnet only (docs/superseded/6f9431f/).

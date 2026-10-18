@@ -14,6 +14,7 @@ import type { CalldataEncodable, TransactionHash } from "genlayer-js/types";
 import { encodeExternalMessageFeeParams } from "genlayer-js";
 import { NETWORK, getDeployment, getReadClient, getWalletClient } from "./genlayer";
 import { ADDR } from "./deployments";
+import { withDisplayLabel } from "./labels";
 import type { Bond, Check, GateAnswer, Ledger, Pair, Reading, RegistryConfig, Stats, TxProgress, WriteResult } from "./types";
 
 const READ_TIMEOUT_MS = 45_000;
@@ -75,8 +76,11 @@ const rv = <T,>(fn: string, args: CalldataEncodable[] = [], reg?: string) => vie
 export const getConfig = (reg?: string) => rv<RegistryConfig>("get_config", [], reg);
 export const getStats = (reg?: string) => rv<Stats>("get_stats", [], reg);
 export const getLedger = (reg?: string) => rv<Ledger>("get_ledger", [], reg);
-export const getPairs = (reg?: string) => rv<{ total: number; pairs: Pair[] }>("get_pairs", [0, 50], reg);
-export const getPair = (id: number, reg?: string) => rv<Pair>("get_pair", [id], reg);
+export const getPairs = async (reg?: string) => {
+  const r = await rv<{ total: number; pairs: Pair[] }>("get_pairs", [0, 50], reg);
+  return { ...r, pairs: r.pairs.map((p) => withDisplayLabel(p, reg ?? registry())) };
+};
+export const getPair = async (id: number, reg?: string) => withDisplayLabel(await rv<Pair>("get_pair", [id], reg), reg ?? registry());
 export const getCheck = (id: number, reg?: string) => rv<Check>("get_check", [id], reg);
 export const getChecks = (offset = 0, limit = 50, reg?: string) => rv<{ total: number; checks: Check[] }>("get_checks", [offset, limit], reg);
 export const getBond = (id: number, reg?: string) => rv<Bond>("get_bond", [id], reg);
