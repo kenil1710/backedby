@@ -1,0 +1,791 @@
+{
+ "at": "2026-11-14T07:17:46.458Z",
+ "wormhole": [
+  {
+   "sym": "USDC",
+   "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+   "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+   "locked": "7850133058977",
+   "ledger_native": "7849121785773",
+   "dests": [
+    {
+     "chain": "polygon",
+     "l2": "0x4318cb63a2b8edf2de971e2f17f77097e499459d",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "92514015556"
+    },
+    {
+     "chain": "arbitrum",
+     "l2": "0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "27589964991"
+    },
+    {
+     "chain": "optimism",
+     "l2": "0x711e53d031ea9b0bb0c24dd506df11b41aea419e",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "23345726718"
+    },
+    {
+     "chain": "base",
+     "l2": "0xec267c53f53807c2337c257f8ac3fc3cc07cc0ed",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "18797983634"
+    }
+   ],
+   "ratio_vs_ledger_bps": 10001
+  },
+  {
+   "sym": "WETH",
+   "l1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+   "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+   "locked": "47581831547480000000000",
+   "ledger_native": "47581831547130000000000",
+   "dests": [
+    {
+     "chain": "polygon",
+     "l2": "0x11cd37bb86f65419713f30673a480ea33c826872",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "245654240820000000000"
+    },
+    {
+     "chain": "arbitrum",
+     "l2": "0xd8369c2eda18dd6518eabb1f85bd60606deb39ec",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "9883857530000000000"
+    },
+    {
+     "chain": "optimism",
+     "l2": "0xb47bc3ed6d70f04fe759b2529c9bc7377889678f",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "3053654260000000000"
+    },
+    {
+     "chain": "base",
+     "l2": "0x71b35ecb35104773537f849fbc353f81303a5860",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "20033899400000000000"
+    }
+   ],
+   "ratio_vs_ledger_bps": 10000
+  },
+  {
+   "sym": "USDT",
+   "l1": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+   "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+   "locked": "3751512480997",
+   "ledger_native": "3751511304041",
+   "dests": [
+    {
+     "chain": "polygon",
+     "l2": "0x9417669fbf23357d2774e9d421307bd5ea1006d2",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "131780047437"
+    },
+    {
+     "chain": "arbitrum",
+     "l2": "0xe4728f3e48e94c6da2b53610e677cc241dafb134",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "23379918421"
+    },
+    {
+     "chain": "optimism",
+     "l2": "0xf6b4185fcf8af291c0e3927fbeab7046b4f6a8ca",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "10773475086"
+    },
+    {
+     "chain": "base",
+     "l2": "0xff0c62a4979400841efaa6faadb07ac7d5c98b27",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 6,
+     "dd": 6,
+     "supply": "4785075223"
+    }
+   ],
+   "ratio_vs_ledger_bps": 10000
+  },
+  {
+   "sym": "WBTC",
+   "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+   "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+   "locked": "246516693748",
+   "ledger_native": "246516693739",
+   "dests": [
+    {
+     "chain": "polygon",
+     "l2": "0x5d49c278340655b56609fdf8976eb0612af3a0c3",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 8,
+     "dd": 8,
+     "supply": "23250783"
+    },
+    {
+     "chain": "arbitrum",
+     "l2": "0x397846a8078d4845c7f5c6ca76aebbcfdc044fae",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 8,
+     "dd": 8,
+     "supply": "128277881"
+    },
+    {
+     "chain": "optimism",
+     "l2": "0xb214c19d81c99e75e84706a3aa0a757319023e26",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 8,
+     "dd": 8,
+     "supply": "3647307"
+    },
+    {
+     "chain": "base",
+     "l2": "0xe6396f780b543df16ee3b784d789c75b68319db0",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 8,
+     "dd": 8,
+     "supply": "11975626"
+    }
+   ],
+   "ratio_vs_ledger_bps": 10000
+  },
+  {
+   "sym": "DAI",
+   "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+   "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+   "locked": "659464325200500902710000",
+   "ledger_native": "659464307589300000000000",
+   "dests": [
+    {
+     "chain": "polygon",
+     "l2": "0x732eb1747eccfc431ff19bc359ffc83755b1918c",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "1567916889540000000000"
+    },
+    {
+     "chain": "arbitrum",
+     "l2": "0x5c4f2fefb97f7df09e762d95c83f0ccf8bce8234",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "797558250900000000000"
+    },
+    {
+     "chain": "optimism",
+     "l2": "0x098ea47d630b46df1e08e389e5e4466119c7dd30",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "199066539500000000000"
+    },
+    {
+     "chain": "base",
+     "l2": "0x617edadb51bfb43a44bb91c7402129c23ba52381",
+     "ok": true,
+     "vault": "0x3ee18b2214aff97000d974cf647e7c347e8fa585",
+     "sd": 18,
+     "dd": 18,
+     "supply": "270595960990000000000"
+    }
+   ],
+   "ratio_vs_ledger_bps": 10000
+  }
+ ],
+ "ccip": [
+  {
+   "sym": "GHO",
+   "l1": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
+   "vault": "0x06179f7c1be40863405f374e7f5f8806c728660a",
+   "locked": "66516827775305250305808896",
+   "supported": [
+    "4949039107694359620",
+    "15971525489660198786",
+    "6433500567565415381",
+    "465200170687744372",
+    "3461204551265785888",
+    "9335212494177455608",
+    "1556008542357238666",
+    "3016212468291539606",
+    "8481857512324358265"
+   ],
+   "dests": [
+    {
+     "chain": "arbitrum",
+     "l2": "0x7dff72693f6a4149b17e7c6314655f6a9f7c8b33",
+     "ok": true,
+     "vault": "0x06179f7c1be40863405f374e7f5f8806c728660a",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xb94ab28c6869466a46a42aba834ca2b3cecca5eb",
+     "supply": "29883684488212955935700635"
+    },
+    {
+     "chain": "base",
+     "l2": "0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee",
+     "ok": true,
+     "vault": "0x06179f7c1be40863405f374e7f5f8806c728660a",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0x98217a06721ebf727f2c8d9ad7718ec28b7aae34",
+     "supply": "759802424971357454826343"
+    },
+    {
+     "chain": "ink",
+     "l2": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73",
+     "ok": true,
+     "vault": "0x06179f7c1be40863405f374e7f5f8806c728660a",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xde6539018b095353a40753dc54c91c68c9487d4e",
+     "supply": "2795900605562101351193412"
+    },
+    {
+     "chain": "mantle",
+     "l2": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73",
+     "ok": true,
+     "vault": "0x06179f7c1be40863405f374e7f5f8806c728660a",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xde6539018b095353a40753dc54c91c68c9487d4e",
+     "supply": "720602511103062754849794"
+    },
+    {
+     "chain": "xlayer",
+     "l2": "0xde6539018b095353a40753dc54c91c68c9487d4e",
+     "ok": true,
+     "vault": "0x06179f7c1be40863405f374e7f5f8806c728660a",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xa5ba213867e175a182a5dd6a9193c6158738105a",
+     "supply": "123182302511534698076"
+    },
+    {
+     "chain": "monad",
+     "l2": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73",
+     "ok": true,
+     "vault": "0x06179f7c1be40863405f374e7f5f8806c728660a",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xa5ae05b71c3f170e12e7620fdf7679721aec1ec8",
+     "supply": "19980546499302361775893153"
+    }
+   ],
+   "unlisted": [
+    {
+     "selector": "6433500567565415381",
+     "chain": null
+    },
+    {
+     "selector": "465200170687744372",
+     "chain": null
+    },
+    {
+     "selector": "9335212494177455608",
+     "chain": null
+    }
+   ]
+  },
+  {
+   "sym": "rsETH",
+   "l1": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7",
+   "vault": "0x55e5a21b4ccc7fa502434ab1109d4ede0397ab25",
+   "locked": "12098064504030956983398",
+   "supported": [
+    "4627098889531055414",
+    "3734403246176062136",
+    "15971525489660198786",
+    "1556008542357238666",
+    "3461204551265785888"
+   ],
+   "dests": [
+    {
+     "chain": "optimism",
+     "l2": "0x043849686ee254ada46a432770e1a491491fc44d",
+     "ok": true,
+     "vault": "0x55e5a21b4ccc7fa502434ab1109d4ede0397ab25",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xc28a1f91e6d0ecf6cbfe6809d256a7753fae52b5",
+     "supply": "34656913358781739134"
+    },
+    {
+     "chain": "base",
+     "l2": "0xe2110d5a2722abd8c8002646c645af15f5e9db1f",
+     "ok": true,
+     "vault": "0x55e5a21b4ccc7fa502434ab1109d4ede0397ab25",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xaadf0bf985307b6830eaf68da6b4313a2a60fa61",
+     "supply": "11398610622856013411546"
+    },
+    {
+     "chain": "mantle",
+     "l2": "0x91a8aa510d20b2c1b27512777a1b6bd7e0552579",
+     "ok": true,
+     "vault": "0x55e5a21b4ccc7fa502434ab1109d4ede0397ab25",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xd68fefd0febf69b33ffa7c0d92c35a8532f77c80",
+     "supply": "8114050000000000000"
+    },
+    {
+     "chain": "ink",
+     "l2": "0x3c29af7a7b7ec62a481d27ed297b90c1974a0230",
+     "ok": true,
+     "vault": "0x55e5a21b4ccc7fa502434ab1109d4ede0397ab25",
+     "sd": 18,
+     "dd": 18,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0x0fc90feec60939765ac40839515537fe2306f2f8",
+     "supply": "164900000000000000"
+    }
+   ],
+   "unlisted": [
+    {
+     "selector": "4627098889531055414",
+     "chain": null
+    }
+   ]
+  },
+  {
+   "sym": "syrupUSDC",
+   "l1": "0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b",
+   "vault": "0x20b79d39bd44deee4f89b1e9d0e3b945fde06491",
+   "locked": "171364687408855",
+   "supported": [
+    "3016212468291539606",
+    "4949039107694359620",
+    "15971525489660198786",
+    "3461204551265785888",
+    "7281642695469137430",
+    "8481857512324358265",
+    "6180753054346818345",
+    "6370580034781731079",
+    "124615329519749607"
+   ],
+   "dests": [
+    {
+     "chain": "xlayer",
+     "l2": "0xd503b0581aa504e75b345bf4cb8c359d8d1a042f",
+     "ok": true,
+     "vault": "0x20b79d39bd44deee4f89b1e9d0e3b945fde06491",
+     "sd": 6,
+     "dd": 6,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 2.0.0",
+     "dpool": "0xf981950e47ec3d060b524ecbda80e146e6e36a90",
+     "supply": "2141573"
+    },
+    {
+     "chain": "arbitrum",
+     "l2": "0x41ca7586cc1311807b4605fbb748a3b8862b42b5",
+     "ok": true,
+     "vault": "0x20b79d39bd44deee4f89b1e9d0e3b945fde06491",
+     "sd": 6,
+     "dd": 6,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0x660975730059246a68521a3e2fbd4740173100f5",
+     "supply": "532229444946"
+    },
+    {
+     "chain": "base",
+     "l2": "0x660975730059246a68521a3e2fbd4740173100f5",
+     "ok": true,
+     "vault": "0x20b79d39bd44deee4f89b1e9d0e3b945fde06491",
+     "sd": 6,
+     "dd": 6,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.5.1",
+     "dpool": "0xa36955b2bc12aee77ff7519482d16c7b86dbe42a",
+     "supply": "110179566271"
+    },
+    {
+     "chain": "ink",
+     "l2": "0x3c23e6fb09064e9a64829fa8fee27ad19a27bfa9",
+     "ok": true,
+     "vault": "0x20b79d39bd44deee4f89b1e9d0e3b945fde06491",
+     "sd": 6,
+     "dd": 6,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.6.1",
+     "dpool": "0xa3361ff0d9ca1cba31335a3280eece47f1a08f43",
+     "supply": "110"
+    },
+    {
+     "chain": "monad",
+     "l2": "0xab6e5a0c3799d020c790d34f7b2c02639e238af7",
+     "ok": true,
+     "vault": "0x20b79d39bd44deee4f89b1e9d0e3b945fde06491",
+     "sd": 6,
+     "dd": 6,
+     "tv": "LockReleaseTokenPool 1.5.1",
+     "dtv": "BurnMintTokenPool 1.6.1",
+     "dpool": "0x4ea35565147a7a6bfdaf7e605bdcda4bd039a540",
+     "supply": "63370712999261"
+    }
+   ],
+   "unlisted": [
+    {
+     "selector": "7281642695469137430",
+     "chain": null
+    },
+    {
+     "selector": "6180753054346818345",
+     "chain": null
+    },
+    {
+     "selector": "6370580034781731079",
+     "chain": null
+    },
+    {
+     "selector": "124615329519749607",
+     "chain": null
+    }
+   ]
+  }
+ ],
+ "layerzero": [
+  {
+   "sym": "weETH",
+   "l1": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+   "vault": "0xcd2eb13d6831d4602d80e5db9230a57596cdca63",
+   "locked": "120813003094540249195429",
+   "scan_range": [
+    30101,
+    30700
+   ],
+   "peers": [
+    {
+     "eid": 30102,
+     "chain": null,
+     "peer": "0x00000000000000000000000004c0599ae5a44757c0af6f9ec3b93da8976c150a"
+    },
+    {
+     "eid": 30106,
+     "chain": null,
+     "peer": "0x000000000000000000000000a3d68b74bf0528fdd07263c60d6488749044914b"
+    },
+    {
+     "eid": 30111,
+     "chain": "optimism",
+     "peer": "0x0000000000000000000000005a7facb970d094b6c7ff1df0ea68d99e6e73cbff"
+    },
+    {
+     "eid": 30165,
+     "chain": null,
+     "peer": "0x000000000000000000000000c1fa6e2e8667d9be0ca938a54c7e0285e9df924a"
+    },
+    {
+     "eid": 30183,
+     "chain": null,
+     "peer": "0x0000000000000000000000001bf74c010e6320bab11e2e5a532b5ac15e0b8aa6"
+    },
+    {
+     "eid": 30184,
+     "chain": "base",
+     "peer": "0x00000000000000000000000004c0599ae5a44757c0af6f9ec3b93da8976c150a"
+    },
+    {
+     "eid": 30214,
+     "chain": null,
+     "peer": "0x00000000000000000000000001f0a31698c4d065659b9bdc21b3610292a1c506"
+    },
+    {
+     "eid": 30243,
+     "chain": null,
+     "peer": "0x00000000000000000000000004c0599ae5a44757c0af6f9ec3b93da8976c150a"
+    },
+    {
+     "eid": 30260,
+     "chain": null,
+     "peer": "0x00000000000000000000000004c0599ae5a44757c0af6f9ec3b93da8976c150a"
+    },
+    {
+     "eid": 30320,
+     "chain": "unichain",
+     "peer": "0x0000000000000000000000007dcc39b4d1c53cb31e1abc0e358b43987fef80f7"
+    },
+    {
+     "eid": 30322,
+     "chain": "morph",
+     "peer": "0x0000000000000000000000007dcc39b4d1c53cb31e1abc0e358b43987fef80f7"
+    },
+    {
+     "eid": 30335,
+     "chain": null,
+     "peer": "0x000000000000000000000000a6cb988942610f6731e664379d15ffcfbf282b44"
+    },
+    {
+     "eid": 30339,
+     "chain": "ink",
+     "peer": "0x000000000000000000000000a3d68b74bf0528fdd07263c60d6488749044914b"
+    },
+    {
+     "eid": 30362,
+     "chain": "berachain",
+     "peer": "0x0000000000000000000000007dcc39b4d1c53cb31e1abc0e358b43987fef80f7"
+    },
+    {
+     "eid": 30367,
+     "chain": "hyperevm",
+     "peer": "0x000000000000000000000000a3d68b74bf0528fdd07263c60d6488749044914b"
+    },
+    {
+     "eid": 30383,
+     "chain": null,
+     "peer": "0x000000000000000000000000a3d68b74bf0528fdd07263c60d6488749044914b"
+    },
+    {
+     "eid": 30390,
+     "chain": "monad",
+     "peer": "0x000000000000000000000000a3d68b74bf0528fdd07263c60d6488749044914b"
+    },
+    {
+     "eid": 30396,
+     "chain": null,
+     "peer": "0x00000000000000000000000060a08269e5f3406d8fd7892567d53188c7f75009"
+    },
+    {
+     "eid": 30416,
+     "chain": null,
+     "peer": "0x000000000000000000000000a3d68b74bf0528fdd07263c60d6488749044914b"
+    },
+    {
+     "eid": 30417,
+     "chain": null,
+     "peer": "0x000000000000000000000000a3d68b74bf0528fdd07263c60d6488749044914b"
+    }
+   ]
+  },
+  {
+   "sym": "WBTC",
+   "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+   "vault": "0x0555e30da8f98308edb960aa94c0db47230d2b9c",
+   "locked": "80887959399",
+   "scan_range": [
+    30101,
+    30700
+   ],
+   "peers": [
+    {
+     "eid": 30102,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30106,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30108,
+     "chain": null,
+     "peer": "0xef3a1c7d6aa1a531336433e48d7b1d9b46c5bedc69f3db291df4e39bef4708e2"
+    },
+    {
+     "eid": 30111,
+     "chain": "optimism",
+     "peer": "0x000000000000000000000000c3f854b2970f8727d28527ece33176fac67fef48"
+    },
+    {
+     "eid": 30184,
+     "chain": "base",
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30199,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30279,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30280,
+     "chain": "sei",
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30316,
+     "chain": "hedera",
+     "peer": "0x000000000000000000000000d7d4d91d64a6061fa00a94e2b3a2d2a5fb677849"
+    },
+    {
+     "eid": 30320,
+     "chain": "unichain",
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30332,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30335,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30336,
+     "chain": null,
+     "peer": "0x000000000000000000000000717dae2baf7656be9a9b01dee31d571a9d4c9579"
+    },
+    {
+     "eid": 30340,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30362,
+     "chain": "berachain",
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30367,
+     "chain": "hyperevm",
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30378,
+     "chain": null,
+     "peer": "0xf028303ea0d8dc2ac3ec17c696ca04f097d0c9af01e8a6607dc28242bd393a8c"
+    },
+    {
+     "eid": 30380,
+     "chain": null,
+     "peer": "0x000000000000000000000000c5098b3ca516784323872f17235fa074e167d3d2"
+    },
+    {
+     "eid": 30388,
+     "chain": null,
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30390,
+     "chain": "monad",
+     "peer": "0x0000000000000000000000000555e30da8f98308edb960aa94c0db47230d2b9c"
+    },
+    {
+     "eid": 30500,
+     "chain": null,
+     "peer": "0x069ac468d7ad7324c2807d9422630c650729a46121f023b11a647edf173562f9"
+    }
+   ]
+  },
+  {
+   "sym": "rsETH",
+   "l1": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7",
+   "vault": "0x85d456b2dff1fd8245387c0bfb64dfb700e98ef3",
+   "locked": "16986231813120661841135",
+   "scan_range": [
+    30101,
+    30700
+   ],
+   "peers": [
+    {
+     "eid": 30110,
+     "chain": "arbitrum",
+     "peer": "0x0000000000000000000000004186bfc76e2e237523cbc30fd220fe055156b41f"
+    }
+   ]
+  }
+ ],
+ "por": [
+  {
+   "token": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+   "feed": "0xa81fe04086865e63e12dd3776978e49deea2ea4e",
+   "name": "WBTC PoR",
+   "answer": "11614465016450",
+   "updated_at": 1794575315,
+   "decimals": 8,
+   "supply": "11613218273262",
+   "supply_decimals": 8
+  },
+  {
+   "token": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+   "feed": "0xad410e655c0fe4741f573152592eeb766e686ce7",
+   "name": "stETH PoR",
+   "answer": "9744701057850212313954985",
+   "updated_at": 1794636143,
+   "decimals": 18,
+   "supply": "9750336999004325536731075",
+   "supply_decimals": 18
+  },
+  {
+   "token": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+   "feed": "0xc8cd82067ea907ea4af81b625d2bb653e21b5156",
+   "name": "eETH PoR",
+   "answer": "2277147239788571972804454",
+   "updated_at": 1794598691,
+   "decimals": 18,
+   "supply": "2277738121262779279735730",
+   "supply_decimals": 18
+  }
+ ],
+ "reads": 414,
+ "agreed": 414,
+ "diffs": []
+}
