@@ -1,100 +1,99 @@
 # BackedBy
 
-**Is this bridged token actually backed?** BackedBy compares the tokens a bridge has locked in its vault on Ethereum
-with the supply of the tokens it minted on the other chain, at pinned finalized blocks on both chains, and records the
-answer on GenLayer: BACKED, UNDER_BACKED or INCONCLUSIVE.
+**Is this bridged token actually backed?** BackedBy compares what a bridge holds in its vaults on Ethereum with the
+supply of the tokens it minted on other chains, at pinned finalized blocks on every chain, and records the answer on
+GenLayer: BACKED, UNDER_BACKED or INCONCLUSIVE. Code computes every number and every verdict; no model is called.
 
-Live: **https://backedby-ledger.vercel.app** · Rules: [docs/RULES.md](docs/RULES.md) · Seeds: [docs/SEEDS.md](docs/SEEDS.md)
+Live: **https://backedby-ledger.vercel.app** · Rules: [docs/RULES.md](docs/RULES.md) · Seeds: [docs/SEEDS.md](docs/SEEDS.md) ·
+Milestone: [docs/MILESTONE.md](docs/MILESTONE.md) · Keeper: [/keeper](https://backedby-ledger.vercel.app/keeper)
 
 ## What and why
 
-A bridged token is only worth what its bridges still hold. Nomad's Ethereum vault was drained in August 2022 and its
-Moonbeam tokens kept circulating; today the vault holds about 0.2% of the madUSDC outstanding. Nobody has to trust a
-dashboard for that number: both halves are public chain state. BackedBy makes reading them a GenLayer transaction, so
-the number is agreed by independent validators, pinned to specific blocks, and usable by other contracts: an
-operator can bond that a pair stays backed, anyone can challenge with a stake, and a lending market can ask
-`CollateralGate.is_backed(pair)` before it accepts the token.
+A bridged token is only worth what its bridge still holds. Nomad's Ethereum vault was drained in August 2022 and its
+Moonbeam tokens still circulate; today the vault holds well under 1% of what is outstanding. Both halves of that number
+are public chain state. BackedBy makes reading them a GenLayer transaction, so the number is agreed by independent
+validators, pinned to specific blocks, kept as a history, and usable by other contracts: an operator can bond that a
+pair stays backed, anyone can challenge with a stake, and a lending market asks
+`CollateralGate.is_backed(pair, source_token, dest_chain, dest_token, now)` before it accepts the token.
 
 ## How the rules work
 
-1. **Pairs are authenticated by the bridges themselves.** A pair is one source token, 1..n vaults holding it on
-   Ethereum (summed) and 1..n destination tokens (summed). ChainReader proves every vault and destination from the
-   bridge's own mapping on both chains (Arbitrum's gateway routers, the OP Stack token's `remoteToken`/`bridge`,
-   Polygon's Root/ChildChainManager, the DAI bridges, Nomad's TokenRegistry, LayerZero OFT peers such as USDT0's).
-   Anything it cannot prove is refused. Anyone can add a missing vault or destination with the same proof, so a token
-   with two mint paths (Polygon's USDT: the PoS bridge and USDT0) is judged against both.
-2. **One finalized block per chain, source last.** The Ethereum block must be at or after every destination block and
-   at most 10 minutes later (5 for Polygon, 2 once a pair holds a fast LayerZero vault), so transfers in flight can
-   only look over-backed, never under, except a fast bridge's, which RULES.md bounds
-   ([why](docs/RULES.md#why-this-order-makes-in-flight-transfers-look-over-backed-never-under)).
-3. **Two RPCs per chain, or INCONCLUSIVE.** Every value is read from two RPCs run by different operators and must be
-   identical; validators accept the leader's reading only if it matches their own. Any disagreement, error, missing
-   block, decimals change or bridge remapping is INCONCLUSIVE and refunds every stake.
-4. **The verdict is arithmetic.** Decimals are normalized exactly; BACKED if `locked >= supply * (1 - tolerance)`, with
-   the tolerance frozen at registration. On OP and Base a token counts as the larger of its supply and the bridge's
-   own ledger, which can only err towards UNDER_BACKED. No model is involved anywhere.
-5. **Bonds and challenges.** UNDER_BACKED slashes the bond (challenger gets the stake back plus half, the treasury the
-   other half); BACKED moves the challenger's stake into the bond; INCONCLUSIVE refunds.
-6. **PROVISIONAL, CONTESTABLE, FINAL.** Every ruling can be contested for 6 hours (90 s on the demo registry); a contest
-   re-reads the same blocks. Every state has a deadline and a public exit.
-7. **Patrol.** A GitHub Actions job ([.github/workflows/patrol.yml](.github/workflows/patrol.yml)) files monitoring
-   checks on every canonical pair every 6 hours and finalizes expired windows.
+1. **Pairs are authenticated by the bridges themselves.** A pair is one source token, 1-8 vaults holding it on
+   Ethereum (summed) and 1-16 destination tokens (summed). ChainReader proves every vault and destination from the
+   bridge's own config on both chains: Arbitrum's gateway routers, the OP Stack token's `remoteToken`/`bridge`, the OP
+   DAI bridges, Polygon's Root/ChildChainManager, Nomad's TokenRegistry, **LayerZero** OFT adapters (`token()` and
+   `peers`), **Wormhole** Portal (`bridgeContracts`, `wrappedAsset`, the token's origin) and **Chainlink CCIP**
+   token pools (TokenAdminRegistry, lock-release and burn-mint pools naming each other). Anything else is refused.
+2. **Coverage: nothing a vault backs goes unnoticed.** Every check also reads, at its pinned Ethereum block, which
+   destinations each vault's own bridge config names: every LayerZero eid 30101-31100 in one Multicall3 call, a CCIP
+   pool's supported chains, Wormhole's ledger of what it owes everywhere. Unlisted ones are named in the ruling; the
+   keeper adds the ones it can prove and records the rest, which the site shows.
+3. **One finalized block per chain, source last**, within 10 minutes (5 for Polygon, 2 with a LayerZero vault), so
+   transfers in flight can only look over-backed ([why](docs/RULES.md#why-this-order-makes-in-flight-transfers-look-over-backed-never-under)).
+4. **Two RPCs per chain; transport faults are PENDING.** Every value is read from two RPCs run by different operators
+   and must be identical. An outage or a disagreement stores nothing: the check stays open and anyone retries until
+   a read window fixed at filing closes, then it expires and refunds. Validators read the registry's request
+   themselves and accept a leader's PENDING only if their own read fails too.
+5. **The verdict is arithmetic.** BACKED if `locked >= supply * (1 - tolerance)`, tolerance frozen at registration;
+   within 10 bps of that line is ALERT. Every FINAL ruling becomes a point of the pair's history (charted on the site).
+   Where Chainlink publishes Proof of Reserve for the token, it is read at the same block and shown next to the ratio,
+   MATCH or DIFF with the delta and its explanation; over-backed pairs show where the surplus comes from.
+6. **Bonds, challenges, contests.** UNDER_BACKED slashes the bond (challenger gets the stake back plus half);
+   BACKED moves the stake into the bond; INCONCLUSIVE refunds. Rulings are contestable for 6 h (90 s on the demo
+   registry) and every state has a deadline and a public exit. Payouts are external sends, each proved on chain.
+7. **CollateralGate** is bound to one pair and its exact tokens (a copycat pair is never read) and answers in named
+   states; only BACKED and BACKED_ALERT are favorable, never on missing, pending, stale or partial data.
+8. **Keeper.** A GitHub Actions job ([keeper.yml](.github/workflows/keeper.yml)), hourly and every 6 hours, drives
+   every check on both v2 registries with durable checkpoints on the `keeper-state` branch.
 
 ## Addresses (GenLayer Studio Dev, chain 61997)
 
-Every contract was deployed from commit `047d3406d5c78f4cbb1913012bd5df249998fcb5`.
+Every v2 contract was deployed from commit `0ee50f9c4ca75e71d11c5778c9bb8a7b67d34ff7`.
 
 | Contract | Address | Deployed file | sha256 | Constructor |
 |---|---|---|---|---|
-| ChainReader | [`0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C`](https://explorer-studio-dev.genlayer.com/address/0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C) | `build/ChainReader.py` | `a8d4f3ff0b62e485` | `[]` |
-| BackedByRegistry | [`0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102`](https://explorer-studio-dev.genlayer.com/address/0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102) | `build/BackedByRegistry.py` | `14c42a676e00f96d` | `["CANONICAL", "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C"]` |
-| BackedByRegistryDemo | [`0x0Cf85aC9650f7957D74224561DF6667a769AF20f`](https://explorer-studio-dev.genlayer.com/address/0x0Cf85aC9650f7957D74224561DF6667a769AF20f) | `build/BackedByRegistry.py` | `14c42a676e00f96d` | `["DEMO", "0x7d0C1Ccc40A8ECB5a82a3879C78F503E7ECac35C"]` |
-| CollateralGate | [`0x78d4Bbfc42Ebc94A18Aee6557079215881bA3aD8`](https://explorer-studio-dev.genlayer.com/address/0x78d4Bbfc42Ebc94A18Aee6557079215881bA3aD8) | `build/CollateralGate.py` | `2f84b3fd462670ea` | `["0x66BA2FF893f5FaAf21f000286A5e34BBDB9c8102", 86400, 50]` |
-| CollateralGateDemo | [`0x77F394DD1E2D7226621C37c7F6887D340B4D194F`](https://explorer-studio-dev.genlayer.com/address/0x77F394DD1E2D7226621C37c7F6887D340B4D194F) | `build/CollateralGate.py` | `2f84b3fd462670ea` | `["0x0Cf85aC9650f7957D74224561DF6667a769AF20f", 1800, 50]` |
+| ChainReader | [`0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C`](https://explorer-studio-dev.genlayer.com/address/0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C) | `build/ChainReader.py` | `d66ff61ab930ca55` | `[]` |
+| BackedByRegistry | [`0x40dDb09B6bB789562127A829c87Cf361D8012557`](https://explorer-studio-dev.genlayer.com/address/0x40dDb09B6bB789562127A829c87Cf361D8012557) | `build/BackedByRegistry.py` | `e35efb5bdbd657a1` | `["CANONICAL", "0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C"]` |
+| BackedByRegistryDemo | [`0xACf1d85bF09a50078ac422A3af69eAe8B10AB384`](https://explorer-studio-dev.genlayer.com/address/0xACf1d85bF09a50078ac422A3af69eAe8B10AB384) | `build/BackedByRegistry.py` | `e35efb5bdbd657a1` | `["DEMO", "0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C"]` |
+| CollateralGate | [`0xf1CBE123DA97c9E6B0Db7BE945a816880870677C`](https://explorer-studio-dev.genlayer.com/address/0xf1CBE123DA97c9E6B0Db7BE945a816880870677C) | `build/CollateralGate.py` | `c216e4cabecfde88` | `["0x40dDb09B6bB789562127A829c87Cf361D8012557", 86400, 50]` |
+| CollateralGateDemo | [`0x9a75bB17C9b27Ab746c06B3bba47D86C2cb7DE8C`](https://explorer-studio-dev.genlayer.com/address/0x9a75bB17C9b27Ab746c06B3bba47D86C2cb7DE8C) | `build/CollateralGate.py` | `c216e4cabecfde88` | `["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384", 1800, 50]` |
 
-The canonical registry runs the 6 h contest window and holds the seeded pairs; the demo registry runs a 90 s window
-and holds the [demo run](docs/demo-run.log): every payout in it is proved on chain ([docs/payouts.json](docs/payouts.json))
-and its `eth_getBalance` is 0.
-
-Earlier deployments are retired; their records are kept unchanged: [docs/superseded/e915d21](docs/superseded/e915d21/README.md)
-(one vault per pair) and [docs/superseded/6f9431f](docs/superseded/6f9431f/README.md) (internal transfers that Studio Dev
-skipped, so payouts never arrived; USDT0 read on 3 of its chains).
+The canonical registry holds the seeded pairs; the demo registry holds the [demo run](docs/demo-run.log), every
+payout of which is proved on chain ([docs/payouts.json](docs/payouts.json)). The accepted v1 deployment is unchanged and
+proven byte-identical to its build at BASE ([docs/MILESTONE.md](docs/MILESTONE.md), [docs/superseded/047d340](docs/superseded/047d340/README.md)).
 
 ## How to verify
 
 - **Source.** `node tools/verify_source.mjs` reads each address's code from Studio Dev (`gen_getContractCode`) and
-  compares it byte for byte with `build/` at the deploy commit and at HEAD. The site does the same live at
-  [/verify](https://backedby-ledger.vercel.app/verify). `build/` is `contracts/` with the shared helpers inlined
-  (`python3 tools/build.py`).
-- **Numbers.** Every pair page links each read to a block explorer: the vault's balance at the pinned Ethereum block,
-  the token's supply at the pinned destination block, and every bridge-mapping call that was re-read.
-- **Tests.** `sh test/run_offline.sh`: the offline suite runs the deployed build files against mock chains (rules,
-  every boundary, RPC disagreement, fake pairs, omitted destinations, double checks, griefing, withdrawals, fund
-  conservation, stuck-state timeouts, the attack round in [docs/ATTACK_REPORT.md](docs/ATTACK_REPORT.md)).
-- **Everything at once.** `node tools/final_check.mjs`, result in [docs/FINAL_CHECK.md](docs/FINAL_CHECK.md).
-- **API.** `/api/backed?pair=<id>` returns the pair's standing as JSON, read from chain; `&format=svg` returns a badge:
-  ![badge](https://backedby-ledger.vercel.app/api/backed?pair=9&format=svg)
+  compares it byte for byte with `build/` at the deploy commit and at HEAD; the site does it live at
+  [/verify](https://backedby-ledger.vercel.app/verify). `node tools/base_proof.mjs <BASE>` does the same for v1.
+- **Numbers.** Every pair page links each read to a block explorer at the pinned block;
+  `node tools/real_world.mjs` recomputes every ruling from a third RPC per chain ([docs/REAL_WORLD_CHECK.md](docs/REAL_WORLD_CHECK.md)).
+- **Tests.** `sh test/run_offline.sh` (contract, rule, attack, meaning, payout and keeper suites against `build/`),
+  `.venv-gl/bin/python -m pytest tests/direct` (GenLayer Direct Mode), `cd e2e && npx playwright test` (the live
+  site); all of them, lint, the site build and deployed-source verification run in [CI](.github/workflows/ci.yml).
+- **Everything at once.** `node tools/final_check.mjs` ([docs/FINAL_CHECK.md](docs/FINAL_CHECK.md)) and
+  `node tools/audit.mjs` ([docs/AUDIT.md](docs/AUDIT.md)).
+- **API.** `/api/backed?pair=<id>` returns the pair's standing and the gate's bound answer as JSON; `&format=svg` a badge:
+  ![badge](https://backedby-ledger.vercel.app/api/backed?pair=1&format=svg)
 
 ## Scope
 
-- Source chain is Ethereum; destinations are Arbitrum One, OP Mainnet, Base, Polygon PoS and Moonbeam through six
-  bridge kinds (Arbitrum's escrow gateways, the OP and Base Standard Bridges, the OP DAI bridge, Polygon PoS's ERC20
-  predicate, Nomad), plus LayerZero OFTs on those chains and on Mantle, X Layer, Sei, Flare, Hedera, Unichain, Morph,
-  Ink, Berachain, HyperEVM and Monad. Other bridges need their own authentication rule in ChainReader.
-- A pair's supply is the destination tokens' `totalSupply` (on OP Stack chains, the bridge's own per-token deposits
-  if larger). A vault belongs to one pair, which lists every destination it backs that two RPCs can read
-  ([shared vaults](docs/SEEDS.md#shared-vaults)). USDT0's adapter has peers on six chains left out (Conflux, Rootstock,
-  Plasma, Stable, MegaETH, Tempo: no second honest RPC or no finalized tag); their supply is not counted, which can
-  only make the USDT pair look better backed, never worse.
-- "Locked" is the vault's balance of the source token. A rebasing source token or a destination token that can mint
-  outside the bridge is measured as the chains report it, which is the point.
-- Moonbeam has not produced a block since 2026-08-10, so Nomad pairs can only be checked at that moment.
-- Payouts are external value messages, delivered when the claim finalizes; every demo payout is proved by the
-  finalized transaction and by `eth_getBalance` ([docs/payouts.json](docs/payouts.json), [docs/PAYOUT_PROBE.md](docs/PAYOUT_PROBE.md)).
-- The read path depends on public RPC endpoints. When one is down or throttling, reads come back INCONCLUSIVE and
-  are retried; they never become a verdict.
+- Source chain is Ethereum. Destinations: Arbitrum One, OP Mainnet, Base, Polygon PoS and Moonbeam through the
+  canonical bridges and Nomad; LayerZero OFTs on those and on Mantle, X Layer, Sei, Flare, Hedera, Unichain, Morph,
+  Ink, Berachain, HyperEVM and Monad; Wormhole Portal on Polygon, Arbitrum, OP Mainnet and Base; Chainlink CCIP on
+  twelve chains. A chain is read only where two public RPCs from different operators serve archive state and the
+  finalized tag; destinations a vault backs elsewhere are named in its coverage, counted through Wormhole's ledger,
+  and keep the gate from answering BACKED for that pair.
+- OP and Base Standard Bridges and Nomad keep one escrow for every representation of a token, which cannot be
+  enumerated on chain: their coverage is OPEN and the gate does not accept them. A destination counts as the larger of
+  its supply and the bridge's own per-token ledger there.
+- "Locked" is the vault's balance of the source token, as the chain reports it. Proof of Reserve and surplus
+  explanations are shown next to the verdict and never change it.
+- Moonbeam has not produced a block since 2026-08-10, so Nomad pairs are checked at that moment.
 
 ## Repository
 
-`contracts/` source · `build/` deployed bytes · `test/` offline suite and on-chain scripts (deploy, seed, demo) ·
-`tools/` feasibility, patrol, verification, final check · `frontend/` the site · `docs/` everything written down.
+`contracts/` source · `build/` deployed bytes · `test/` offline suites and on-chain scripts (deploy, seed, demo) ·
+`tests/direct/` Direct Mode · `e2e/` Playwright · `tools/` feasibility, keeper, verification, real-world check,
+final check, audit · `frontend/` the site · `docs/` everything written down.
