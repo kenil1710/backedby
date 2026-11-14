@@ -1,0 +1,27 @@
+
+# Demo run 2026-11-14T07:54:23.950Z on 0xACf1d85bF09a50078ac422A3af69eAe8B10AB384 (commit 0ee50f9c4ca75e71d11c5778c9bb8a7b67d34ff7)
+config: window 90s, read timeout 300s, unbond delay 120s, min bond 50000000000000000, min stake 10000000000000000, fast gap 120s
+
+## 1. Register eight real pairs, each authenticated by its bridge's own mapping  (2026-11-14T07:54:23.951Z)
+  authenticate(["arbitrum","0x514910771af9ca656af840dff83e8264ecf986ca","0xf97f4df75117a78c1a5a0dbb814af92458539fb4"]) -> ok ACCEPTED 35s tx 0x2cc93dbd36334bd69bb9daf0263c63e5cbe2cb9bd259952239893b91e10f69dc {"auth_id":2,"dest_decimals":18,"dest_token":"0xf97f4df75117a78c1a5a0dbb814af92458539fb4","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":18,"vault":"0xa3a7b6f88361f48403514059f1f16c8e78d60eec"}
+  register_pair(["2",0,"LINK on Arbitrum (demo)"]) -> ok ACCEPTED 12s tx 0x37b8f1cd07563da5c2e7a19d13bc610214b2fc032a2bd09412cbca44f23d6a6a {"destinations":1,"ok":true,"pair_id":1,"vaults":1}
+   -> pair 1: LINK on Arbitrum (demo)
+  authenticate(["polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 22s tx 0xaa51ff26174a991d9ea5471c4617c3ba225fde26609748320d3dae115919571e {"auth_id":3,"dest_decimals":6,"dest_token":"0xc2132d05d31c914a87c6611c10748aeb04b58e8f","family":"MAPPING","remote":"polygon:polygon","source_decimals":6,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["3",0,"USDT on Polygon, PoS vault only (demo)"]) -> ok ACCEPTED 22s tx 0x0cd52a2bb23abd931165c3c00a387b49019957877f42721a0ffa87bbe6b19494 {"destinations":1,"ok":true,"pair_id":2,"vaults":1}
+   -> pair 2: USDT on Polygon, PoS vault only (demo)
+GenLayer RPC error (sim_estimateTransactionFees): The GenLayer RPC did not respond within 45s.
+  … write fee simulation failed for authenticate (An internal error was received.
+
+Details: The GenLayer RPC did not respond within 45s.
+Version: viem)
+  authenticate(["nomad","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x8f552a71efe5eefc207bf75485b356a0b3f01ec9"]) -> ok ACCEPTED 62s tx 0xe24dd16ecf79fee66efebe34056f2696a454ede7cd1f1044b5959d010b2af5ae {"auth_id":4,"dest_decimals":6,"dest_token":"0x8f552a71efe5eefc207bf75485b356a0b3f01ec9","family":"OPEN","remote":"nomad:moonbeam","source_decimals":6,"vault":"0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"}
+  register_pair(["4",0,"madUSDC on Moonbeam (demo)"]) -> ok ACCEPTED 12s tx 0xca64165fd6eb92a174e9e04d8d5132f36d21fac6d9f11521cea9c4864d30f5b0 {"destinations":1,"ok":true,"pair_id":3,"vaults":1}
+   -> pair 3: madUSDC on Moonbeam (demo)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x7f5c764cbc14f9669b88837ca1490cca17c31607"]) -> ok ACCEPTED 14s tx 0x59447e721f5d7f9f7c5e080e09fad2ea5be2f5986c4af3ef874188b4aeeb2566 {"auth_id":6,"dest_decimals":6,"dest_token":"0x7f5c764cbc14f9669b88837ca1490cca17c31607","family":"OPEN","remote":"optimism:optimism","source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+  register_pair(["6",0,"USDC.e on OP Mainnet (demo)"]) -> ok ACCEPTED 12s tx 0xb3f8f0d2f3489d694992ff682bd3995f4c27d5ff2a7a9d3d4e8795e3a376678a {"destinations":1,"ok":true,"pair_id":4,"vaults":1}
+   -> pair 4: USDC.e on OP Mainnet (demo)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)

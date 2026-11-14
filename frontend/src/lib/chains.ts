@@ -29,6 +29,10 @@ export const KIND_NAME: Record<string, string> = {
   oft_berachain: "LayerZero OFT (Berachain)",
   oft_hyperevm: "LayerZero OFT (HyperEVM)",
   oft_monad: "LayerZero OFT (Monad)",
+  wh_polygon: "Wormhole (Polygon)", wh_arbitrum: "Wormhole (Arbitrum)", wh_optimism: "Wormhole (OP)", wh_base: "Wormhole (Base)",
+  ccip_arbitrum: "CCIP (Arbitrum)", ccip_base: "CCIP (Base)", ccip_optimism: "CCIP (OP)", ccip_polygon: "CCIP (Polygon)",
+  ccip_mantle: "CCIP (Mantle)", ccip_xlayer: "CCIP (X Layer)", ccip_monad: "CCIP (Monad)", ccip_ink: "CCIP (Ink)",
+  ccip_unichain: "CCIP (Unichain)", ccip_sei: "CCIP (Sei)", ccip_berachain: "CCIP (Berachain)", ccip_hyperevm: "CCIP (HyperEVM)",
 };
 export const TOKEN_SYMBOL: Record<string, string> = {
   "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": "USDC", "0xdac17f958d2ee523a2206206994597c13d831ec7": "USDT",
@@ -38,5 +42,7 @@ export const TOKEN_SYMBOL: Record<string, string> = {
   "0x5a98fcbea516cf06857215779fd812ca3bef1b32": "LDO", "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0": "wstETH",
   "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": "WETH", "0xbe9895146f7af43049ca1c1ae358b0541ea49704": "cbETH",
   "0xae78736cd615f374d3085123a210448e74fc6393": "rETH",
+  "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f": "GHO", "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7": "rsETH",
+  "0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b": "syrupUSDC", "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee": "weETH",
 };
 export const symbolOf = (a: string) => TOKEN_SYMBOL[a?.toLowerCase()] ?? `${a.slice(0, 6)}…${a.slice(-4)}`;

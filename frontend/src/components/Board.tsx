@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import useSWR from "swr";
 import { getPairs, getConfig } from "@/lib/contract";
 import { CHAIN_NAME, KIND_NAME, symbolOf } from "@/lib/chains";
@@ -27,6 +28,7 @@ const ORDER: Record<string, number> = { UNDER_BACKED: 0, INCONCLUSIVE: 1, BACKED
 
 export function Board() {
   const { data, error } = useSWR("pairs", () => getPairs(), { refreshInterval: 30_000 });
+  const [limit, setLimit] = useState(50);
   const cfg = useSWR("config", () => getConfig()).data;
   if (error && !data) return <Problem error={error} />;
   if (!data) return <Loading what="Reading every pair" />;
@@ -36,6 +38,7 @@ export function Board() {
   });
   const n = (v: string) => data.pairs.filter((p) => standing(p).verdict === v && !standing(p).provisional).length;
   if (rows.length === 0) return <p className="py-10 text-ink-2">No pairs registered on this registry yet.</p>;
+  const shownRows = rows.slice(0, limit);
   return (
     <div>
       <p className="mb-3 text-[14px] text-ink-2">
@@ -50,7 +53,7 @@ export function Board() {
           <span>Pair</span><span>Locked against supply, 0 to 150%</span><span className="text-right">Ratio</span><span>Pinned</span><span>Ruling</span>
         </div>
         <ul>
-          {rows.map((p) => {
+          {shownRows.map((p) => {
             const s = standing(p);
             const d = p.dests[0];
             return (
@@ -63,6 +66,12 @@ export function Board() {
                       {symbolOf(p.source_token)} on Ethereum{p.vaults.length > 1 ? ` in ${p.vaults.length} vaults` : ""}, {p.dests.length > 1 ? `${p.dests.length} tokens on ${[...new Set(p.dests.map((x) => CHAIN_NAME[x.chain] ?? x.chain))].join(", ")}` : CHAIN_NAME[d?.chain] ?? d?.chain} · {p.vaults.map((v) => KIND_NAME[v.kind] ?? v.kind).join(" + ")}
                       {p.tolerance_bps > 0 ? ` · ${p.tolerance_bps} bps tolerance` : ""}
                     </div>
+                    {(p.latest?.ruling1?.alert === "ALERT" || (p.latest?.ruling1?.coverage && p.latest.ruling1.coverage.state !== "COMPLETE")) && (
+                      <div className="mt-1 flex gap-1.5 text-[11.5px]">
+                        {p.latest?.ruling1?.alert === "ALERT" && <span className="rounded border border-seam px-1.5 text-inconc">alert</span>}
+                        {p.latest?.ruling1?.coverage && p.latest.ruling1.coverage.state !== "COMPLETE" && <span className="rounded border border-seam px-1.5 text-inconc">coverage {p.latest.ruling1.coverage.state.toLowerCase()}{p.latest.ruling1.coverage.unlisted.length ? `, ${p.latest.ruling1.coverage.unlisted.length} unlisted` : ""}</span>}
+                      </div>
+                    )}
                   </div>
                   <div className="order-3 col-span-2 md:order-none md:col-span-1"><Span ratioBps={s.ratio} verdict={s.verdict} /></div>
                   <div className={`num text-right text-[15px] ${s.verdict === "UNDER_BACKED" ? "text-under" : "text-ink"}`}>{ratioText(s.ratio)}</div>
@@ -77,6 +86,8 @@ export function Board() {
           })}
         </ul>
       </div>
+      {rows.length > limit && <button className="mt-3 text-[14px] text-steel" onClick={() => setLimit(limit + 50)}>Show 50 more of {rows.length}</button>}
+      {data.truncated && <p className="mt-2 text-[13px] text-ink-3">The board reads the first 1,000 pairs; the rest are on their pages.</p>}
     </div>
   );
 }

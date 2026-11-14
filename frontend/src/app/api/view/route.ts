@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   const f = u.searchParams.get("f") ?? "";
   let args: unknown[] = [];
   try { args = JSON.parse(u.searchParams.get("args") ?? "[]"); } catch { return Response.json({ error: "bad args" }, { status: 400 }); }
-  if (!ALLOWED.has(a.toLowerCase()) || !/^(get_|is_backed$)/.test(f) || !Array.isArray(args) || args.length > 4) {
+  if (!ALLOWED.has(a.toLowerCase()) || !/^(get_|is_backed$)/.test(f) || !Array.isArray(args) || args.length > 5) {
     return Response.json({ error: "not a BackedBy view" }, { status: 400 });
   }
   const addr = Object.values(ADDR).find((x) => x.toLowerCase() === a.toLowerCase())!;

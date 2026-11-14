@@ -1,0 +1,36 @@
+{
+  "seeds": {
+    "USDC.e on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
+      "label": "USDC.e on Arbitrum",
+      "auth_id": 1,
+      "auth_tx": "0xacd8e6852d04d97fc54885f8f0210f5d3cb8603658c4032a287852464973e077",
+      "pair_id": 1,
+      "register_tx": "0xbbdbe40910c4d04da053d9791e61e9bbd3fe2ff9547a689e55857e8d372dba5f",
+      "blocks": {
+        "ethereum": 26411764,
+        "arbitrum": 524096295
+      },
+      "check_id": 1,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10007,
+      "contest_deadline": 1794664565,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "WBTC on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "WBTC",
+      "l1": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "l2": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+      "label": "WBTC on Arbitrum",
+      "auth_id": 5,
+      "auth_tx": "0xe63c15db9d7ca290669e39ff7ae41c4b6417039bc0c630ec63c8b990579b0019",
+      "pair_id": 2,
+      "register_tx": "0x2072b2a9da11b25161b060ec23f11c46cce01e4159b897cd07d82eac369521d7"
+    }
+  }
+}

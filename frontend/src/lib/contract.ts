@@ -15,7 +15,7 @@ import { encodeExternalMessageFeeParams } from "genlayer-js";
 import { NETWORK, getDeployment, getReadClient, getWalletClient } from "./genlayer";
 import { ADDR } from "./deployments";
 import { withDisplayLabel } from "./labels";
-import type { Bond, Check, GateAnswer, Ledger, Pair, Reading, RegistryConfig, Stats, TxProgress, WriteResult } from "./types";
+import type { Bond, Check, GateAnswer, HistoryPoint, Ledger, Pair, Reading, RegistryConfig, Stats, TxProgress, WriteResult } from "./types";
 
 const READ_TIMEOUT_MS = 45_000;
 
@@ -47,7 +47,23 @@ export function plain(v: unknown): unknown {
  *  per 20 s per view, shared by every visitor), and straight to Studio elsewhere. */
 let freshReads = 0;
 
+/** Retries with exponential backoff (0.8 s, 1.6 s, 3.2 s): Studio answers bursts with 429s and the odd HTML page. */
+async function backoff<T>(work: () => Promise<T>, tries = 4): Promise<T> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    try { return await work(); } catch (e) {
+      last = e;
+      if (i < tries - 1) await new Promise((r) => setTimeout(r, 800 * 2 ** i));
+    }
+  }
+  throw last;
+}
+
 async function readRaw(address: string, functionName: string, args: CalldataEncodable[]): Promise<unknown> {
+  return backoff(() => readOnce(address, functionName, args));
+}
+
+async function readOnce(address: string, functionName: string, args: CalldataEncodable[]): Promise<unknown> {
   if (typeof window !== "undefined") {
     const q = new URLSearchParams({ a: address, f: functionName, args: JSON.stringify(args, (_k, v) => (typeof v === "bigint" ? v.toString() : v)) });
     // after a write, re-read the contract itself, never a cached copy
@@ -76,10 +92,40 @@ const rv = <T,>(fn: string, args: CalldataEncodable[] = [], reg?: string) => vie
 export const getConfig = (reg?: string) => rv<RegistryConfig>("get_config", [], reg);
 export const getStats = (reg?: string) => rv<Stats>("get_stats", [], reg);
 export const getLedger = (reg?: string) => rv<Ledger>("get_ledger", [], reg);
-export const getPairs = async (reg?: string) => {
-  const r = await rv<{ total: number; pairs: Pair[] }>("get_pairs", [0, 50], reg);
+export const PAGE = 50;
+export const MAX_PAGES = 20;
+/** One page of pairs (the contract caps a page at 50). */
+export const getPairsPage = async (offset: number, reg?: string) => {
+  const r = await rv<{ total: number; pairs: Pair[] }>("get_pairs", [offset, PAGE], reg);
   return { ...r, pairs: r.pairs.map((p) => withDisplayLabel(p, reg ?? registry())) };
 };
+/** Every pair, page by page, bounded to MAX_PAGES pages (1,000 pairs); `truncated` says if more exist. */
+export const getPairs = async (reg?: string) => {
+  const first = await getPairsPage(0, reg);
+  const pairs = [...first.pairs];
+  let pages = 1;
+  while (pairs.length < first.total && pages < MAX_PAGES) {
+    const next = await getPairsPage(pairs.length, reg);
+    if (next.pairs.length === 0) break;
+    pairs.push(...next.pairs);
+    pages++;
+  }
+  return { total: first.total, pairs, truncated: pairs.length < first.total };
+};
+export const getHistory = (pairId: number, offset = 0, limit = 100, reg?: string) =>
+  rv<{ found: boolean; total: number; offset: number; points: HistoryPoint[]; next_offset: number }>("get_history", [pairId, offset, limit], reg);
+/** The whole time series, page by page (100 points a page), bounded to 10 pages. */
+export async function getAllHistory(pairId: number, reg?: string) {
+  const out: HistoryPoint[] = [];
+  let off = 0;
+  for (let i = 0; i < 10 && off >= 0; i++) {
+    const h = await getHistory(pairId, off, 100, reg);
+    out.push(...h.points);
+    off = h.next_offset;
+  }
+  return { points: out, truncated: off >= 0 };
+}
+export const getLatest = (pairId: number, reg?: string) => rv<Record<string, unknown>>("get_latest", [pairId], reg);
 export const getPair = async (id: number, reg?: string) => withDisplayLabel(await rv<Pair>("get_pair", [id], reg), reg ?? registry());
 export const getCheck = (id: number, reg?: string) => rv<Check>("get_check", [id], reg);
 export const getChecks = (offset = 0, limit = 50, reg?: string) => rv<{ total: number; checks: Check[] }>("get_checks", [offset, limit], reg);
@@ -90,9 +136,11 @@ export const getReading = (checkId: number, round: number, reg?: string) =>
   viewOf<Reading>(ADDR.reader, "get_reading", [reg ?? registry(), checkId, round]);
 export const getAuth = (id: number) => viewOf<Record<string, unknown>>(ADDR.reader, "get_auth", [id]);
 export const getReaderConfig = () => viewOf<Record<string, unknown>>(ADDR.reader, "get_config");
-export const isBacked = (pairId: number, now: number, g?: string) => viewOf<GateAnswer>(g ?? gate(), "is_backed", [pairId, now]);
+/** The gate's answer, bound to the pair AND its tokens (a copycat pair id is never read for another token). */
+export const isBacked = (pairId: number, sourceToken: string, destChain: string, destToken: string, now: number, g?: string) =>
+  viewOf<GateAnswer>(g ?? gate(), "is_backed", [pairId, sourceToken, destChain, destToken, now]);
 export const getAttempts = (g?: string) =>
-  viewOf<{ total: number; allowed: number; refused: number; attempts: { attempt_id: number; sender: string; pair_id: number; amount: string; allowed: boolean; reason: string; check_id: number; at: number; note: string }[] }>(g ?? gate(), "get_attempts", [0, 25]);
+  viewOf<{ total: number; allowed: number; refused: number; attempts: { attempt_id: number; sender: string; pair_id: number; amount: string; allowed: boolean; reason: string; check_id: number; at: number; note: string; dest_chain?: string; dest_token?: string }[] }>(g ?? gate(), "get_attempts", [0, 25]);
 export const getGateConfig = (g?: string) => viewOf<{ registry: string; max_age_s: number; max_tolerance_bps: number }>(g ?? gate(), "get_config");
 
 // ── Writes ─────────────────────────────────────────────────────────────────

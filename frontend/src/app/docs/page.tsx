@@ -63,6 +63,8 @@ export default function Docs() {
         <li><b className="text-ink">{KIND_NAME.op_dai}</b>: the L1 and L2 DAI bridges name the same tokens and each other; the vault is <Code>escrow()</Code>.</li>
         <li><b className="text-ink">{KIND_NAME.polygon}</b>: RootChainManager <Code>rootToChildToken</Code>, ChildChainManager <Code>childToRootToken</Code> pointing back, type ERC20; the vault is the ERC20 predicate.</li>
         <li><b className="text-ink">LayerZero OFT</b> (for example USDT0): the destination token&apos;s <Code>oftContract()</Code> has the Ethereum adapter as its peer and the adapter&apos;s <Code>token()</Code> is the source token, its peer for that chain is the same OFT, both on the LayerZero endpoint. The vault is that adapter, derived from the token, never supplied.</li>
+        <li><b className="text-ink">Wormhole (Portal)</b>: Ethereum&apos;s token bridge <Code>bridgeContracts(chain)</Code> is that chain&apos;s token bridge, which maps <Code>wrappedAsset(2, l1)</Code> to the token, lists it in <Code>isWrappedAsset</Code> and registers Ethereum back; the token&apos;s <Code>chainId()</Code> is 2 and <Code>nativeContract()</Code> the source token. The vault is Ethereum&apos;s token bridge; its own ledger <Code>outstandingBridged(l1)</Code> (what it owes on every chain) is counted as supply when it is larger than the listed tokens.</li>
+        <li><b className="text-ink">Chainlink CCIP</b>: Ethereum&apos;s TokenAdminRegistry names the source token&apos;s pool, a LockReleaseTokenPool whose <Code>getToken()</Code> is the source token, whose <Code>getRemoteToken</Code> for the chain is the destination token and whose remote pools include the destination pool; the destination registry names a BurnMint pool that points back the same way. The vault is the lock-release pool.</li>
         <li><b className="text-ink">{KIND_NAME.nomad}</b>: the Moonbeam TokenRegistry maps the representation to the Ethereum token both ways, the Moonbeam router&apos;s remote for Ethereum is the Ethereum BridgeRouter (the vault), and the token is local on Ethereum.</li>
       </ul>
       <P>Anyone can add a destination or a vault a pair is missing, with the same proof, so an operator cannot hide supply by leaving
@@ -79,10 +81,14 @@ export default function Docs() {
         only; a withdrawal is burned before it is released, and every supported bridge takes longer than the gap to release, so one in
         flight shows up as removed from supply only. In-flight transfers can only ever look over-backed, never under.</P>
 
-      <H>3. Two RPCs per chain, or INCONCLUSIVE</H>
-      <P>Every value is read from both RPCs of its chain, and the fields used must be identical. A disagreement, an error, a missing
-        block, a decimals value different from the one frozen at registration, or a changed bridge mapping makes the check INCONCLUSIVE:
-        every stake is refunded and nobody is slashed.</P>
+      <H>3. Two RPCs per chain; transport faults are PENDING</H>
+      <P>Every value is read from both RPCs of its chain, and the fields used must be identical. An RPC that is down or throttled, or a
+        chain&apos;s two RPCs answering differently, is a transport fault: the read is PENDING, nothing is stored, the check stays open and
+        anyone retries it until the read window fixed when the round opened (retries never move it); then it expires INCONCLUSIVE and
+        every stake is refunded. A validator agrees with a PENDING leader only if its own read fails too, and reads exactly the blocks,
+        vaults and tokens in the registry&apos;s state, never ones a leader names. A missing block, an unreadable token, a decimals value
+        different from the one frozen at registration, or a changed bridge mapping is about the pair: the check is INCONCLUSIVE, every
+        stake is refunded and nobody is slashed.</P>
       {reader && (
         <ul className="mt-3 grid max-w-3xl gap-1 text-[13.5px] text-ink-2 sm:grid-cols-2">
           {Object.entries(reader.chains).map(([c, v]) => (
@@ -93,7 +99,22 @@ export default function Docs() {
 
       <H>4. The verdict is arithmetic</H>
       <P>Both sides are scaled to the larger of their decimals, exactly, in integers. <Code>BACKED</Code> if
-        <Code>locked × 10000 ≥ supply × (10000 − tolerance_bps)</Code>, otherwise <Code>UNDER_BACKED</Code>.</P>
+        <Code>locked × 10000 ≥ supply × (10000 − tolerance_bps)</Code>, otherwise <Code>UNDER_BACKED</Code>. A BACKED ratio within
+        {" "}{canon?.alert_margin_bps ?? 10} bps of that line is marked ALERT. Every FINAL ruling becomes a point of the pair&apos;s history.</P>
+
+      <H>4a. Coverage: nothing a vault backs goes unnoticed</H>
+      <P>Each check also records, at its pinned Ethereum block, which destinations every vault&apos;s own bridge config says it backs:
+        a LayerZero adapter&apos;s peer on every eid from 30101 to 31100 (one Multicall3 call read from two scan RPCs, which is UNREAD if
+        Ethereum&apos;s endpoint supports any eid in the 200 above), a CCIP pool&apos;s <Code>getSupportedChains()</Code>, Wormhole&apos;s ledger,
+        or a bridge that maps the token to exactly one destination. COMPLETE when every one is listed; GAP names the unlisted ones; OPEN
+        for escrows that cannot be enumerated (OP and Base Standard Bridges, Nomad). Coverage never changes the arithmetic; the keeper adds
+        what it can prove, the rest is shown on the pair&apos;s page, and the gate refuses anything but COMPLETE.</P>
+
+      <H>4b. Proof of Reserve, next to the ratio</H>
+      <P>Where Chainlink publishes a Proof of Reserve feed for the source token (WBTC, stETH for wstETH, eETH for weETH), the check reads
+        <Code>latestRoundData()</Code> and the token&apos;s supply at the same pinned block from both RPCs and shows reserves / supply next
+        to BackedBy&apos;s ratio: MATCH within {canon?.por_match_bps ?? 50} bps, otherwise DIFF with the delta and its explanation, STALE when
+        the answer is older than {canon ? durationText(canon.por_max_age_s ?? 172800) : "48 h"} at that block. It never changes the verdict.</P>
 
       <H>5. Bonds and challenges</H>
       <P>An operator bonds that a pair stays BACKED from the moment of bonding until they request to unbond. Anyone (not the operator)
@@ -109,10 +130,13 @@ export default function Docs() {
         deadline and a public exit: an unread check expires as INCONCLUSIVE, an unread contest leaves the first ruling standing.</P>
 
       <H>7. Monitoring and the gate</H>
-      <P>Monitoring checks cost no stake and are rate limited: one ruled check per pair per interval. The patrol bot files one for each
-        canonical pair every six hours, reads and rules any check it finds open, and finalizes expired windows. CollateralGate says yes
-        only for a pair whose latest ruling is FINAL and BACKED, pinned within its max age, with no other ruling inside that age, and a
-        tolerance within its limit.</P>
+      <P>Monitoring checks cost no stake and are rate limited: one ruled check per pair per interval. The keeper (hourly, and every six
+        hours as a backstop; <a className="text-steel" href="/keeper">/keeper</a>) files one for each pair whose chains have moved, reads,
+        rules, finalizes and expires checks, and adds unlisted destinations it can prove. CollateralGate is asked about one pair and the
+        exact tokens: <Code>is_backed(pair, source_token, dest_chain, dest_token, now)</Code>; anything else is NOT_THIS_PAIR. It answers
+        BACKED (or BACKED_ALERT) only for a pair whose latest ruling is FINAL and BACKED, pinned within its max age, with no other ruling
+        inside that age, coverage COMPLETE and a tolerance within its limit; every other state (UNDER_BACKED, INCONCLUSIVE, STALE,
+        PENDING, NEVER_CHECKED, RECENT_NOT_BACKED, COVERAGE_GAP, COVERAGE_UNREAD, COVERAGE_OPEN, TOLERANCE_TOO_WIDE) refuses.</P>
       <P>Source: <Ext href="https://github.com/kenil1710/backedby/tree/main/contracts">contracts/</Ext> and{" "}
         <Ext href="https://github.com/kenil1710/backedby/blob/main/docs/RULES.md">docs/RULES.md</Ext>.</P>
     </div>

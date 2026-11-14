@@ -11,11 +11,14 @@ import { standing } from "@/components/Board";
 import { Readings } from "@/components/Readings";
 import { Act } from "@/components/Act";
 import { Ext, KV, Loading, Panel, Problem, Span, Verdict, ratioText } from "@/components/ui";
+import { CoveragePanel, HistoryChart, PorPanel, SurplusPanel, Badge } from "@/components/V2";
+import { useKeeper } from "@/lib/keeper";
 
 export default function PairPage({ params }: { params: Promise<{ id: string }> }) {
   const id = Number(use(params).id);
   const { data: p, error, mutate } = useSWR(["pair", id], () => getPair(id), { refreshInterval: 30_000 });
   const cfg = useSWR("config", () => getConfig()).data;
+  const keeper = useKeeper();
   const recent = p ? [...p.checks].reverse().slice(0, 12) : [];
   const { data: checks } = useSWR(p ? ["pair-checks", id, recent.join(",")] : null, () => Promise.all(recent.map((c) => getCheck(c))));
   const { data: bonds } = useSWR(p ? ["pair-bonds", id, p.bonds.join(",")] : null, () => Promise.all(p!.bonds.map((b) => getBond(b))));
@@ -37,7 +40,13 @@ export default function PairPage({ params }: { params: Promise<{ id: string }> }
             Pair <span className="num">{p.pair_id}</span>.
           </p>
         </div>
-        <Verdict v={s.verdict} provisional={s.provisional} size="lg" />
+        <div className="flex flex-col items-end gap-1.5">
+          <Verdict v={s.verdict} provisional={s.provisional} size="lg" />
+          <div className="flex gap-1.5">
+            {shown?.ruling1?.alert === "ALERT" && <Badge text="alert: near the tolerance line" tone="text-inconc" />}
+            {shown?.ruling1?.coverage && <Badge text={`coverage ${shown.ruling1.coverage.state.toLowerCase()}`} tone={shown.ruling1.coverage.state === "COMPLETE" ? "text-backed" : "text-inconc"} />}
+          </div>
+        </div>
       </div>
       <div className="mt-6 rounded-md border border-seam bg-plate px-4 py-4">
         <div className="flex items-baseline justify-between gap-3">
@@ -50,6 +59,15 @@ export default function PairPage({ params }: { params: Promise<{ id: string }> }
 
       {shown && <div className="mt-6"><Readings pair={p} check={shown} round={shown.ruling2 ? 2 : 1} /></div>}
       {!shown && <p className="mt-6 text-ink-2">Nothing has been read for this pair yet. File a monitoring check below.</p>}
+
+      <div className="mt-6"><HistoryChart pair={p} alertMargin={cfg?.alert_margin_bps ?? 10} /></div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <CoveragePanel pair={p} check={shown} unmatched={keeper?.unmatchedFor(registry(), p.pair_id)} />
+        <div className="space-y-4">
+          <PorPanel check={shown} />
+          <SurplusPanel pair={p} registry={registry()} />
+        </div>
+      </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Panel title="Check history" aside={`${p.checks.length} checks`}>

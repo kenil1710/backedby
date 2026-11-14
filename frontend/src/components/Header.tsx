@@ -12,6 +12,7 @@ const NAV = [
   { href: "/collateral", label: "Collateral" },
   { href: "/bond", label: "Bond" },
   { href: "/challenge", label: "Challenge" },
+  { href: "/keeper", label: "Keeper" },
   { href: "/verify", label: "Verify" },
   { href: "/docs", label: "Rules" },
 ];

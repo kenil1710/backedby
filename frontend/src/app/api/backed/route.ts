@@ -48,12 +48,16 @@ export async function GET(req: Request) {
   const gate = demo ? ADDR.gateDemo : ADDR.gate;
   try {
     const now = Math.floor(Date.now() / 1000);
-    const [p, latest, g] = await Promise.all([view(reg, "get_pair", [pair]), view(reg, "get_latest", [pair]), view(gate, "is_backed", [pair, now])]);
+    const [p, latest] = await Promise.all([view(reg, "get_pair", [pair]), view(reg, "get_latest", [pair])]);
     if (!p.found) return Response.json({ error: "no such pair" }, { status: 404 });
+    // the gate is asked bound to this pair's source token and a destination (?chain=&token= picks one; default the first)
+    const want = p.dests.find((d: { chain: string; token: string }) => d.chain === u.searchParams.get("chain") && d.token === (u.searchParams.get("token") ?? "").toLowerCase()) ?? p.dests[0];
+    const g = await view(gate, "is_backed", [pair, p.source_token, want.chain, want.token, now]);
     const body = {
       pair, registry: reg, label: displayLabel(reg, pair, p.label), kind: p.kind, vaults: p.vaults, source_token: p.source_token, destinations: p.dests,
-      tolerance_bps: p.tolerance_bps, latest: latest.found ? { check_id: latest.check_id, verdict: latest.verdict, status: latest.status, ratio_bps: latest.ratio_bps, pinned_source_time: latest.source_time, final_at: latest.final_at, reason: latest.reason } : null,
-      gate: { contract: gate, backed: g.backed, reason: g.reason, max_age_s: g.max_age_s }, read_at: now,
+      tolerance_bps: p.tolerance_bps, latest: latest.found ? { check_id: latest.check_id, verdict: latest.verdict, status: latest.status, ratio_bps: latest.ratio_bps, pinned_source_time: latest.source_time, final_at: latest.final_at, reason: latest.reason,
+        alert: latest.alert, coverage: latest.coverage, unlisted: latest.unlisted, por: latest.por, por_ratio_bps: latest.por_ratio_bps, por_delta_bps: latest.por_delta_bps } : null,
+      gate: { contract: gate, asked_for: { pair, source_token: p.source_token, chain: want.chain, token: want.token }, backed: g.backed, state: g.state, max_age_s: g.max_age_s }, read_at: now,
       page: `${u.origin}/pair/${pair}`,
     };
     if (u.searchParams.get("format") === "svg") {

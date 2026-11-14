@@ -1,0 +1,474 @@
+{
+"1010349088906777999": {
+"chain_id": 978670,
+"name": "ethereum-mainnet-arbitrum-1-treasure-1"
+},
+"10817664450262215148": {
+"chain_id": 7000,
+"name": "zetachain-mainnet"
+},
+"11344663589394136015": {
+"chain_id": 56,
+"name": "binance_smart_chain-mainnet"
+},
+"11690709103138290329": {
+"chain_id": 228,
+"name": "mind-mainnet"
+},
+"11964252391146578476": {
+"chain_id": 30,
+"name": "rootstock-mainnet"
+},
+"1224752112135636129": {
+"chain_id": 1116,
+"name": "core-mainnet"
+},
+"1237925231416731909": {
+"chain_id": 13371,
+"name": "ethereum-mainnet-immutable-zkevm-1"
+},
+"12505351618335765396": {
+"chain_id": 1868,
+"name": "soneium-mainnet"
+},
+"1252863800116739621": {
+"chain_id": 1284,
+"name": "polkadot-mainnet-moonbeam"
+},
+"12657445206920369324": {
+"chain_id": 68414,
+"name": "nexon-mainnet-henesys"
+},
+"1294465214383781161": {
+"chain_id": 80094,
+"name": "berachain-mainnet"
+},
+"13204309965629103672": {
+"chain_id": 534352,
+"name": "ethereum-mainnet-scroll-1"
+},
+"13447077090413146373": {
+"chain_id": 1750,
+"name": "metal-mainnet"
+},
+"1346049177634351622": {
+"chain_id": 42220,
+"name": "celo-mainnet"
+},
+"1355020143337428062": {
+"chain_id": 1285,
+"name": "kusama-mainnet-moonriver"
+},
+"13624601974233774587": {
+"chain_id": 42793,
+"name": "etherlink-mainnet"
+},
+"13879014182901017172": {
+"chain_id": 2026041005,
+"name": "dtcc-mainnet-appchain"
+},
+"1456215246176062136": {
+"chain_id": 25,
+"name": "cronos-mainnet"
+},
+"1462016016387883143": {
+"chain_id": 252,
+"name": "fraxtal-mainnet"
+},
+"14632960069656270105": {
+"chain_id": 807424,
+"name": "nexon-qa"
+},
+"1477345371608778000": {
+"chain_id": 40,
+"name": "telos-evm-mainnet"
+},
+"14894068710063348487": {
+"chain_id": 33139,
+"name": "apechain-mainnet"
+},
+"1523760397290643893": {
+"chain_id": 5734951,
+"name": "jovay-mainnet"
+},
+"15293031020466096408": {
+"chain_id": 1135,
+"name": "lisk-mainnet"
+},
+"1540201334317828111": {
+"chain_id": 3776,
+"name": "ethereum-mainnet-astar-zkevm-1"
+},
+"1546563616611573946": {
+"chain_id": 728126428,
+"name": "tron-mainnet-evm"
+},
+"1556008542357238666": {
+"chain_id": 5000,
+"name": "ethereum-mainnet-mantle-1"
+},
+"1562403441176082196": {
+"chain_id": 324,
+"name": "ethereum-mainnet-zksync-1"
+},
+"15758750456714168963": {
+"chain_id": 60118,
+"name": "nexon-mainnet-lith"
+},
+"15971525489660198786": {
+"chain_id": 8453,
+"name": "ethereum-mainnet-base-1"
+},
+"16468599424800719238": {
+"chain_id": 167000,
+"name": "ethereum-mainnet-taiko-1"
+},
+"1673871237479749969": {
+"chain_id": 146,
+"name": "sonic-mainnet"
+},
+"16978377838628290997": {
+"chain_id": 988,
+"name": "stable-mainnet"
+},
+"17164792800244661392": {
+"chain_id": 185,
+"name": "mint-mainnet"
+},
+"17198166215261833993": {
+"chain_id": 48900,
+"name": "ethereum-mainnet-zircuit-1"
+},
+"17349189558768828726": {
+"chain_id": 6900,
+"name": "nibiru-mainnet"
+},
+"1761333065194157300": {
+"chain_id": 52,
+"name": "coinex_smart_chain-mainnet"
+},
+"17673274061779414707": {
+"chain_id": 50,
+"name": "xdc-mainnet"
+},
+"17912061998839310979": {
+"chain_id": 98866,
+"name": "plume-mainnet"
+},
+"1804312132722180201": {
+"chain_id": 43111,
+"name": "hemi-mainnet"
+},
+"18164309074156128038": {
+"chain_id": 2818,
+"name": "morph-mainnet"
+},
+"18240105181246962294": {
+"chain_id": 102030,
+"name": "creditcoin-mainnet"
+},
+"1923510103922296319": {
+"chain_id": 130,
+"name": "ethereum-mainnet-unichain-1"
+},
+"1939936305787790600": {
+"chain_id": 463,
+"name": "areon-mainnet"
+},
+"2039744413822257700": {
+"chain_id": 397,
+"name": "near-mainnet"
+},
+"2049429975587534727": {
+"chain_id": 480,
+"name": "ethereum-mainnet-worldchain-1"
+},
+"2135107236357186872": {
+"chain_id": 964,
+"name": "bittensor-mainnet"
+},
+"241851231317828981": {
+"chain_id": 4200,
+"name": "bitcoin-merlin-mainnet"
+},
+"2442541497099098535": {
+"chain_id": 999,
+"name": "hyperliquid-mainnet"
+},
+"2459028469735686113": {
+"chain_id": 747474,
+"name": "polygon-mainnet-katana"
+},
+"2988178761202034333": {
+"chain_id": 127001,
+"name": "gravity-mainnet"
+},
+"3016212468291539606": {
+"chain_id": 196,
+"name": "ethereum-mainnet-xlayer-1"
+},
+"3162193654116181371": {
+"chain_id": 12324,
+"name": "ethereum-mainnet-arbitrum-1-l3x-1"
+},
+"3229138320728879060": {
+"chain_id": 295,
+"name": "hedera-mainnet"
+},
+"3314641565992046393": {
+"chain_id": 61900,
+"name": "mova-mainnet"
+},
+"3358365939762719202": {
+"chain_id": 1030,
+"name": "conflux-mainnet"
+},
+"3461204551265785888": {
+"chain_id": 57073,
+"name": "ethereum-mainnet-ink-1"
+},
+"3555797439612589184": {
+"chain_id": 7777777,
+"name": "zora-mainnet"
+},
+"3577778157919314504": {
+"chain_id": 2741,
+"name": "abstract-mainnet"
+},
+"3719320017875267166": {
+"chain_id": 255,
+"name": "ethereum-mainnet-kroma-1"
+},
+"3734403246176062136": {
+"chain_id": 10,
+"name": "ethereum-mainnet-optimism-1"
+},
+"374210358663784372": {
+"chain_id": 106,
+"name": "velas-mainnet"
+},
+"3768048213127883732": {
+"chain_id": 250,
+"name": "fantom-mainnet"
+},
+"3776006016387883143": {
+"chain_id": 199,
+"name": "bittorrent_chain-mainnet"
+},
+"3849287863852499584": {
+"chain_id": 60808,
+"name": "bitcoin-mainnet-bob-1"
+},
+"3993510008929295315": {
+"chain_id": 109,
+"name": "shibarium-mainnet"
+},
+"4051577828743386545": {
+"chain_id": 137,
+"name": "polygon-mainnet"
+},
+"4059281736450291836": {
+"chain_id": 36900,
+"name": "adi-mainnet"
+},
+"4215185756725900654": {
+"chain_id": 61901,
+"name": "mova-mainnet-2"
+},
+"4348158687435793198": {
+"chain_id": 1101,
+"name": "ethereum-mainnet-polygon-zkevm-1"
+},
+"4350319965322101699": {
+"chain_id": 810180,
+"name": "zklink_nova-mainnet"
+},
+"4411394078118774322": {
+"chain_id": 81457,
+"name": "ethereum-mainnet-blast-1"
+},
+"4426351306075016396": {
+"chain_id": 16661,
+"name": "0g-mainnet"
+},
+"4560701533377838164": {
+"chain_id": 3637,
+"name": "bitcoin-mainnet-botanix"
+},
+"4561443241176882990": {
+"chain_id": 314,
+"name": "filecoin-mainnet"
+},
+"4627098889531055414": {
+"chain_id": 59144,
+"name": "ethereum-mainnet-linea-1"
+},
+"465200170687744372": {
+"chain_id": 100,
+"name": "gnosis_chain-mainnet"
+},
+"465944652040885897": {
+"chain_id": 204,
+"name": "binance_smart_chain-mainnet-opbnb-1"
+},
+"470401360549526817": {
+"chain_id": 5330,
+"name": "superseed-mainnet"
+},
+"4829375610284793157": {
+"chain_id": 36888,
+"name": "ab-mainnet"
+},
+"4874388048629246000": {
+"chain_id": 1907,
+"name": "bitcichain-mainnet"
+},
+"4949039107694359620": {
+"chain_id": 42161,
+"name": "ethereum-mainnet-arbitrum-1"
+},
+"5009297550715157269": {
+"chain_id": 1,
+"name": "ethereum-mainnet"
+},
+"5142893604156789321": {
+"chain_id": 1111,
+"name": "wemix-mainnet"
+},
+"5214452172935136222": {
+"chain_id": 61166,
+"name": "treasure-mainnet"
+},
+"5406759801798337480": {
+"chain_id": 223,
+"name": "bitcoin-mainnet-bsquared-1"
+},
+"5463201557265485081": {
+"chain_id": 432204,
+"name": "avalanche-subnet-dexalot-mainnet"
+},
+"5556806327594153475": {
+"chain_id": 847799,
+"name": "nexon-stage"
+},
+"5608378062013572713": {
+"chain_id": 232,
+"name": "lens-mainnet"
+},
+"5936861837188149645": {
+"chain_id": 239,
+"name": "tac-mainnet"
+},
+"6093540873831549674": {
+"chain_id": 4326,
+"name": "megaeth-mainnet"
+},
+"6180753054346818345": {
+"chain_id": 4663,
+"name": "robinhood-mainnet"
+},
+"6325494908023253251": {
+"chain_id": 3343,
+"name": "edge-mainnet"
+},
+"6370580034781731079": {
+"chain_id": 5042,
+"name": "arc-mainnet"
+},
+"6422105447186081193": {
+"chain_id": 592,
+"name": "polkadot-mainnet-astar"
+},
+"6433500567565415381": {
+"chain_id": 43114,
+"name": "avalanche-mainnet"
+},
+"6473245816409426016": {
+"chain_id": 51888,
+"name": "memento-mainnet"
+},
+"6916147374840168594": {
+"chain_id": 2020,
+"name": "ronin-mainnet"
+},
+"7222032299962346917": {
+"chain_id": 47763,
+"name": "neox-mainnet"
+},
+"7264351850409363825": {
+"chain_id": 34443,
+"name": "ethereum-mainnet-mode-1"
+},
+"7281642695469137430": {
+"chain_id": 4217,
+"name": "tempo-mainnet"
+},
+"7550000543357438061": {
+"chain_id": 2222,
+"name": "kava-mainnet"
+},
+"7613811247471741961": {
+"chain_id": 177,
+"name": "ethereum-mainnet-hashkey-1"
+},
+"7937294810946806131": {
+"chain_id": 200901,
+"name": "bitcoin-mainnet-bitlayer-1"
+},
+"8175830712062617656": {
+"chain_id": 2031,
+"name": "polkadot-mainnet-centrifuge"
+},
+"8239338020728974000": {
+"chain_id": 259,
+"name": "neonlink-mainnet"
+},
+"8481857512324358265": {
+"chain_id": 143,
+"name": "monad-mainnet"
+},
+"8788096068760390840": {
+"chain_id": 388,
+"name": "cronos-zkevm-mainnet"
+},
+"8805746078405598895": {
+"chain_id": 1088,
+"name": "ethereum-mainnet-metis-1"
+},
+"8866418665544333000": {
+"chain_id": 46,
+"name": "polkadot-mainnet-darwinia"
+},
+"8911150974185440581": {
+"chain_id": 5668,
+"name": "nexon-dev"
+},
+"9027416829622342829": {
+"chain_id": 1329,
+"name": "sei-mainnet"
+},
+"9043146809313071210": {
+"chain_id": 21000000,
+"name": "corn-mainnet"
+},
+"9107126442626377432": {
+"chain_id": 678,
+"name": "janction-mainnet"
+},
+"9335212494177455608": {
+"chain_id": 9745,
+"name": "plasma-mainnet"
+},
+"9478124434908827753": {
+"chain_id": 81224,
+"name": "codex-mainnet"
+},
+"9723842205701363942": {
+"chain_id": 25327,
+"name": "everclear-mainnet"
+},
+"9813823125703490621": {
+"chain_id": 8217,
+"name": "kaia-mainnet"
+}
+}
