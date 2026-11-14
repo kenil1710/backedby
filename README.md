@@ -48,19 +48,20 @@ pair stays backed, anyone can challenge with a stake, and a lending market asks
 
 ## Addresses (GenLayer Studio Dev, chain 61997)
 
-Every v2 contract was deployed from commit `0ee50f9c4ca75e71d11c5778c9bb8a7b67d34ff7`.
+Every v2 contract was deployed from commit `61a08f80d875fb868032effff3539b93a5450c39`.
 
 | Contract | Address | Deployed file | sha256 | Constructor |
 |---|---|---|---|---|
-| ChainReader | [`0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C`](https://explorer-studio-dev.genlayer.com/address/0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C) | `build/ChainReader.py` | `d66ff61ab930ca55` | `[]` |
-| BackedByRegistry | [`0x40dDb09B6bB789562127A829c87Cf361D8012557`](https://explorer-studio-dev.genlayer.com/address/0x40dDb09B6bB789562127A829c87Cf361D8012557) | `build/BackedByRegistry.py` | `e35efb5bdbd657a1` | `["CANONICAL", "0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C"]` |
-| BackedByRegistryDemo | [`0xACf1d85bF09a50078ac422A3af69eAe8B10AB384`](https://explorer-studio-dev.genlayer.com/address/0xACf1d85bF09a50078ac422A3af69eAe8B10AB384) | `build/BackedByRegistry.py` | `e35efb5bdbd657a1` | `["DEMO", "0xC9007829E329c2170Db93AfA8a490Ad1f7393b5C"]` |
-| CollateralGate | [`0xf1CBE123DA97c9E6B0Db7BE945a816880870677C`](https://explorer-studio-dev.genlayer.com/address/0xf1CBE123DA97c9E6B0Db7BE945a816880870677C) | `build/CollateralGate.py` | `c216e4cabecfde88` | `["0x40dDb09B6bB789562127A829c87Cf361D8012557", 86400, 50]` |
-| CollateralGateDemo | [`0x9a75bB17C9b27Ab746c06B3bba47D86C2cb7DE8C`](https://explorer-studio-dev.genlayer.com/address/0x9a75bB17C9b27Ab746c06B3bba47D86C2cb7DE8C) | `build/CollateralGate.py` | `c216e4cabecfde88` | `["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384", 1800, 50]` |
+| ChainReader | [`0x3E9C72f34fB668fe92626757B85613203AF19713`](https://explorer-studio-dev.genlayer.com/address/0x3E9C72f34fB668fe92626757B85613203AF19713) | `build/ChainReader.py` | `d66ff61ab930ca55` | `[]` |
+| BackedByRegistry | [`0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2`](https://explorer-studio-dev.genlayer.com/address/0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2) | `build/BackedByRegistry.py` | `82348269fbc3b5bc` | `["CANONICAL", "0x3E9C72f34fB668fe92626757B85613203AF19713"]` |
+| BackedByRegistryDemo | [`0x3D957588dC1Ee60B1D50678f721aaCc5FceC1f1F`](https://explorer-studio-dev.genlayer.com/address/0x3D957588dC1Ee60B1D50678f721aaCc5FceC1f1F) | `build/BackedByRegistry.py` | `82348269fbc3b5bc` | `["DEMO", "0x3E9C72f34fB668fe92626757B85613203AF19713"]` |
+| CollateralGate | [`0x3b8FD1A7334D7B92Fc1C0758FD3e0566627236f0`](https://explorer-studio-dev.genlayer.com/address/0x3b8FD1A7334D7B92Fc1C0758FD3e0566627236f0) | `build/CollateralGate.py` | `c216e4cabecfde88` | `["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2", 86400, 50]` |
+| CollateralGateDemo | [`0xb42285b21Ddf38265041B06C494A6Ac04Fee689f`](https://explorer-studio-dev.genlayer.com/address/0xb42285b21Ddf38265041B06C494A6Ac04Fee689f) | `build/CollateralGate.py` | `c216e4cabecfde88` | `["0x3D957588dC1Ee60B1D50678f721aaCc5FceC1f1F", 1800, 50]` |
 
 The canonical registry holds the seeded pairs; the demo registry holds the [demo run](docs/demo-run.log), every
 payout of which is proved on chain ([docs/payouts.json](docs/payouts.json)). The accepted v1 deployment is unchanged and
-proven byte-identical to its build at BASE ([docs/MILESTONE.md](docs/MILESTONE.md), [docs/superseded/047d340](docs/superseded/047d340/README.md)).
+proven byte-identical to its build at BASE ([docs/MILESTONE.md](docs/MILESTONE.md), [docs/superseded/047d340](docs/superseded/047d340/README.md)); the first v2
+deployment, retired after the demo found H6, is in [docs/superseded/0ee50f9](docs/superseded/0ee50f9/README.md).
 
 ## How to verify
 
