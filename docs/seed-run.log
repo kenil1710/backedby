@@ -445,3 +445,10 @@ Double check you have provided the correct parameters.
 Details: exec)
   authenticate(["oft_morph","0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee","0x7dcc39b4d1c53cb31e1abc0e358b43987fef80f7"]) -> FAILED ACCEPTED 23s tx 0xe8c1d3790ef16941a724f9dc600872e330ff07562b3cc987f96db240c3b0b4c7 revert: REFUSED: RPC_UNREADABLE
   ... authenticate oft_morph: RPC throttled from GenVM (attempt 1), retrying in 105s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee","0x7dcc39b4d1c53cb31e1abc0e358b43987fef80f7"]) -> FAILED ACCEPTED 24s tx 0xf27d03fd535f41f7e776295d193a3f6dfc1aa4d99de5e6eddb9d5f942244b862 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 2), retrying in 150s

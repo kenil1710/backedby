@@ -932,3 +932,19 @@ Version: viem@2.57.7
 
 Node.js v22.22.2
 DEMO EXIT 1
+
+## 17. (resumed) Everyone claims; each payout is proved on chain; the registry drains to 0  (2026-11-14T12:36:36.319Z)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  claim() by operator 0x00BB59efE7cD069Df92C711EF80908473A36b814 owed 70000000000000000 -> ok ACCEPTED tx 0xdfc28206007b4e5b503ee82eb4c22e9385d1b4edd06b8a5f5261fd386a305f64
+   DELIVERED 70000000000000000 to 0x00BB59efE7cD069Df92C711EF80908473A36b814: registry 140000000000000000 -> 70000000000000000, payee 499668149330499982482 -> 499738023023999981659 (net fee 126306500000823)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  claim() by challenger 0xfE86fC89b5a04D699198d03Afe4b0686aCF5C0d6 owed 45000000000000000 -> ok ACCEPTED tx 0xaf27c890cb80083ef2fc7e922376a3d173b6c3d297632ee12749046ec7eebdd9
+   DELIVERED 45000000000000000 to 0xfE86fC89b5a04D699198d03Afe4b0686aCF5C0d6: registry 70000000000000000 -> 25000000000000000, payee 499923589959749986832 -> 499968463653249986009 (net fee 126306500000823)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  claim() by treasury 0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E owed 25000000000000000 -> ok ACCEPTED tx 0x25f56e253cee507dbef592d5b7c61fa8514eac1ff7398e54f2a5707af0f2d32c
+   DELIVERED 25000000000000000 to 0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E: registry 25000000000000000 -> 0, payee 500020507123749954265 -> 500045380816749953442 (net fee 126307000000823)
+   ledger: {"bonds":"0","bonds_recomputed_match":true,"bounties":"25000000000000000","claimable":"0","claimed":"140000000000000000","held_now":"0","invariant_holds":true,"on_chain_balance":"0","open_recomputed_match":true,"open_stakes":"0","received":"140000000000000000","slashed":"50000000000000000"}
+   eth_getBalance(0xACf1d85bF09a50078ac422A3af69eAe8B10AB384) = 0
+
+RESULT demo: eth_getBalance 0, ledger held_now 0 (received 140000000000000000 = claimed 140000000000000000), 3/3 payouts delivered, invariant true
+CLAIMS EXIT 0
