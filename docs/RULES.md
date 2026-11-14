@@ -7,7 +7,7 @@ No model is asked anything at any step.
 ## 1. Pairs exist only if the bridge says so
 
 A **pair** is: a source chain (always Ethereum), a source token, **1 to 8 vaults** there whose balances of the source
-token are summed ("locked"), and **1 to 8 destination tokens** whose supplies are summed. Vaults and destinations are
+token are summed ("locked"), and **1 to 16 destination tokens** whose supplies are summed. Vaults and destinations are
 symmetric: a token with a second mint path (Polygon's USDT is minted both by the PoS bridge and by USDT0's LayerZero
 adapter) is only judged fairly when every vault that backs it is counted, so anyone can add a missing vault, exactly
 as anyone can add a missing destination. `ChainReader.authenticate(kind, source_token, dest_token)` reads the bridge's own mapping on
@@ -21,7 +21,9 @@ it. Otherwise the call is refused.
 | `op_dai` | L1DAITokenBridge `l1Token/l2Token/escrow`; L2DAITokenBridge `l1Token/l2Token/l1DAITokenBridge` point at each other | `L1DAITokenBridge.escrow()` |
 | `polygon` | RootChainManager `rootToChildToken(l1)` is the destination, `tokenToType(l1)` is `keccak256("ERC20")`, ChildChainManager `childToRootToken(child)` is the source | `typeToPredicate(ERC20)` |
 | `nomad` | the Moonbeam BridgeRouter's `tokenRegistry()` maps the representation to (Ethereum domain, source token) both ways, its `remotes(Ethereum)` is the Ethereum BridgeRouter, and the Ethereum TokenRegistry says the source token is local | the Ethereum BridgeRouter |
-| `oft_polygon`, `oft_arbitrum`, `oft_optimism`, `oft_base` (LayerZero OFT, e.g. USDT0) | the destination token's `oftContract()` (or the token itself, for a native OFT) is an OFT whose `peers(Ethereum)` is the Ethereum adapter, whose `token()` is the destination token, and whose `endpoint()` is the LayerZero EndpointV2; the adapter's `token()` is the source token, its `endpoint()` is EndpointV2 and its `peers(<this chain>)` is that OFT | the adapter, **derived** from the destination token, never supplied |
+| `wh_polygon`, `wh_arbitrum`, `wh_optimism`, `wh_base` (Wormhole Portal) | Ethereum's token bridge `0x3ee1…a585` `bridgeContracts(<wormhole chain>)` is that chain's token bridge; that bridge's `wrappedAsset(2, l1)` is the destination token, `isWrappedAsset(dest)` is true and `bridgeContracts(2)` is Ethereum's bridge; the token's `chainId()` is 2 and `nativeContract()` is the source token | Ethereum's token bridge; its own ledger `outstandingBridged(l1)` is counted (section 4) |
+| `ccip_<chain>` (Chainlink CCIP, 12 chains) | Ethereum's TokenAdminRegistry `getPool(l1)` is a pool whose `typeAndVersion()` starts `LockReleaseTokenPool `, whose `getToken()` is the source token, whose `getRemoteToken(<selector>)` is the destination and whose `isRemotePool(<selector>, <dest pool>)` is true; the destination chain's registry `getPool(dest)` is a `BurnMintTokenPool` / `BurnFromMintTokenPool` / `BurnWithFromMintTokenPool` whose `getToken()` is the destination, whose `getRemoteToken(Ethereum)` is the source token and whose `isRemotePool(Ethereum, <source pool>)` is true | the lock-release pool |
+| `oft_<chain>` (LayerZero OFT, e.g. USDT0, weETH, WBTC, rsETH; 15 chains) | the destination token's `oftContract()` (or the token itself, for a native OFT) is an OFT whose `peers(Ethereum)` is the Ethereum adapter, whose `token()` is the destination token, and whose `endpoint()` is the LayerZero EndpointV2; the adapter's `token()` is the source token, its `endpoint()` is EndpointV2 and its `peers(<this chain>)` is that OFT | the adapter, **derived** from the destination token, never supplied |
 
 - **Registration** (`register_pair(auth_ids, tolerance_bps, label)`): every authentication must be at most 1 hour old,
   and all of one vault and one source token. The **tolerance** (0 to 1000 bps) and every token's **decimals** are
@@ -125,7 +127,28 @@ under-backed; it is refused.
 A depositor can still use the over-backing on purpose (bridge a large amount and file a monitoring check that
 instant): see rule 7, where the gate refuses a pair with any non-BACKED ruling inside its max age.
 
-## 3. Two RPCs per chain, or INCONCLUSIVE
+## 1a. Coverage: nothing a vault backs goes unnoticed
+
+Every check records, at its pinned Ethereum block, which destinations each vault's **own bridge config** says it
+backs, and compares them with the pair's list. Each vault has a family, fixed by its kind:
+
+| Family | Kinds | How the bridge's own config is enumerated | Coverage |
+|---|---|---|---|
+| MAPPING | `arbitrum`, `polygon`, `op_dai` | the bridge maps the source token to exactly one destination token | COMPLETE |
+| LEDGER | `wh_*` | Wormhole's `outstandingBridged(l1)` is what the bridge owes on **every** chain; it is counted as supply when larger than the listed tokens | COMPLETE |
+| LZ | `oft_*` | `peers(eid)` of the adapter for **every eid from 30101 to 31100**, in one Multicall3 `aggregate3` call at the pinned block, from the two scan RPCs (rpc.mevblocker.io, eth-mainnet.public.blastapi.io), identical; in the same call Ethereum's LayerZero endpoint must support **no eid from 31101 to 31300**, and no `peers` entry may revert | COMPLETE, GAP or UNREAD |
+| CCIP | `ccip_*` | the pool's `getSupportedChains()` at the pinned block, from both Ethereum RPCs | COMPLETE, GAP or UNREAD |
+| OPEN | `optimism`, `base`, `nomad` | none on chain: one escrow holds every representation of the token | OPEN |
+
+- **COMPLETE**: every destination the bridge names is listed. **GAP**: the ruling names each unlisted one (`lz:<eid>`,
+  `ccip:<selector>`). **UNREAD**: a scan failed, disagreed, or could not be trusted (above). **OPEN**: not enumerable.
+  The pair's coverage is the first of GAP, UNREAD, OPEN present, else COMPLETE.
+- Coverage **never changes the arithmetic**: the verdict is the ratio of what is listed. It decides what the gate may
+  say (only COMPLETE is favorable) and what the keeper adds.
+- Validators accept a leader's scan or PoR entry that is an **error** (it can only make the answer less favorable),
+  and a leader's entry with data only if it equals their own read; every field that decides the verdict must be identical.
+
+## 3. Two RPCs per chain; transport faults are PENDING
 
 Every value (block header, every vault's balance, supply, decimals, deposits, every anchor) is read from **both** RPCs of its
 chain; only the fields used are compared, and they must be identical. Validators then accept the leader's reading
@@ -151,23 +174,47 @@ only if it is identical to their own.
 | HyperEVM | rpc.hyperliquid.xyz/evm | hyperliquid-json-rpc.stakely.io |
 | Monad | rpc.monad.xyz | monad-mainnet-rpc.spidernode.net |
 
-Any disagreement, an error, a missing block, a call that reverts, a decimals value different from the frozen one, or
-a changed anchor makes the check **INCONCLUSIVE**: every stake is refunded, nobody is slashed. An INCONCLUSIVE that is
-about the pair's data (`RPC_DISAGREE`, `CALL_FAILED`, `MALFORMED_ANSWER`, `DECIMALS_MISMATCH`, `MAPPING_CHANGED`,
-`CONTEST_DISAGREES`) becomes the pair's latest ruling; one that is about the filing (pins, coverage, timeouts) or the
-transport (`RPC_UNREADABLE`) does not.
+**Transport faults are PENDING, never a ruling.** An RPC that is down, throttled or answers junk, or a chain's two RPCs
+answering differently (`RPC_UNREADABLE`, `RPC_DISAGREE`), makes `read_check` return `PENDING`: nothing is stored for the
+check except an attempt counter, the check stays OPEN (or CONTESTED), and **anyone** calls `read_check` again. The read
+window is fixed when the round opens: `read_by` is the filing time plus 2 h / 300 s (the contest time plus the same for
+a re-read); `read_check` refuses after it (`READ_WINDOW_CLOSED_AT_...`), so retries, junk calls and calls about other
+checks never extend it; `expire` then ends the round (section 6). Validators read the request (blocks, vaults, tokens,
+anchors, scans) from the registry's state before the non-deterministic step, never a block or range a leader names,
+and agree with a leader's PENDING only when their own read is PENDING too.
+
+A missing block, a call that reverts or returns nothing (`CALL_FAILED`), a decimals value different from the frozen
+one, or a changed anchor makes the check **INCONCLUSIVE**: every stake is refunded, nobody is slashed. An INCONCLUSIVE
+that is about the pair's data (`CALL_FAILED`, `MALFORMED_ANSWER`, `DECIMALS_MISMATCH`, `MAPPING_CHANGED`,
+`CONTEST_DISAGREES`) becomes the pair's latest ruling; one that is about the filing (pins, timeouts) does not.
 
 ## 4. The verdict is arithmetic
 
 Both sides are scaled to the larger of all decimals involved, exactly, in integers:
 `locked_norm = (sum over vaults of balance_v) * 10^(D - source_decimals)`,
 `supply_norm = sum(counted_i * 10^(D - decimals_i))`, with `counted_i = totalSupply_i`, or
-`max(totalSupply_i, deposits_i)` for an OP/Base destination.
+`max(totalSupply_i, deposits_i)` for an OP/Base destination. For a Wormhole vault the destinations through it count
+together as `max(their sum, outstandingBridged(l1))` (the ledger is kept in 8 decimals for tokens with more and is
+scaled back), so supply on chains the pair does not list is counted.
 
 - **BACKED** if `locked_norm * 10000 >= supply_norm * (10000 - tolerance_bps)`
 - **UNDER_BACKED** otherwise.
 
 The ratio shown everywhere is `floor(locked_norm * 10000 / supply_norm)` in bps (`-1` when supply is 0).
+
+- **Alert.** A BACKED ruling whose ratio is below `10000 - tolerance_bps + 10` (within **10 bps** of the line) is
+  `ALERT`; BACKED above it is `OK`; UNDER_BACKED is `BREACH`.
+- **History.** Every FINAL ruling is appended to the pair's time series (`get_history(pair, offset, limit)`, at most
+  100 points a page): check, pinned time and blocks, verdict, ratio, locked and supply, alert, coverage, PoR.
+- **Proof of Reserve.** For a source token with a Chainlink PoR feed on Ethereum (WBTC: WBTC PoR; wstETH: stETH PoR
+  against stETH's supply; weETH: eETH PoR against eETH's supply) the check reads `latestRoundData()`, the feed's
+  decimals and the covered token's supply at the pinned block from both RPCs. `por_ratio = reserves / supply`;
+  **MATCH** if BackedBy's ratio is within **50 bps** of it, else **DIFF** with the delta and an explanation
+  (`BRIDGE_VAULT_SURPLUS_EXCEEDS_CUSTODY_SURPLUS`, `BRIDGE_VAULT_BELOW_CUSTODY_RATIO`, plus
+  `CUSTODY_RESERVES_BELOW_SUPPLY` when reserves are below supply); **STALE** if the answer is more than **48 h** older
+  than the pinned block; **UNREAD** if the feed could not be read. It never changes the verdict. PoR measures custody
+  of the token's whole supply; BackedBy measures one bridge's vault against what it minted, so a DIFF is expected
+  whenever the vault holds a surplus; the site shows that surplus's sources (`tools/explain_surplus.mjs`).
 
 ## 5. Bonds and challenges
 
@@ -204,8 +251,8 @@ Every non-terminal state has a deadline and a permissionless exit, so every chec
 | CONTESTED, re-read recorded | `rule` | none needed | FINAL or INCONCLUSIVE |
 | CONTESTED, nothing re-read | `expire` | 2 h / 300 s after the contest | first ruling FINAL, contest stake refunded |
 
-A contest re-read that fails only on transport (`RPC_UNREADABLE`) is not recorded (`RETRY`), so an outage cannot
-overturn a ruling; the timeout above ends it.
+A re-read that fails on transport is PENDING (section 3) and is not recorded, so an outage cannot overturn a ruling;
+the timeout above ends it.
 
 ## 7. Withdrawals, monitoring and the gate
 
@@ -227,11 +274,22 @@ effect delivered and not skipped and the registry's `eth_getBalance` fell by the
 re-reads every demo payout that way, and calls the demo registry drained only when `eth_getBalance` is 0.
 - `monitor(pair, blocks)`: no stake, only when no check is open on the pair, and at most one **ruled** monitoring
   check per pair per **1 h** (demo 30 s). Filings whose pins break the rules do not use up the interval.
-- **Patrol**: `tools/patrol.mjs` runs every 6 h in GitHub Actions. It reads, rules, finalizes or expires every open
-  check on the canonical registry, and files a monitoring check for every pair whose chains have new finalized blocks.
-- **CollateralGate** `is_backed(pair, now)` is true only if the pair's latest ruling is **FINAL** and **BACKED**, its
-  pinned Ethereum block is at most `max_age` old (24 h canonical, 30 min demo), **no ruling within `max_age` was
-  anything but BACKED**, and the pair's tolerance is at most `max_tolerance_bps` (50). `borrow()` asks it with the
+- **Keeper**: `tools/keeper.mjs` runs hourly and every 6 h in GitHub Actions on both v2 registries. It walks every
+  page of pairs (read from two endpoints, identical, cursor persisted), files a monitoring check for each pair whose
+  chains have moved, reads (retrying PENDING reads inside the window), rules, finalizes and expires checks, and adds
+  each unlisted destination the vault's bridge config names on a chain BackedBy reads (authenticate, then
+  `add_destination`); the rest are recorded as unmatched with the reason. An action is done only when its transaction
+  is FINALIZED, succeeded, and contract state shows its effect; every step is checkpointed on the `keeper-state`
+  branch and a run resumes from its stored transaction hashes. Anyone can do every action by hand.
+- **CollateralGate** `is_backed(pair, source_token, dest_chain, dest_token, now)` is bound to one pair and its exact
+  tokens: anything else is `NOT_THIS_PAIR`, so a copycat pair (the same tokens under another tolerance, a look-alike
+  token) is never read for the caller. It answers **BACKED** only if the pair's latest ruling is **FINAL** and
+  **BACKED**, its pinned Ethereum block is at most `max_age` old (24 h canonical, 30 min demo), **no ruling within
+  `max_age` was anything but BACKED**, coverage is **COMPLETE**, and the pair's tolerance is at most
+  `max_tolerance_bps` (50); **BACKED_ALERT** when the ratio is within the alert margin. Every other state refuses:
+  UNDER_BACKED, INCONCLUSIVE, STALE, PENDING (never ruled, a check open), NEVER_CHECKED, RECENT_NOT_BACKED,
+  COVERAGE_GAP, COVERAGE_UNREAD, COVERAGE_OPEN, TOLERANCE_TOO_WIDE, NO_SUCH_PAIR, REGISTRY_UNREADABLE, NO_CLOCK,
+  RULING_FROM_THE_FUTURE. `borrow(pair, source_token, dest_chain, dest_token, amount, note)` asks it with the
   transaction's own clock and records the answer either way.
 
 ## Clock

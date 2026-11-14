@@ -72,7 +72,17 @@
       "auth_id": 8,
       "auth_tx": "0x9549b60c8a0d723cde9a73569b14470a57fb5fead698f9df47474a401301157c",
       "pair_id": 4,
-      "register_tx": "0x19c2cfa71fb3ec005e1c61974cbdadcbdd7c13d58f9b97b238104319548537b4"
+      "register_tx": "0x19c2cfa71fb3ec005e1c61974cbdadcbdd7c13d58f9b97b238104319548537b4",
+      "blocks": {
+        "ethereum": 26411795,
+        "arbitrum": 524097539
+      },
+      "check_id": 4,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10024,
+      "contest_deadline": 1794665003,
+      "reason": "LOCKED_COVERS_SUPPLY"
     }
   }
 }

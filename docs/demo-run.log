@@ -37,3 +37,5 @@ Details: exec)
   authenticate(["optimism","0x59d1e836f7b7210a978b25a855085cc46fd090b5","0x16d375422a1d6b069c1958848746b97cc053c69e"]) -> ok ACCEPTED 15s tx 0xdcac38b28a8a1875b97464ddf33d1a50572b9cb34d080f715571c8f17f95fd6c {"auth_id":9,"dest_decimals":18,"dest_token":"0x16d375422a1d6b069c1958848746b97cc053c69e","family":"OPEN","remote":"optimism:optimism","source_decimals":18,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
   register_pair(["9",0,"A token bridged to OP on 2026-09-01 (demo)"]) -> ok ACCEPTED 12s tx 0xa8b497ef1081661ad3160621348bd0897f4175e55d1f8dc6db93572f53d058a0 {"destinations":1,"ok":true,"pair_id":5,"vaults":1}
    -> pair 5: A token bridged to OP on 2026-09-01 (demo)
+  authenticate(["arbitrum","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"]) -> FAILED ACCEPTED 28s tx 0x649cca7ca9ada1478ff0cd940a523da11e10fb9b1eb8cfeffb5283506580e437 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate arbitrum: RPC throttled from GenVM (attempt 1), retrying in 105s
