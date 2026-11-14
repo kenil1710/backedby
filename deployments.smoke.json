@@ -5,48 +5,48 @@
   "explorer": "https://explorer-studio-dev.genlayer.com/",
   "contracts": {
     "ChainReader": {
-      "address": "0xDF70829Cb8d5b008D6C365074A228c37578DEC60",
-      "deploy_tx": "0x0e70faa909c79aef6f8642d8092d46be0e7ef4084320428104fd15e06e7a82a0",
+      "address": "0x68C511433332107492c9A1b33BacdCC5C6934Ae6",
+      "deploy_tx": "0x8015ba7971a824786347b623f47ecfd826fb7e8c293edd9b898d2cac08fbd9a2",
       "file": "build/ChainReader.py",
       "source": "contracts/ChainReader.py",
-      "commit": "db38e0e2fda212b7cbaa7c7f8ce4d8cf6ac153f5",
-      "bytes": 50055,
-      "sha256": "9becb714b5535fe66c5ecb999c798d569f163ea8541e359d67130a56aa90cece",
+      "commit": "2cefa76331293b8534a2394448be36b553c88dc3",
+      "bytes": 72467,
+      "sha256": "d66ff61ab930ca55b77f34461b711f6410ca0e93378b7766d5ee5435973d9a19",
       "constructor_args": [],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
-      "deployed_at": "2026-10-17T16:39:55.726Z"
+      "deployed_at": "2026-11-14T07:43:07.801Z"
     },
     "BackedByRegistryDemo": {
-      "address": "0x3a405bE692283D81F3e7a14A60046F6240d9DeEa",
-      "deploy_tx": "0xb064410ad5761f06d3b6362ddd8e46cf5796244cee9b4eef21a228adba2d0fab",
+      "address": "0x6863c79b5d84e268A1E73C707395eF903203F6a2",
+      "deploy_tx": "0x9c4efcd5b8723de5f43cb3383e3fd4fff470eee720cbb284a7dbf16b477ca9b7",
       "file": "build/BackedByRegistry.py",
       "source": "contracts/BackedByRegistry.py",
-      "commit": "db38e0e2fda212b7cbaa7c7f8ce4d8cf6ac153f5",
-      "bytes": 65633,
-      "sha256": "de61021c85747e793dbc2a1df83ab2d6779bc5996039ebd390d151c54bb7e5bc",
+      "commit": "2cefa76331293b8534a2394448be36b553c88dc3",
+      "bytes": 78261,
+      "sha256": "e35efb5bdbd657a14dcb41e338bcf028b93c728c96ff81f298fca77ee63b5909",
       "constructor_args": [
         "DEMO",
-        "0xDF70829Cb8d5b008D6C365074A228c37578DEC60"
+        "0x68C511433332107492c9A1b33BacdCC5C6934Ae6"
       ],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
-      "deployed_at": "2026-10-17T16:40:03.265Z",
+      "deployed_at": "2026-11-14T07:43:22.501Z",
       "mode": "DEMO"
     },
     "CollateralGateDemo": {
-      "address": "0x93884579b61BAA01194Da78Be2eE6748e43FCe58",
-      "deploy_tx": "0x27bf948d734f6f5f33ace5da52a926099c26a5e777a884872e85cb868b734918",
+      "address": "0x5a03a6Adfa054f8a9eD373E3e3c5fC11B2f4Bdce",
+      "deploy_tx": "0xac57c6e78bdb9765ab4c86ecac12196c0747478cd652da37cc1dbc97776a65b2",
       "file": "build/CollateralGate.py",
       "source": "contracts/CollateralGate.py",
-      "commit": "db38e0e2fda212b7cbaa7c7f8ce4d8cf6ac153f5",
-      "bytes": 12271,
-      "sha256": "b6bdf5b3f0b277e8f27779dc1e91017a88464beca95f5f1e1dee1a0dc337e101",
+      "commit": "2cefa76331293b8534a2394448be36b553c88dc3",
+      "bytes": 15841,
+      "sha256": "c216e4cabecfde88c2401785140a94d945a25fe9f865a5695be5c13a6176bb33",
       "constructor_args": [
-        "0x3a405bE692283D81F3e7a14A60046F6240d9DeEa",
+        "0x6863c79b5d84e268A1E73C707395eF903203F6a2",
         1800,
         50
       ],
       "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
-      "deployed_at": "2026-10-17T16:40:09.529Z",
+      "deployed_at": "2026-11-14T07:43:28.833Z",
       "mode": "DEMO"
     }
   },
@@ -422,6 +422,60 @@
       "mode": "DEMO",
       "superseded_by": "0x93884579b61BAA01194Da78Be2eE6748e43FCe58",
       "why": "redeployed"
+    },
+    {
+      "name": "ChainReader",
+      "address": "0xDF70829Cb8d5b008D6C365074A228c37578DEC60",
+      "deploy_tx": "0x0e70faa909c79aef6f8642d8092d46be0e7ef4084320428104fd15e06e7a82a0",
+      "file": "build/ChainReader.py",
+      "source": "contracts/ChainReader.py",
+      "commit": "db38e0e2fda212b7cbaa7c7f8ce4d8cf6ac153f5",
+      "bytes": 50055,
+      "sha256": "9becb714b5535fe66c5ecb999c798d569f163ea8541e359d67130a56aa90cece",
+      "constructor_args": [],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T16:39:55.726Z",
+      "superseded_by": "0x68C511433332107492c9A1b33BacdCC5C6934Ae6",
+      "why": "v2 smoke"
+    },
+    {
+      "name": "BackedByRegistryDemo",
+      "address": "0x3a405bE692283D81F3e7a14A60046F6240d9DeEa",
+      "deploy_tx": "0xb064410ad5761f06d3b6362ddd8e46cf5796244cee9b4eef21a228adba2d0fab",
+      "file": "build/BackedByRegistry.py",
+      "source": "contracts/BackedByRegistry.py",
+      "commit": "db38e0e2fda212b7cbaa7c7f8ce4d8cf6ac153f5",
+      "bytes": 65633,
+      "sha256": "de61021c85747e793dbc2a1df83ab2d6779bc5996039ebd390d151c54bb7e5bc",
+      "constructor_args": [
+        "DEMO",
+        "0xDF70829Cb8d5b008D6C365074A228c37578DEC60"
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T16:40:03.265Z",
+      "mode": "DEMO",
+      "superseded_by": "0x6863c79b5d84e268A1E73C707395eF903203F6a2",
+      "why": "v2 smoke"
+    },
+    {
+      "name": "CollateralGateDemo",
+      "address": "0x93884579b61BAA01194Da78Be2eE6748e43FCe58",
+      "deploy_tx": "0x27bf948d734f6f5f33ace5da52a926099c26a5e777a884872e85cb868b734918",
+      "file": "build/CollateralGate.py",
+      "source": "contracts/CollateralGate.py",
+      "commit": "db38e0e2fda212b7cbaa7c7f8ce4d8cf6ac153f5",
+      "bytes": 12271,
+      "sha256": "b6bdf5b3f0b277e8f27779dc1e91017a88464beca95f5f1e1dee1a0dc337e101",
+      "constructor_args": [
+        "0x3a405bE692283D81F3e7a14A60046F6240d9DeEa",
+        1800,
+        50
+      ],
+      "deployer": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+      "deployed_at": "2026-10-17T16:40:09.529Z",
+      "mode": "DEMO",
+      "superseded_by": "0x5a03a6Adfa054f8a9eD373E3e3c5fC11B2f4Bdce",
+      "why": "v2 smoke"
     }
   ]
 }
