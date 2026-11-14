@@ -1,0 +1,386 @@
+
+=== seed run 2026-11-14T13:05:36.570Z
+
+--- pass 1: 29 to do
+
+== USDC.e on Arbitrum
+  authenticate(["arbitrum","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xff970a61a04b1ca14834a43f5de4533ebddb5cc8"]) -> ok ACCEPTED 25s tx 0x7c338d7d008b076c1c0114d904d27898bafd46c3c9d46a229816949b21cb4ad9 {"auth_id":1,"dest_decimals":6,"dest_token":"0xff970a61a04b1ca14834a43f5de4533ebddb5cc8","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":6,"vault":"0xcee284f754e854890e311e3280b767f80797180d"}
+  register_pair(["1",0,"USDC.e on Arbitrum"]) -> ok ACCEPTED 14s tx 0xef5a34bfc94653445c0e012f4ec319d8be403fbe9f60f6fe4a5a5ba1eaba3f07 {"destinations":1,"ok":true,"pair_id":1,"vaults":1}
+  monitor([1,"{\"ethereum\":26413318,\"arbitrum\":524156332}"]) -> ok ACCEPTED 15s tx 0x1265e91365fb7665043ff79812ba123e2e4886c408e4dd52a18730204fee5490 {"check_id":1,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",1,1]) -> ok ACCEPTED 23s tx 0x6e1cdb0de72e08f1e46858ed08adddf11bee17395d49110d4532fddb1230287c {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|1|1","reason":"","status":"OK"}
+  rule([1]) -> ok ACCEPTED 22s tx 0x4adaf341f6f6f4f4e016f603c643b819078480fcd9a0f7f5cc808da283cffa9d {"check_id":1,"contestable_until":1794683237,"ok":true,"ratio_bps":10007,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT USDC.e on Arbitrum: check 1 PROVISIONAL BACKED ratio_bps 10007 
+
+== WBTC on Arbitrum
+  authenticate(["arbitrum","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"]) -> ok ACCEPTED 89s tx 0x566ae43311eefa9a7a263a826821ade091677ce76150fca0f5dc6cf117a9e2d8 {"auth_id":4,"dest_decimals":8,"dest_token":"0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":8,"vault":"0xa3a7b6f88361f48403514059f1f16c8e78d60eec"}
+  register_pair(["4",0,"WBTC on Arbitrum"]) -> ok ACCEPTED 14s tx 0xdd55bfad592433f82c15147fa91386d414d831c1dc3fc086677100f490c87398 {"destinations":1,"ok":true,"pair_id":2,"vaults":1}
+  monitor([2,"{\"ethereum\":26413318,\"arbitrum\":524156332}"]) -> ok ACCEPTED 15s tx 0x996b0bea1e82ff3dbd4fa6f9c50d474dd74121a9353e11f033d4a656ea9cff23 {"check_id":2,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",2,1]) -> ok ACCEPTED 16s tx 0xbf1f50b1356c80c0e58d6b6f749fbe2857fd5e4d53c1677987584ccb95beb725 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|2|1","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 13s tx 0x802a6eb0eb6a4d653e7695e3dfd52912a80f3a4566b8230fef9eba7663efc848 {"check_id":2,"contestable_until":1794683411,"ok":true,"ratio_bps":10141,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT WBTC on Arbitrum: check 2 PROVISIONAL BACKED ratio_bps 10141 
+
+== DAI on Arbitrum
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["arbitrum","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> FAILED ACCEPTED 14s tx 0xc394e3143644c0fea68dc48ea01e66c5285e1eb8188105e74e05227d52c64e1f revert: REFUSED: RPC_UNREADABLE
+  ... authenticate arbitrum: RPC throttled from GenVM (attempt 1), retrying in 105s
+  authenticate(["arbitrum","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> ok ACCEPTED 23s tx 0xec11236c21454cc1c994b1ea95156244768f3774a43881587d4ad4adcc789c42 {"auth_id":8,"dest_decimals":18,"dest_token":"0xda10009cbd5d07dd0cecc66161fc93d7c9000da1","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":18,"vault":"0xa10c7ce4b876998858b1a9e12b10092229539400"}
+  register_pair(["8",0,"DAI on Arbitrum"]) -> ok ACCEPTED 14s tx 0xfa803a3a5d832339636c13a18d8203b0dc5d802b469458c128e234bd3bbd6583 {"destinations":1,"ok":true,"pair_id":3,"vaults":1}
+  monitor([3,"{\"ethereum\":26413364,\"arbitrum\":524158161}"]) -> ok ACCEPTED 15s tx 0xbc9eba8ff5d8a7f6b116907f21dc6e0f0e0978a68da7cb19fb6b490e0053d246 {"check_id":3,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",3,1]) -> ok ACCEPTED 16s tx 0xe609131c15600ae2c32bda2049dabc0f0f54d6417bd25653228fb4e12f181b19 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|3|1","retry_until":1794669201,"status":"PENDING"}
+  ... read attempt 1: PENDING (1 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",3,1]) -> ok ACCEPTED 27s tx 0x6c535514d8115bdd9aca85be520fa32c4f95a120526dfb229897a1173a26bf00 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|3|1","reason":"","status":"OK"}
+  rule([3]) -> ok ACCEPTED 18s tx 0x34f46f6f7a31ea2ac8f7f7bd6391cc1a4b3945549de7118f4ba2958b31a52d98 {"check_id":3,"contestable_until":1794683726,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT DAI on Arbitrum: check 3 PROVISIONAL BACKED ratio_bps 10000 
+
+== wstETH on Arbitrum
+  authenticate(["arbitrum","0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0","0x5979d7b546e38e414f7e9822514be443a4800529"]) -> FAILED ACCEPTED 24s tx 0xcecf8194f9e03da8f8ac1f7e98011cc41d3a594201aed378a326b4540a9e6d71 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate arbitrum: RPC throttled from GenVM (attempt 1), retrying in 105s
+  authenticate(["arbitrum","0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0","0x5979d7b546e38e414f7e9822514be443a4800529"]) -> ok ACCEPTED 25s tx 0x9bb02b86edab69838723e60d4d539790ed4fdbb7146df039720796fce8744dbf {"auth_id":11,"dest_decimals":18,"dest_token":"0x5979d7b546e38e414f7e9822514be443a4800529","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":18,"vault":"0x0f25c1dc2a9922304f2eac71dca9b07e310e8e5a"}
+  register_pair(["11",0,"wstETH on Arbitrum"]) -> ok ACCEPTED 17s tx 0x3b87c4512821932f0bce7674aced705b7b409a5a9f8d44ae64b194e43a4c836b {"destinations":1,"ok":true,"pair_id":4,"vaults":1}
+  ... wstETH on Arbitrum: RPC throttled from GenVM (attempt 1), retrying in 105s
+GenLayer RPC error (gen_call): fetch failed
+  … get_pair attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (gen_call): fetch failed
+  … get_pair attempt 2 hit transient RPC noise, waiting 8s
+GenLayer RPC error (eth_getTransactionCount): fetch failed
+  … monitor attempt 1 hit transient RPC noise, waiting 4s
+  monitor([4,"{\"ethereum\":26413648,\"arbitrum\":524170346}"]) -> FAILED UNSETTLED 2418s tx 0xe339dfc35074f206502dfe1ecd4ac1e24e83bde539c82ddc91895e0da4691fcc revert: never settled in 900s — tx stayed non-terminal
+  monitor failed
+
+== USDC.e on OP Mainnet
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x7f5c764cbc14f9669b88837ca1490cca17c31607"]) -> ok FINALIZED 625s tx 0xc3e3667e85f997306ec6b7cfd07beacf92a3e6f713bc4f35f1bc51b6189e36c0 {"auth_id":13,"dest_decimals":6,"dest_token":"0x7f5c764cbc14f9669b88837ca1490cca17c31607","family":"OPEN","remote":"optimism:optimism","source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+  register_pair(["13",0,"USDC.e on OP Mainnet"]) -> ok ACCEPTED 16s tx 0x88dbf2e081380f77eb132292ea93f5659626dedc01d7171f96f8e9fdb5658524 {"destinations":1,"ok":true,"pair_id":5,"vaults":1}
+  monitor([5,"{\"ethereum\":26413872,\"optimism\":159534163}"]) -> ok ACCEPTED 15s tx 0x8706e5cf486f5406e3b590f49dde609afa772fa1efe62e6e160e64d39b49a8f9 {"check_id":5,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",5,1]) -> ok ACCEPTED 17s tx 0x8b2d049e51ccaa67800cab92b02a79f639ef6a3a6a76295e7a96c34421e6a838 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|5|1","reason":"","status":"OK"}
+  rule([5]) -> ok ACCEPTED 16s tx 0x427dbbe275b4d78c7ef1f44d42337b2944854483c13ae396a943e06345b26149 {"check_id":5,"contestable_until":1794690118,"ok":true,"ratio_bps":10002,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT USDC.e on OP Mainnet: check 5 PROVISIONAL BACKED ratio_bps 10002 
+
+== WBTC on OP Mainnet
+  authenticate(["optimism","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x68f180fcce6836688e9084f035309e29bf0a2095"]) -> ok ACCEPTED 17s tx 0xb0914e4401b58d984b2197331e7ed2c8822508582aa61ca8dc2c137c57952719 {"auth_id":15,"dest_decimals":8,"dest_token":"0x68f180fcce6836688e9084f035309e29bf0a2095","family":"OPEN","remote":"optimism:optimism","source_decimals":8,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+  register_pair(["15",0,"WBTC on OP Mainnet"]) -> ok ACCEPTED 14s tx 0x5ebd47590703ccca1f11b95b0460c46ac49f4ddbe8e8fba023a1ad13ae34711a {"destinations":1,"ok":true,"pair_id":6,"vaults":1}
+  monitor([6,"{\"ethereum\":26413872,\"optimism\":159534163}"]) -> ok ACCEPTED 15s tx 0xf9fe7964c678d034cb972882ba815166475e94dba63c6e59f3dc3df279ba7ae0 {"check_id":6,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",6,1]) -> ok ACCEPTED 23s tx 0xc27e287a89cb6ebe9afa90d5a91ddc87bf04cb9e2de7cfafe6208b52b0c7f9f9 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|6|1","reason":"","status":"OK"}
+  rule([6]) -> ok ACCEPTED 16s tx 0xb517fb58d2f5e201a4cf2bc78a4c7e53eff04fe723f605ac903cf1754c90340d {"check_id":6,"contestable_until":1794690222,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT WBTC on OP Mainnet: check 6 PROVISIONAL BACKED ratio_bps 10000 
+
+== DAI on OP Mainnet
+  authenticate(["op_dai","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> ok ACCEPTED 19s tx 0x48dc12cae4328075f39ed0535122a8554b14ecef8b740d62de953a781b170f7e {"auth_id":16,"dest_decimals":18,"dest_token":"0xda10009cbd5d07dd0cecc66161fc93d7c9000da1","family":"MAPPING","remote":"op_dai:optimism","source_decimals":18,"vault":"0x467194771dae2967aef3ecbedd3bf9a310c76c65"}
+  register_pair(["16",0,"DAI on OP Mainnet"]) -> ok ACCEPTED 15s tx 0x211d3d4e60d75a07a8303ee13fe0e250c8256370f2845d4cefcef2d82afc577a {"destinations":1,"ok":true,"pair_id":7,"vaults":1}
+  monitor([7,"{\"ethereum\":26413872,\"optimism\":159534163}"]) -> ok ACCEPTED 15s tx 0x57470489cd0c41c223aba5cf78abdf712329987c9c7ec9445718878c7c866557 {"check_id":7,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",7,1]) -> ok ACCEPTED 18s tx 0xbc3e80a502382dcf573feb6c18c50f40451e24010112fd313af18d37b5729ff5 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|7|1","retry_until":1794675888,"status":"PENDING"}
+  ... read attempt 1: PENDING (1 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",7,1]) -> ok ACCEPTED 29s tx 0x62bddb70ded38750c0c30cc1c7684bd0882ad89ce5414f2f0277afdcc29d8d88 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|7|1","reason":"","status":"OK"}
+  rule([7]) -> ok ACCEPTED 22s tx 0x5c1c2764c9b6cdcc8a40cd4702c80e93ee79c454d5adb283080a6769ea7d0950 {"check_id":7,"contestable_until":1794690420,"ok":true,"ratio_bps":10058,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT DAI on OP Mainnet: check 7 PROVISIONAL BACKED ratio_bps 10058 
+
+== USDbC on Base
+  authenticate(["base","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca"]) -> ok ACCEPTED 40s tx 0x16d2475fb38882179ec2cb80631c9f7a52250e9b0fc4daf6e3cd0ce50c9403fb {"auth_id":19,"dest_decimals":6,"dest_token":"0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca","family":"OPEN","remote":"base:base","source_decimals":6,"vault":"0x3154cf16ccdb4c6d922629664174b904d80f2c35"}
+  register_pair(["19",0,"USDbC on Base"]) -> ok ACCEPTED 15s tx 0x46fcd1112df4549aaca6e4fea23e64387ac3c531fa5248fa88ec6ab90d882676 {"destinations":1,"ok":true,"pair_id":8,"vaults":1}
+  monitor([8,"{\"ethereum\":26413905,\"base\":57385617}"]) -> ok ACCEPTED 15s tx 0x57a03ac2a61b26bf69410698a5cd98555a31e0eb1dae7a0b0ce31377f65565d0 {"check_id":8,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",8,1]) -> ok ACCEPTED 22s tx 0x8fb4992f545ed5a579ebaaa6cdd050fd68152aef718abc134d9ae3c37f4fce29 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|8|1","reason":"","status":"OK"}
+  rule([8]) -> ok ACCEPTED 14s tx 0xfc1f45a9d1fc0361a33bd3a02c5a949a1f8d3d285ac7e1d6312b19fa8d8fcef8 {"check_id":8,"contestable_until":1794690546,"ok":true,"ratio_bps":10044,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT USDbC on Base: check 8 PROVISIONAL BACKED ratio_bps 10044 
+
+== cbETH on Base
+  authenticate(["base","0xbe9895146f7af43049ca1c1ae358b0541ea49704","0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22"]) -> FAILED ACCEPTED 17s tx 0x5ba2c22790b3ffaf936f0478482def7544f6223f8d58dc76ed03f90f8c075fc3 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate base: RPC throttled from GenVM (attempt 1), retrying in 105s
+  authenticate(["base","0xbe9895146f7af43049ca1c1ae358b0541ea49704","0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22"]) -> ok ACCEPTED 19s tx 0x9cf206f0680ede1916a25b39f19f09211050d244e6b62db6202f6bc94673b167 {"auth_id":20,"dest_decimals":18,"dest_token":"0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22","family":"OPEN","remote":"base:base","source_decimals":18,"vault":"0x3154cf16ccdb4c6d922629664174b904d80f2c35"}
+  register_pair(["20",0,"cbETH on Base"]) -> ok ACCEPTED 15s tx 0x670841f6d77ea26de8e9035290670a3064cef26475bbf3bb0be4dc03383738bc {"destinations":1,"ok":true,"pair_id":9,"vaults":1}
+  monitor([9,"{\"ethereum\":26413937,\"base\":57387537}"]) -> ok ACCEPTED 19s tx 0xe7f3ca1dc5b9c6e3b7da516b84287d75e12ed88530ebd410d89950d0457400a9 {"check_id":9,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",9,1]) -> ok ACCEPTED 16s tx 0xc3ea46c072b198a19e24b87c85f0ae90c4ccfc55f25eef631a3d2daf11d81940 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|9|1","reason":"","status":"OK"}
+  rule([9]) -> ok ACCEPTED 15s tx 0x23b1c9319f35ce362768fee9266e0983941f19da2ab6923c7c27622ccce1ebe4 {"check_id":9,"contestable_until":1794690773,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT cbETH on Base: check 9 PROVISIONAL BACKED ratio_bps 10000 
+
+== USDC.e on Polygon
+  authenticate(["polygon","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x2791bca1f2de4661ed88a30c99a7a9449aa84174"]) -> ok ACCEPTED 18s tx 0x7a20b576a0e424419ad611f29a43d26e2924e21e9992a48e84b0e1fbba95404e {"auth_id":21,"dest_decimals":6,"dest_token":"0x2791bca1f2de4661ed88a30c99a7a9449aa84174","family":"MAPPING","remote":"polygon:polygon","source_decimals":6,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["21",0,"USDC.e on Polygon"]) -> ok ACCEPTED 14s tx 0x1d12ccb10b68912739bfc891974d6615ec1485eaedd8d12e469ad32da0b78871 {"destinations":1,"ok":true,"pair_id":10,"vaults":1}
+  monitor([10,"{\"ethereum\":26413971,\"polygon\":97308548}"]) -> ok ACCEPTED 14s tx 0x0acdb3887553fd757cceeffd9003868234638164afda914484d576a7f991f5d3 {"check_id":10,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",10,1]) -> ok ACCEPTED 17s tx 0xb4c4cb3ea9da7ae87b4ffe387b7b166f20d04e5adaaac21487d9c63961aa8392 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|10|1","reason":"","status":"OK"}
+  rule([10]) -> ok ACCEPTED 18s tx 0xf61180a6841a473842e1ce4532b78adb53bb2184ad00165a6d61712793b0d911 {"check_id":10,"contestable_until":1794690867,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT USDC.e on Polygon: check 10 PROVISIONAL BACKED ratio_bps 10000 
+
+== WBTC on Polygon
+  authenticate(["polygon","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6"]) -> ok ACCEPTED 25s tx 0xea9e42768370a086cfcc97e120c5ddbe2589345e12ce9450efe51f818805ce05 {"auth_id":22,"dest_decimals":8,"dest_token":"0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6","family":"MAPPING","remote":"polygon:polygon","source_decimals":8,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["22",0,"WBTC on Polygon"]) -> ok ACCEPTED 15s tx 0x5a3fb91276d089ee4dec27e21e8c5ea33b782beeecf919c12dbb3a18fb2545a2 {"destinations":1,"ok":true,"pair_id":11,"vaults":1}
+  monitor([11,"{\"ethereum\":26413971,\"polygon\":97308548}"]) -> ok ACCEPTED 15s tx 0xfb474847e2d189cbf0c63def6c31712cd4d4e5054302cd1ec899583a8fcfc237 {"check_id":11,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",11,1]) -> ok ACCEPTED 25s tx 0xfa28014a1c515a047040a479591f85a81be8e843e2d17ffcd9850cf13d55200a {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|11|1","reason":"","status":"OK"}
+  rule([11]) -> ok ACCEPTED 14s tx 0x6f0e27fb910908e3928cf0110b505fe5b822f8cfacd08c07a760eb70d41da03e {"check_id":11,"contestable_until":1794690974,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT WBTC on Polygon: check 11 PROVISIONAL BACKED ratio_bps 10000 
+
+== DAI on Polygon
+  authenticate(["polygon","0x6b175474e89094c44da98b954eedeac495271d0f","0x8f3cf7ad23cd3cadbd9735aff958023239c6a063"]) -> ok ACCEPTED 25s tx 0x936a9b398e900ef7b283c7704ca3a38a817b7b08af41ae3d4da4978cd663c016 {"auth_id":23,"dest_decimals":18,"dest_token":"0x8f3cf7ad23cd3cadbd9735aff958023239c6a063","family":"MAPPING","remote":"polygon:polygon","source_decimals":18,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["23",0,"DAI on Polygon"]) -> ok ACCEPTED 15s tx 0xea36f047f08ec1302a8a9b0a074620c487c4671a4351ed20c584be5f232ad477 {"destinations":1,"ok":true,"pair_id":12,"vaults":1}
+  monitor([12,"{\"ethereum\":26413971,\"polygon\":97308548}"]) -> ok ACCEPTED 16s tx 0x5cc6ceefe201bc2ba826c0f4aaa2aad9c90aa4d0978cd6b19dcdbbf6b70fb4aa {"check_id":12,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",12,1]) -> ok ACCEPTED 17s tx 0x060b74ac5db22729163c4cd642b6d35d2d13470853a526da09f8f2f941fb39ac {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|12|1","reason":"","status":"OK"}
+  rule([12]) -> ok ACCEPTED 15s tx 0xbfd7d34eb3473b4adf10cbdb5d497076d16fc0f6933d33b1cb40b6e4634e388a {"check_id":12,"contestable_until":1794691077,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT DAI on Polygon: check 12 PROVISIONAL BACKED ratio_bps 10000 
+
+== USDT on Polygon
+  authenticate(["polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 28s tx 0x791426e2d6fb9f6f40bdd9d3de687654f399ccf454c2059d61f397b100f2158a {"auth_id":24,"dest_decimals":6,"dest_token":"0xc2132d05d31c914a87c6611c10748aeb04b58e8f","family":"MAPPING","remote":"polygon:polygon","source_decimals":6,"vault":"0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf"}
+  register_pair(["24",0,"USDT on Polygon"]) -> ok ACCEPTED 15s tx 0xb575a10feb01ea536de07a337e7e03a5905cecdcd875060c6910d957c235e34b {"destinations":1,"ok":true,"pair_id":13,"vaults":1}
+  authenticate(["oft_polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 17s tx 0x074caeee7952f365b851b371563b80aa754f45018a3fcf96b2f1284969970e54 {"auth_id":25,"dest_decimals":6,"dest_token":"0xc2132d05d31c914a87c6611c10748aeb04b58e8f","family":"LZ","remote":"lz:30109","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_vault([13,25]) -> ok ACCEPTED 17s tx 0xe790f9fd7acca30da935495e4d68981e88e8b81bb7b7ece34d77d0e4438fe308 {"max_gap_s":120,"ok":true,"pair_id":13,"vaults":2}
+  authenticate(["oft_arbitrum","0xdac17f958d2ee523a2206206994597c13d831ec7","0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"]) -> ok ACCEPTED 21s tx 0x0acea75423bc7fbf16faf290b0a1c7d2a8148a08cdf665816d8d2e600138a2d7 {"auth_id":26,"dest_decimals":6,"dest_token":"0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9","family":"LZ","remote":"lz:30110","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,26]) -> ok ACCEPTED 19s tx 0x100302b97598caaba57fff6823c7aa672ee56870ae3881144da6bfa7a92d85bd {"destinations":2,"ok":true,"pair_id":13}
+  authenticate(["oft_optimism","0xdac17f958d2ee523a2206206994597c13d831ec7","0x01bff41798a0bcf287b996046ca68b395dbc1071"]) -> ok ACCEPTED 25s tx 0xbab3c0d45b31f22bc1a98522febf460e630ea829754333a11de1d2780ecc9b74 {"auth_id":27,"dest_decimals":6,"dest_token":"0x01bff41798a0bcf287b996046ca68b395dbc1071","family":"LZ","remote":"lz:30111","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,27]) -> ok ACCEPTED 18s tx 0x3648d2ba02b3673cfacbdf81ca50dd80861cd64554444901d3dc306a26b79da8 {"destinations":3,"ok":true,"pair_id":13}
+  authenticate(["oft_mantle","0xdac17f958d2ee523a2206206994597c13d831ec7","0x779ded0c9e1022225f8e0630b35a9b54be713736"]) -> ok ACCEPTED 41s tx 0xe6392d88b0c3c5799e9191e605fee375263073660841bcd6ed8462674c0cb17f {"auth_id":28,"dest_decimals":6,"dest_token":"0x779ded0c9e1022225f8e0630b35a9b54be713736","family":"LZ","remote":"lz:30181","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,28]) -> ok ACCEPTED 25s tx 0xa223a766939513b64b26f2fe8df5e1d4bc1153d99e30c7463d6c06a7799c9c09 {"destinations":4,"ok":true,"pair_id":13}
+  authenticate(["oft_xlayer","0xdac17f958d2ee523a2206206994597c13d831ec7","0x779ded0c9e1022225f8e0630b35a9b54be713736"]) -> ok ACCEPTED 19s tx 0xcfd001ab1655d05c0408a9e37d0c52d9d4c022c516e93d36e1e830b3476edeb5 {"auth_id":29,"dest_decimals":6,"dest_token":"0x779ded0c9e1022225f8e0630b35a9b54be713736","family":"LZ","remote":"lz:30274","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,29]) -> ok ACCEPTED 16s tx 0xec2739b06e6aeb534ae9eb1161bed23fe7023f7fe5f298860f7b5a5bbf13f335 {"destinations":5,"ok":true,"pair_id":13}
+  authenticate(["oft_sei","0xdac17f958d2ee523a2206206994597c13d831ec7","0x9151434b16b9763660705744891fa906f660ecc5"]) -> ok ACCEPTED 88s tx 0xdc27b6e224ae1a438a59f3ce4e1cd67134f42ca507715e50a07b4219aa2577fc {"auth_id":30,"dest_decimals":6,"dest_token":"0x9151434b16b9763660705744891fa906f660ecc5","family":"LZ","remote":"lz:30280","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,30]) -> ok ACCEPTED 29s tx 0x759071c79c832fadc5f3628139dfe76f916cb993011b4651f3c522d15a3b5a9d {"destinations":6,"ok":true,"pair_id":13}
+  authenticate(["oft_flare","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> ok ACCEPTED 25s tx 0x855d354fc834024f4123ac57c382973051df86c6d93010d610be45db6c1108b2 {"auth_id":31,"dest_decimals":6,"dest_token":"0xe7cd86e13ac4309349f30b3435a9d337750fc82d","family":"LZ","remote":"lz:30295","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,31]) -> ok ACCEPTED 18s tx 0x3bee0ee3e884f9ca38183dd6d71e66bf05884b72a2daa88476e532b748274cf3 {"destinations":7,"ok":true,"pair_id":13}
+GenLayer RPC error (sim_estimateTransactionFees): Service temporarily unavailable
+  … authenticate fee attempt 1 hit transient RPC noise, waiting 2s
+  authenticate(["oft_hedera","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe3119e23fc2371d1e6b01775ba312035425a53d6"]) -> ok ACCEPTED 201s tx 0xa51c443b81bc2cebe9b10ea4fba6bf4bf98d07f400f940cdf3974600d7760c12 {"auth_id":32,"dest_decimals":6,"dest_token":"0x00000000000000000000000000000000009ce723","family":"LZ","remote":"lz:30316","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,32]) -> ok ACCEPTED 14s tx 0xe5af72c22d50f5c9f377dcf3dbc0257f015fb6dac8f1ce151940bcc126b898bb {"destinations":8,"ok":true,"pair_id":13}
+  authenticate(["oft_unichain","0xdac17f958d2ee523a2206206994597c13d831ec7","0x9151434b16b9763660705744891fa906f660ecc5"]) -> ok ACCEPTED 114s tx 0xe2ef45fc54fae8d16b417669b34dad7558af87b36c8f20ccb16172f670135ec4 {"auth_id":33,"dest_decimals":6,"dest_token":"0x9151434b16b9763660705744891fa906f660ecc5","family":"LZ","remote":"lz:30320","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,33]) -> ok ACCEPTED 15s tx 0x8829a931349eaddd26f333f91833b0f775b90c878f8b9c534953b0a303ecbd6e {"destinations":9,"ok":true,"pair_id":13}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 24s tx 0xe3bda466e17846a6dafd807061214c5ce067744456d5c7517d1bff10c1f5aa5a revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 1), retrying in 105s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 16s tx 0x2fe5d24c1f53556b2d0441dd84584999bed7028512f433e27f7fa64ffa057a53 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 2), retrying in 150s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 22s tx 0x3439f19ddfa99d63ac9a8b1fc6d5ee327fdb722d5ce18d5a110da9c66876b602 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 3), retrying in 195s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 24s tx 0xbdda085cbe1ba3735610d3bd2d7126731ad291995dac29bc267e29ad3bc024ab revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 4), retrying in 240s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 23s tx 0x38b59733cb1ce9f2c122a790c95c896caf1d1f64cf1272d164585275ec3eaa13 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 5), retrying in 285s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 24s tx 0x3f99ee4247ade1df3801e943d363e270d60cadd405fdba4d1d4657f350fe3181 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 6), retrying in 330s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 28s tx 0xefa957b4ae351fb3cd0e158e29e392c63381e997858320cc169c6c0e2fdc2f21 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 7), retrying in 375s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 25s tx 0x09d1a0ba4cddb34b4fe6fd13842d6e171e156d1a718ccea6850c20f77c579a7c revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 8), retrying in 420s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 25s tx 0xf47c4adb5ad21a5d024372aa396671fff2c7cc5dfcc01790519ed1a5c2d53cb3 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 9), retrying in 465s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 23s tx 0x4ad2bc7d1d9a601685be88b8cfeb5414c1bb158d1c70ae9011074eea2313afd0 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 10), retrying in 480s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 24s tx 0x658502c45cff5b07f3c7c9827b6af513a3933c1e34988ea8c96174c1c451bfdb revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 11), retrying in 480s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 26s tx 0xdc9aa64a84822334c1852fde68bb6cb5e876b70399f1b0e1b086da8a97f76492 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 12), retrying in 480s
+  authenticate(["oft_ink","0xdac17f958d2ee523a2206206994597c13d831ec7","0x0200c29006150606b650577bbe7b6248f58470c1"]) -> ok ACCEPTED 28s tx 0x6fe243b6714167b538296bdef3dd43056411cc3b7561e35aa7064c6478a81a58 {"auth_id":45,"dest_decimals":6,"dest_token":"0x0200c29006150606b650577bbe7b6248f58470c1","family":"LZ","remote":"lz:30339","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,45]) -> ok ACCEPTED 15s tx 0x8bf562c9d8fb377e6faa6e2659cbbc7f2d2ec047782c4bd1e803df6e5bee8ae6 {"destinations":10,"ok":true,"pair_id":13}
+  authenticate(["oft_berachain","0xdac17f958d2ee523a2206206994597c13d831ec7","0x779ded0c9e1022225f8e0630b35a9b54be713736"]) -> ok ACCEPTED 25s tx 0x41f8aa29ab5325ab161bf37a0cfd73dd62b79f297dbec4811c0c393569692f47 {"auth_id":46,"dest_decimals":6,"dest_token":"0x779ded0c9e1022225f8e0630b35a9b54be713736","family":"LZ","remote":"lz:30362","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,46]) -> ok ACCEPTED 14s tx 0xb07a3443c08d804b8fe6662de71466b08373a607c75b841b0ea259e0695285a3 {"destinations":11,"ok":true,"pair_id":13}
+  authenticate(["oft_hyperevm","0xdac17f958d2ee523a2206206994597c13d831ec7","0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb"]) -> ok ACCEPTED 37s tx 0x830a4f948918b8f3b42e2eac9b2c1353158974f6d799ed54adbcdf758b6f5144 {"auth_id":47,"dest_decimals":6,"dest_token":"0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb","family":"LZ","remote":"lz:30367","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,47]) -> ok ACCEPTED 22s tx 0x71edbfc135d40ae45c24641a85473283859a238e8bd731b496d6bb671677e002 {"destinations":12,"ok":true,"pair_id":13}
+  authenticate(["oft_monad","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> ok ACCEPTED 35s tx 0xa59ad859a84540394e7de81140845dea62f9192f3b2d32fe79afc589c154c5d1 {"auth_id":48,"dest_decimals":6,"dest_token":"0xe7cd86e13ac4309349f30b3435a9d337750fc82d","family":"LZ","remote":"lz:30390","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([13,48]) -> ok ACCEPTED 15s tx 0xbaa1cebacfdb3e479f03b19428a2f4a2bb5e4f170fe8b31a26ff02348202ec10 {"destinations":13,"ok":true,"pair_id":13}
+  extras incomplete, retry next pass
+
+== madUSDC on Moonbeam (Nomad)
+  authenticate(["nomad","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x8f552a71efe5eefc207bf75485b356a0b3f01ec9"]) -> ok ACCEPTED 35s tx 0xb5df0991f07aa903bfc471c7b27ad82af956aa0433b1b955d68d44d08a005f8b {"auth_id":49,"dest_decimals":6,"dest_token":"0x8f552a71efe5eefc207bf75485b356a0b3f01ec9","family":"OPEN","remote":"nomad:moonbeam","source_decimals":6,"vault":"0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"}
+  register_pair(["49",0,"madUSDC on Moonbeam (Nomad)"]) -> ok ACCEPTED 13s tx 0x810f64c9c4f62dc7b6e450c3f88a2e363ec41de93c943bb8f700a68b39b82553 {"destinations":1,"ok":true,"pair_id":14,"vaults":1}
+  monitor([14,"{\"ethereum\":25724327,\"moonbeam\":16796683}"]) -> ok ACCEPTED 14s tx 0x16485802a43074fc1aa90062175ec7439ecfb2bffd0749d89ad5b5e7b6124a40 {"check_id":13,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",13,1]) -> ok ACCEPTED 26s tx 0x96d7fcfdc1c3182aa630b9fe6fa757726d8f20a64bb416862504b95dfc8f2215 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|13|1","reason":"","status":"OK"}
+  rule([13]) -> ok ACCEPTED 13s tx 0x66947517e7a7cd198a3766b81647684b112a3234555339988b7f6959edcc0dfe {"check_id":13,"contestable_until":1794696503,"ok":true,"ratio_bps":17,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+RESULT madUSDC on Moonbeam (Nomad): check 13 PROVISIONAL UNDER_BACKED ratio_bps 17 
+
+== madWETH on Moonbeam (Nomad)
+GenLayer RPC error (sim_estimateTransactionFees): Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+  … authenticate fee attempt 1 hit transient RPC noise, waiting 2s
+  authenticate(["nomad","0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7"]) -> ok ACCEPTED 92s tx 0x0116bda485f4df5df543d2556a5190aa67bd056deb9115e1fba30208cd10fde9 {"auth_id":50,"dest_decimals":18,"dest_token":"0x30d2a9f5fdf90ace8c17952cbb4ee48a55d916a7","family":"OPEN","remote":"nomad:moonbeam","source_decimals":18,"vault":"0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"}
+  register_pair(["50",0,"madWETH on Moonbeam (Nomad)"]) -> ok ACCEPTED 20s tx 0x1ec7749fe696b3751703bed2ef6f0cbac4aebddeed680e535606c4f7a162cd29 {"destinations":1,"ok":true,"pair_id":15,"vaults":1}
+  monitor([15,"{\"ethereum\":25724327,\"moonbeam\":16796683}"]) -> ok ACCEPTED 19s tx 0x8fb67ceae58d223860043d9bbdeccba7cbdfbcfcbc41a66b4f1223b73c913ac9 {"check_id":14,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",14,1]) -> ok ACCEPTED 29s tx 0x41bf3e5ecc396da325b82141b3f70d7bb6c0b5648394e38920b9a34c4dede854 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|14|1","reason":"","status":"OK"}
+  rule([14]) -> ok ACCEPTED 19s tx 0xe5e8ed2d5ac293cfcf246f2541c862ab2123e027ba79a576c7fa6ae42cbf42ad {"check_id":14,"contestable_until":1794696713,"ok":true,"ratio_bps":8,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+RESULT madWETH on Moonbeam (Nomad): check 14 PROVISIONAL UNDER_BACKED ratio_bps 8 
+
+== madWBTC on Moonbeam (Nomad)
+  authenticate(["nomad","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0"]) -> ok ACCEPTED 33s tx 0x01a7df749f3f96748aab96eb69e9028eec7e5336feb938eefd26c3958ba35571 {"auth_id":51,"dest_decimals":8,"dest_token":"0x1dc78acda13a8bc4408b207c9e48cdbc096d95e0","family":"OPEN","remote":"nomad:moonbeam","source_decimals":8,"vault":"0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"}
+  register_pair(["51",0,"madWBTC on Moonbeam (Nomad)"]) -> ok ACCEPTED 16s tx 0x1f34af7acd413192f0271cdbd560c6cd6eb9959edc3c703e526ae4db023ae974 {"destinations":1,"ok":true,"pair_id":16,"vaults":1}
+  monitor([16,"{\"ethereum\":25724327,\"moonbeam\":16796683}"]) -> ok ACCEPTED 15s tx 0x563581db44166362489326ecd025c7cad05626506c6d9088ca2ca18a4e7fbe91 {"check_id":15,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",15,1]) -> ok ACCEPTED 27s tx 0x77b00c7df4711c0b71a7a6c7b6a6422bed761af8ee637655884ababd0e84f9b9 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|15|1","reason":"","status":"OK"}
+  rule([15]) -> ok ACCEPTED 17s tx 0x4f2057b13678d3463c63cd588d4f64c37650d6b4200d9b3805aac68f59e36b72 {"check_id":15,"contestable_until":1794696849,"ok":true,"ratio_bps":0,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+RESULT madWBTC on Moonbeam (Nomad): check 15 PROVISIONAL UNDER_BACKED ratio_bps 0 
+
+== madUSDT on Moonbeam (Nomad)
+  authenticate(["nomad","0xdac17f958d2ee523a2206206994597c13d831ec7","0x8e70cd5b4ff3f62659049e74b6649c6603a0e594"]) -> ok ACCEPTED 28s tx 0x84c55b9c9887c88d235c564919255a5d6c8f4d107526fa9ab2afade3b1769b69 {"auth_id":53,"dest_decimals":6,"dest_token":"0x8e70cd5b4ff3f62659049e74b6649c6603a0e594","family":"OPEN","remote":"nomad:moonbeam","source_decimals":6,"vault":"0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"}
+  register_pair(["53",0,"madUSDT on Moonbeam (Nomad)"]) -> ok ACCEPTED 17s tx 0x199269035a684d12c681a32ba698621c9c8847f71ef27c441f169d2cb33dea34 {"destinations":1,"ok":true,"pair_id":17,"vaults":1}
+  monitor([17,"{\"ethereum\":25724327,\"moonbeam\":16796683}"]) -> ok ACCEPTED 17s tx 0x46fc76d12db4bea2bfcc165b65acf14b136dcf28271a941c6e65f642fe10d788 {"check_id":16,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",16,1]) -> ok ACCEPTED 42s tx 0x365f05d004066e7166143f55f57c7ad5b60b1a0c04b5049ef1e043a7ad6212e1 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|16|1","reason":"","status":"OK"}
+  rule([16]) -> ok ACCEPTED 16s tx 0x5df2d5dad36350985e7fcbfbe78584714e5e81c09a4822b45cb647b631e39cf0 {"check_id":16,"contestable_until":1794697001,"ok":true,"ratio_bps":0,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+RESULT madUSDT on Moonbeam (Nomad): check 16 PROVISIONAL UNDER_BACKED ratio_bps 0 
+
+== madDAI on Moonbeam (Nomad)
+  authenticate(["nomad","0x6b175474e89094c44da98b954eedeac495271d0f","0xc234a67a4f840e61ade794be47de455361b52413"]) -> ok ACCEPTED 24s tx 0xd0a5d9da0268138c3d2267edb2955988311c920243ab74702cd798a94f450ad9 {"auth_id":57,"dest_decimals":18,"dest_token":"0xc234a67a4f840e61ade794be47de455361b52413","family":"OPEN","remote":"nomad:moonbeam","source_decimals":18,"vault":"0x88a69b4e698a4b090df6cf5bd7b2d47325ad30a3"}
+  register_pair(["57",0,"madDAI on Moonbeam (Nomad)"]) -> ok ACCEPTED 16s tx 0x1cecfc644f860768e482e11ffad55bb427b8bd882366e31357f24770ccdf4a6b {"destinations":1,"ok":true,"pair_id":18,"vaults":1}
+  monitor([18,"{\"ethereum\":25724327,\"moonbeam\":16796683}"]) -> ok ACCEPTED 18s tx 0xa8e5bea0e925ec5a7400512f143f787825360c23b16f8bc963ce402b15b4c859 {"check_id":17,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",17,1]) -> ok ACCEPTED 110s tx 0xb7936c2b5aa3134771f2e5560cceac8204ea5b7795ca4209b70b1e4463aa0755 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|17|1","reason":"","status":"OK"}
+  rule([17]) -> ok ACCEPTED 15s tx 0xd2a18e9bf7c0a8079907f66602a7fa17e9cd7e135c6a9a005cec0ab07e75ac9f {"check_id":17,"contestable_until":1794697225,"ok":true,"ratio_bps":0,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+RESULT madDAI on Moonbeam (Nomad): check 17 PROVISIONAL UNDER_BACKED ratio_bps 0 
+
+== USDC through Wormhole (Portal)
+  authenticate(["wh_polygon","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x4318cb63a2b8edf2de971e2f17f77097e499459d"]) -> ok ACCEPTED 26s tx 0x92e80b3cd4bee9f1f4561852e3952b4852a6ccd1a6924c3a40ac4dd5351a677f {"auth_id":58,"dest_decimals":6,"dest_token":"0x4318cb63a2b8edf2de971e2f17f77097e499459d","family":"LEDGER","remote":"wh:5","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  register_pair(["58",0,"USDC through Wormhole (Portal)"]) -> ok ACCEPTED 15s tx 0x834592dffdc53eecc8c5e1b59fc0c9ce672da47918ca38d766329664db72dd16 {"destinations":1,"ok":true,"pair_id":19,"vaults":1}
+  authenticate(["wh_arbitrum","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18"]) -> ok ACCEPTED 41s tx 0xca152364ac0b73d64fa2b1df40d67c6e2f2186eb26c7a246a6c53bdffc7f03bc {"auth_id":59,"dest_decimals":6,"dest_token":"0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18","family":"LEDGER","remote":"wh:23","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([19,59]) -> ok ACCEPTED 16s tx 0x45e6da3991a0d82f07a360751d42fc93f2729c8188b7ddd8aa1183114da5f41a {"destinations":2,"ok":true,"pair_id":19}
+  authenticate(["wh_optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x711e53d031ea9b0bb0c24dd506df11b41aea419e"]) -> ok ACCEPTED 24s tx 0x7bd2d0bec673ba68fdd66897b0707a1f99d9e76d0c60b630a2ddc088e1639a35 {"auth_id":60,"dest_decimals":6,"dest_token":"0x711e53d031ea9b0bb0c24dd506df11b41aea419e","family":"LEDGER","remote":"wh:24","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([19,60]) -> ok ACCEPTED 14s tx 0x1754bfc04e65d1ff652970aeb860f14f54bae1fe8a625ab36e645087965fd7f9 {"destinations":3,"ok":true,"pair_id":19}
+  authenticate(["wh_base","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xec267c53f53807c2337c257f8ac3fc3cc07cc0ed"]) -> ok ACCEPTED 25s tx 0x39e37fc5d6fdb75532c0529a4b82783201f950f4a93f6c92bb0590fef7a90c97 {"auth_id":61,"dest_decimals":6,"dest_token":"0xec267c53f53807c2337c257f8ac3fc3cc07cc0ed","family":"LEDGER","remote":"wh:30","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([19,61]) -> ok ACCEPTED 15s tx 0x86957c7b574efd48b2467a15f3976dbe08a599b6f02d033c918b1580de6d689c {"destinations":4,"ok":true,"pair_id":19}
+  monitor([19,"{\"ethereum\":26414466,\"polygon\":97312532,\"arbitrum\":524208077,\"optimism\":159537745,\"base\":57419457}"]) -> ok ACCEPTED 18s tx 0xdf11f8756617bd56d1cdacc06cfadddee0a349e119b105574e29dcdad2d881f1 {"check_id":18,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",18,1]) -> ok ACCEPTED 41s tx 0x21324249e81366a345ddd30bd338f833a2875742b390c27862f083bbf8bb6e50 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|18|1","retry_until":1794683058,"status":"PENDING"}
+  ... read attempt 1: PENDING (1 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",18,1]) -> ok ACCEPTED 38s tx 0x93300d7fdb8c9e68a192a8ef4316b2b37efbdd79442a815f3b835716f222493c {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|18|1","reason":"","status":"OK"}
+  rule([18]) -> ok ACCEPTED 21s tx 0x20d6818ddf181644c875e2150af819998834007ec95dbbf9dbef4afcf5eaf823 {"check_id":18,"contestable_until":1794697620,"ok":true,"ratio_bps":10001,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT USDC through Wormhole (Portal): check 18 PROVISIONAL BACKED ratio_bps 10001 
+
+== WETH through Wormhole (Portal)
+  authenticate(["wh_polygon","0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","0x11cd37bb86f65419713f30673a480ea33c826872"]) -> ok ACCEPTED 26s tx 0xccfdfe4ee71af2fa4b752002c915e4fe7e211740ec10d3c01046b41d5f58413c {"auth_id":62,"dest_decimals":18,"dest_token":"0x11cd37bb86f65419713f30673a480ea33c826872","family":"LEDGER","remote":"wh:5","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  register_pair(["62",0,"WETH through Wormhole (Portal)"]) -> ok ACCEPTED 16s tx 0x2c9e5f7618d859b7e484e57d62610b2e03de0169addcde323ca35a5d1a13ba9a {"destinations":1,"ok":true,"pair_id":20,"vaults":1}
+GenLayer RPC error (sim_estimateTransactionFees): Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+  … authenticate fee attempt 1 hit transient RPC noise, waiting 2s
+  authenticate(["wh_arbitrum","0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","0xd8369c2eda18dd6518eabb1f85bd60606deb39ec"]) -> ok ACCEPTED 142s tx 0x69a5b71158817c6d7c9ecc2926ee7c29577fa1469ff5faabb87bd7773f2f17f9 {"auth_id":63,"dest_decimals":18,"dest_token":"0xd8369c2eda18dd6518eabb1f85bd60606deb39ec","family":"LEDGER","remote":"wh:23","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([20,63]) -> ok ACCEPTED 15s tx 0x42b73b5ef3aeee58b06289202c44dcc94dc6cdfc2a90d7eb96ac3b18606ac851 {"destinations":2,"ok":true,"pair_id":20}
+  authenticate(["wh_optimism","0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","0xb47bc3ed6d70f04fe759b2529c9bc7377889678f"]) -> ok ACCEPTED 30s tx 0xc572995afc8f26a7f5e1a0ee4df80c58b5c0acb09312eb4e262630e95edae27e {"auth_id":64,"dest_decimals":18,"dest_token":"0xb47bc3ed6d70f04fe759b2529c9bc7377889678f","family":"LEDGER","remote":"wh:24","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([20,64]) -> ok ACCEPTED 17s tx 0xf4808ffad183c58081b341c5e3184fab8eaf7b3066a775670c977f4ff6180960 {"destinations":3,"ok":true,"pair_id":20}
+  authenticate(["wh_base","0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","0x71b35ecb35104773537f849fbc353f81303a5860"]) -> ok ACCEPTED 25s tx 0x12560318feb4a3e83b3c331dd232f55ea2c34affbb9d123192b3ee3764f35b60 {"auth_id":65,"dest_decimals":18,"dest_token":"0x71b35ecb35104773537f849fbc353f81303a5860","family":"LEDGER","remote":"wh:30","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([20,65]) -> ok ACCEPTED 16s tx 0x98246a1a0ba05ba47c5945ffd961f68383ea43557cf9bd9b722bf74fb7e04012 {"destinations":4,"ok":true,"pair_id":20}
+  monitor([20,"{\"ethereum\":26414509,\"polygon\":97312876,\"arbitrum\":524209993,\"optimism\":159538003,\"base\":57422037}"]) -> ok ACCEPTED 18s tx 0x6cb4328517a0eb9e96f235c4dfcc99d486e860dc0921ae98972f005dbb8e76c6 {"check_id":19,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",19,1]) -> ok ACCEPTED 62s tx 0xbb3b311a6a851dc718544a5165a20ce50b99bcecbeab867d9eccf3fd240388c4 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|19|1","retry_until":1794683570,"status":"PENDING"}
+  ... read attempt 1: PENDING (1 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",19,1]) -> ok ACCEPTED 33s tx 0xba27e3d17640c278ae194bc6a9d9dadb97d468afaae21a3562b65eee0c0a812d {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|19|1","reason":"","status":"OK"}
+  rule([19]) -> ok ACCEPTED 15s tx 0x7f21ecc5ec087d2069c455ed63c003b161a0a8859a4cdcdeecf20cdb6f2cd994 {"check_id":19,"contestable_until":1794698144,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT WETH through Wormhole (Portal): check 19 PROVISIONAL BACKED ratio_bps 10000 
+
+== USDT through Wormhole (Portal)
+  authenticate(["wh_polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0x9417669fbf23357d2774e9d421307bd5ea1006d2"]) -> ok ACCEPTED 28s tx 0xf8ce349fbc2949821bb214b64f45a5f1804177c7d8cea02ea4f113352e3f787d {"auth_id":66,"dest_decimals":6,"dest_token":"0x9417669fbf23357d2774e9d421307bd5ea1006d2","family":"LEDGER","remote":"wh:5","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  register_pair(["66",0,"USDT through Wormhole (Portal)"]) -> ok ACCEPTED 17s tx 0x913c97ceecccd9341810d8543a74e7c9beb008f300af9218207f539a6142c38c {"destinations":1,"ok":true,"pair_id":21,"vaults":1}
+  authenticate(["wh_arbitrum","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe4728f3e48e94c6da2b53610e677cc241dafb134"]) -> ok ACCEPTED 25s tx 0xbd5935eb2f7a5da9c9e2da01b3a66c8fdd083fdfc27c89dcf5460059a8e3cef5 {"auth_id":67,"dest_decimals":6,"dest_token":"0xe4728f3e48e94c6da2b53610e677cc241dafb134","family":"LEDGER","remote":"wh:23","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([21,67]) -> ok ACCEPTED 15s tx 0x9f0dd4dee3544e8f35611626db237c01a77c6b443be1112e81106df5d28b812a {"destinations":2,"ok":true,"pair_id":21}
+  authenticate(["wh_optimism","0xdac17f958d2ee523a2206206994597c13d831ec7","0xf6b4185fcf8af291c0e3927fbeab7046b4f6a8ca"]) -> ok ACCEPTED 31s tx 0x1edb836295aca7da532e668f0e286766e5105bbf816ff3d9e8d3348fd8810e83 {"auth_id":69,"dest_decimals":6,"dest_token":"0xf6b4185fcf8af291c0e3927fbeab7046b4f6a8ca","family":"LEDGER","remote":"wh:24","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([21,69]) -> ok ACCEPTED 16s tx 0x34fe7dd234c177575ee546fda41c80dba7448898ef9482465748ebd4f5a6f824 {"destinations":3,"ok":true,"pair_id":21}
+GenLayer RPC error (sim_estimateTransactionFees): Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+  … authenticate fee attempt 1 hit transient RPC noise, waiting 2s
+  authenticate(["wh_base","0xdac17f958d2ee523a2206206994597c13d831ec7","0xff0c62a4979400841efaa6faadb07ac7d5c98b27"]) -> ok ACCEPTED 94s tx 0x961b3763429a984b712d2b9c9e8e48508cfa5b6b3335a61c639ff2a143e6f334 {"auth_id":70,"dest_decimals":6,"dest_token":"0xff0c62a4979400841efaa6faadb07ac7d5c98b27","family":"LEDGER","remote":"wh:30","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([21,70]) -> ok ACCEPTED 16s tx 0xb82732a36d1fe8e4c26833dc4bbc0baa7ae47621a22dc884151b344bb8256885 {"destinations":4,"ok":true,"pair_id":21}
+  monitor([21,"{\"ethereum\":26414551,\"polygon\":97313212,\"arbitrum\":524211942,\"optimism\":159538255,\"base\":57424557}"]) -> ok ACCEPTED 16s tx 0xa183806a40f463ea173017714623948787b2ebf27d0517ede4c46da0a33b0c52 {"check_id":20,"ok":true}
+GenLayer RPC error (sim_estimateTransactionFees): Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+  … read_check fee attempt 1 hit transient RPC noise, waiting 2s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",20,1]) -> ok ACCEPTED 106s tx 0xce7152196779298a600b97318e38e5d1f78926771a5b991bbc55810e0c6f875f {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|20|1","retry_until":1794684045,"status":"PENDING"}
+  ... read attempt 1: PENDING (1 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",20,1]) -> ok ACCEPTED 29s tx 0x43b91bbb140949949ab05c2caea4dc95e9699cd3744584c058b030b6842e2e07 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|20|1","reason":"","status":"OK"}
+  rule([20]) -> ok ACCEPTED 15s tx 0x9170ddd6f10176e625d29c3bfaa1a8daa737f32c2706efa8ff49f062e2423740 {"check_id":20,"contestable_until":1794698659,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT USDT through Wormhole (Portal): check 20 PROVISIONAL BACKED ratio_bps 10000 
+
+== WBTC through Wormhole (Portal)
+  authenticate(["wh_polygon","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x5d49c278340655b56609fdf8976eb0612af3a0c3"]) -> ok ACCEPTED 25s tx 0x4cbc2d466940fbb959173feea055206909778ec5fe6ade3a18788f78bf4c7470 {"auth_id":71,"dest_decimals":8,"dest_token":"0x5d49c278340655b56609fdf8976eb0612af3a0c3","family":"LEDGER","remote":"wh:5","source_decimals":8,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  register_pair(["71",0,"WBTC through Wormhole (Portal)"]) -> ok ACCEPTED 16s tx 0x6a0a61e000d29c8beabda69e03775af8bd86aeeeb4ace9d4776f78331b05402b {"destinations":1,"ok":true,"pair_id":22,"vaults":1}
+  authenticate(["wh_arbitrum","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x397846a8078d4845c7f5c6ca76aebbcfdc044fae"]) -> ok ACCEPTED 24s tx 0xf920941762d4cb4834b2a35b38edb8f0584573c1e763ebc1418a2e6725590d9a {"auth_id":73,"dest_decimals":8,"dest_token":"0x397846a8078d4845c7f5c6ca76aebbcfdc044fae","family":"LEDGER","remote":"wh:23","source_decimals":8,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([22,73]) -> ok ACCEPTED 15s tx 0x173290efa82cf24c7e2b161f0b813777810257b40dfa815030f69ec525284c89 {"destinations":2,"ok":true,"pair_id":22}
+  authenticate(["wh_optimism","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0xb214c19d81c99e75e84706a3aa0a757319023e26"]) -> FAILED ACCEPTED 35s tx 0x9310569cc3e3acbfe04261f0ba1109108399a49c07e4f5c0d09155965f340a61 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate wh_optimism: RPC throttled from GenVM (attempt 1), retrying in 105s
+  authenticate(["wh_optimism","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0xb214c19d81c99e75e84706a3aa0a757319023e26"]) -> ok ACCEPTED 26s tx 0x4243295122b89b8bbe5f72378ca905130882af08229939d9ddaa73fbce00380b {"auth_id":74,"dest_decimals":8,"dest_token":"0xb214c19d81c99e75e84706a3aa0a757319023e26","family":"LEDGER","remote":"wh:24","source_decimals":8,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([22,74]) -> ok ACCEPTED 16s tx 0x218f721155c390014d5cdd9fe6145070c5dbe761b0fc66d70395c384a8a09f5e {"destinations":3,"ok":true,"pair_id":22}
+  authenticate(["wh_base","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0xe6396f780b543df16ee3b784d789c75b68319db0"]) -> ok ACCEPTED 19s tx 0x1797200d75bd0528bc8646f804683e57dc1eee6f2224c0320e2b90c1197a391b {"auth_id":75,"dest_decimals":8,"dest_token":"0xe6396f780b543df16ee3b784d789c75b68319db0","family":"LEDGER","remote":"wh:30","source_decimals":8,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([22,75]) -> ok ACCEPTED 16s tx 0xa12cb73fac748fe7fabed89fac07e5ffb735436d712bf1e0a2a7385dd39bed49 {"destinations":4,"ok":true,"pair_id":22}
+  monitor([22,"{\"ethereum\":26414577,\"polygon\":97313420,\"arbitrum\":524213100,\"optimism\":159538411,\"base\":57426117}"]) -> ok ACCEPTED 18s tx 0x33a922f34fc3c0b40d67cba57941c016525453f13024702dd72a57a71fc63e18 {"check_id":21,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",21,1]) -> ok ACCEPTED 38s tx 0x0d874ee73a5308ffe0dd881e66e09d0ff8687bf3dcc9002a46f92ee54df7bc1a {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|21|1","reason":"","status":"OK"}
+  rule([21]) -> ok ACCEPTED 20s tx 0x30a3c4fee0a8a49f9c48e2b689c05b9a681c3903c2ac4ac5117d4c24f1b92507 {"check_id":21,"contestable_until":1794699077,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT WBTC through Wormhole (Portal): check 21 PROVISIONAL BACKED ratio_bps 10000 
+
+== DAI through Wormhole (Portal)
+  authenticate(["wh_polygon","0x6b175474e89094c44da98b954eedeac495271d0f","0x732eb1747eccfc431ff19bc359ffc83755b1918c"]) -> ok ACCEPTED 27s tx 0xcf143944fa48f068d48950536f68af8881b7509f2eb6d2de8c66b9eef01ab427 {"auth_id":76,"dest_decimals":18,"dest_token":"0x732eb1747eccfc431ff19bc359ffc83755b1918c","family":"LEDGER","remote":"wh:5","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  register_pair(["76",0,"DAI through Wormhole (Portal)"]) -> ok ACCEPTED 15s tx 0x666c98ab4fe6bbb04902692a27ab6f7ffdd620cd0e0782ff08d9075e6bd98394 {"destinations":1,"ok":true,"pair_id":23,"vaults":1}
+  authenticate(["wh_arbitrum","0x6b175474e89094c44da98b954eedeac495271d0f","0x5c4f2fefb97f7df09e762d95c83f0ccf8bce8234"]) -> ok ACCEPTED 18s tx 0xebc414d33401a16ce36e0859bcc629a8b615359f88b2c85b164d0f9b52a704d1 {"auth_id":77,"dest_decimals":18,"dest_token":"0x5c4f2fefb97f7df09e762d95c83f0ccf8bce8234","family":"LEDGER","remote":"wh:23","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([23,77]) -> ok ACCEPTED 16s tx 0x8fb481ea49665c26e63798029c88f1fb7cfa9458c62e5f62854c32c07ae3d2ff {"destinations":2,"ok":true,"pair_id":23}
+  authenticate(["wh_optimism","0x6b175474e89094c44da98b954eedeac495271d0f","0x098ea47d630b46df1e08e389e5e4466119c7dd30"]) -> ok ACCEPTED 16s tx 0x266d5308f44f59342b7ab2460eadfd4e8361171a5d87c12e6d04399efc63118e {"auth_id":78,"dest_decimals":18,"dest_token":"0x098ea47d630b46df1e08e389e5e4466119c7dd30","family":"LEDGER","remote":"wh:24","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([23,78]) -> ok ACCEPTED 15s tx 0x3fe7580a16269f309e36554eae88b95daae9a8517344448d4afbb00a6b0ce865 {"destinations":3,"ok":true,"pair_id":23}
+  authenticate(["wh_base","0x6b175474e89094c44da98b954eedeac495271d0f","0x617edadb51bfb43a44bb91c7402129c23ba52381"]) -> ok ACCEPTED 34s tx 0xd98a4118be0dff5b91ba0706b4fe8c700a101a0e225559bffd2ac378234b01d0 {"auth_id":79,"dest_decimals":18,"dest_token":"0x617edadb51bfb43a44bb91c7402129c23ba52381","family":"LEDGER","remote":"wh:30","source_decimals":18,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  add_destination([23,79]) -> ok ACCEPTED 16s tx 0xa78154d39cf0d55d28bf3384fff7f699215843f410a4afd9f539e14981328568 {"destinations":4,"ok":true,"pair_id":23}
+  monitor([23,"{\"ethereum\":26414608,\"polygon\":97313676,\"arbitrum\":524214545,\"optimism\":159538603,\"base\":57428037}"]) -> ok ACCEPTED 17s tx 0xa20b88575267085530724d6e08307c26b479b1014736ad691642925682de6a04 {"check_id":22,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",22,1]) -> ok ACCEPTED 30s tx 0x2bae1e752eb761c5e7fd5d3bcc0eb34ff0894fa4cbbf4654f05c02e078ed84c3 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|22|1","reason":"","status":"OK"}
+  rule([22]) -> ok ACCEPTED 17s tx 0x80d3b1eb2a80dc2978ea27ca309638c2f0a10aa1dc6ca1c01512aa9b0ba86106 {"check_id":22,"contestable_until":1794699348,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT DAI through Wormhole (Portal): check 22 PROVISIONAL BACKED ratio_bps 10000 
+
+== GHO through Chainlink CCIP
+  authenticate(["ccip_arbitrum","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0x7dff72693f6a4149b17e7c6314655f6a9f7c8b33"]) -> ok ACCEPTED 96s tx 0xb397e400809fbdb4f8cf2d6417c4b81f6805b27dfd151adcff52e96d2eaea019 {"auth_id":80,"dest_decimals":18,"dest_token":"0x7dff72693f6a4149b17e7c6314655f6a9f7c8b33","family":"CCIP","remote":"ccip:4949039107694359620","source_decimals":18,"vault":"0x06179f7c1be40863405f374e7f5f8806c728660a"}
+  register_pair(["80",0,"GHO through Chainlink CCIP"]) -> ok ACCEPTED 18s tx 0x7ba64b5f704523da38ed753b4ebd532106da9c5016a6cb07e67c96376f7cced5 {"destinations":1,"ok":true,"pair_id":24,"vaults":1}
+  authenticate(["ccip_base","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee"]) -> ok ACCEPTED 26s tx 0x9744ef730a87d64890cc35d77935964017988f830f36bbf8ae9159a089ae7013 {"auth_id":81,"dest_decimals":18,"dest_token":"0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee","family":"CCIP","remote":"ccip:15971525489660198786","source_decimals":18,"vault":"0x06179f7c1be40863405f374e7f5f8806c728660a"}
+  add_destination([24,81]) -> ok ACCEPTED 15s tx 0x623289f67302e6a8aecb5d1d892e69e897742c28ba52393f47f4755b76870356 {"destinations":2,"ok":true,"pair_id":24}
+  authenticate(["ccip_ink","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0xfc421ad3c883bf9e7c4f42de845c4e4405799e73"]) -> ok ACCEPTED 25s tx 0xda462425eb05dccc89915964e3ab47d20ec79f1ebe05c22731eed78255e9c8eb {"auth_id":82,"dest_decimals":18,"dest_token":"0xfc421ad3c883bf9e7c4f42de845c4e4405799e73","family":"CCIP","remote":"ccip:3461204551265785888","source_decimals":18,"vault":"0x06179f7c1be40863405f374e7f5f8806c728660a"}
+  add_destination([24,82]) -> ok ACCEPTED 15s tx 0x0b5b951dc8e163a31ebdb2e7aaaa3e81a5961d186cd6bc149b4180b4801e3171 {"destinations":3,"ok":true,"pair_id":24}
+  authenticate(["ccip_mantle","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0xfc421ad3c883bf9e7c4f42de845c4e4405799e73"]) -> ok ACCEPTED 55s tx 0x40991f742b646b4172ef2f6a9872f00f81d09b856c048ba8d2dfaab83f7a2f0f {"auth_id":83,"dest_decimals":18,"dest_token":"0xfc421ad3c883bf9e7c4f42de845c4e4405799e73","family":"CCIP","remote":"ccip:1556008542357238666","source_decimals":18,"vault":"0x06179f7c1be40863405f374e7f5f8806c728660a"}
+  add_destination([24,83]) -> ok ACCEPTED 21s tx 0x29d6bd80e599af7c92a9852206a272ac7dbbe79c7d5db0a17463b5c09eb2765b {"destinations":4,"ok":true,"pair_id":24}
+  authenticate(["ccip_xlayer","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0xde6539018b095353a40753dc54c91c68c9487d4e"]) -> ok ACCEPTED 38s tx 0x1e916af55266cbccd42a8735361db4fe9fe70cf3f45c64de9aefff678647bc23 {"auth_id":84,"dest_decimals":18,"dest_token":"0xde6539018b095353a40753dc54c91c68c9487d4e","family":"CCIP","remote":"ccip:3016212468291539606","source_decimals":18,"vault":"0x06179f7c1be40863405f374e7f5f8806c728660a"}
+  add_destination([24,84]) -> ok ACCEPTED 16s tx 0xad6dc1997e6ab06321b383b666c1e6c7ea4de66cbb72b6c4a2c12155e9be90c3 {"destinations":5,"ok":true,"pair_id":24}
+  authenticate(["ccip_monad","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0xfc421ad3c883bf9e7c4f42de845c4e4405799e73"]) -> ok ACCEPTED 40s tx 0xce89646dc660b8c2790bc3ce0e97f80dd78f6ac690490441cd71ee288cfb0cb5 {"auth_id":85,"dest_decimals":18,"dest_token":"0xfc421ad3c883bf9e7c4f42de845c4e4405799e73","family":"CCIP","remote":"ccip:8481857512324358265","source_decimals":18,"vault":"0x06179f7c1be40863405f374e7f5f8806c728660a"}
+  add_destination([24,85]) -> ok ACCEPTED 16s tx 0x591fc75346c22dc45ac71e4e44ed5ac7758695aa80468d6ebe94520697543fc0 {"destinations":6,"ok":true,"pair_id":24}
+  monitor([24,"{\"ethereum\":26414635,\"arbitrum\":524215760,\"base\":57429657,\"ink\":61177896,\"mantle\":103272997,\"xlayer\":75907271,\"monad\":122) -> ok ACCEPTED 14s tx 0x48bc9a69455e32035ed93ea8b78a8b105c6b1bdba5bb5e4a6fec2f7b24234dd1 {"check_id":23,"ok":true}
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",23,1]) -> ok ACCEPTED 45s tx 0x9a807e691fecc702ecbdd677b8602c62bc7f83b7c351480c106368d29799136b {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|23|1","retry_until":1794685399,"status":"PENDING"}
+  ... read attempt 1: PENDING (1 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",23,1]) -> ok ACCEPTED 49s tx 0xfd803359110ad4fbd110fc2dd7607e771b3d4d06c0672abde2936ffa0a3c6256 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|23|1","retry_until":1794685399,"status":"PENDING"}
+  ... read attempt 2: PENDING (2 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",23,1]) -> ok ACCEPTED 49s tx 0x1af8873ab08ea19867634aae1daf3426412a29524e2f1727f44433959b16a335 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|23|1","retry_until":1794685399,"status":"PENDING"}
+  ... read attempt 3: PENDING (3 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",23,1]) -> ok ACCEPTED 51s tx 0x6a461e8a2f4ff7c81dcbfc825267d71986932db3c102671ef8eb95b9812b41ed {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|23|1","retry_until":1794685399,"status":"PENDING"}
+  ... read attempt 4: PENDING (4 so far), retrying in 60s

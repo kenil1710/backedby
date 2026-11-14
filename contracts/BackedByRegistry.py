@@ -476,6 +476,14 @@ def slash_split(bond: int) -> list:
     return [slash, bounty, slash - bounty]
 
 
+def _csv_ints(text: str) -> list:
+    return [int(x) for x in text.split(",")] if text != "" else []
+
+
+def _json_or_none(text: str) -> typing.Any:
+    return json.loads(text) if text != "" else None
+
+
 def clean_label(text: typing.Any) -> str:
     out = ""
     for ch in str(text):
@@ -622,10 +630,11 @@ class BackedByRegistry(gl.contract.Contract):
     # --- helpers --------------------------------------------------------------
 
     # --- long string fields --------------------------------------------------
-    # Studio's runner returns a long string field (>= ~10 KB) corrupted when it is
-    # read through a struct reference after another struct was looked up in the
-    # same call (measured: test/probe/RuleProbe.py). Every read of a long field
-    # goes through a fresh lookup; small fields and writes are not affected.
+    # Studio's runner can return a long string field corrupted when the same field
+    # is read a second time in one call after another struct was looked up
+    # (measured on chain: demo check 4 at 19.5 KB, check 16 at 4.4 KB;
+    # test/probe/RuleProbe.py). So every write reads each long field of each
+    # record at most ONCE, through these helpers, and passes the parsed value on.
 
     def _cs(self, c: "Check", field: str) -> str:
         return getattr(self.checks[u64(int(c.check_id))], field)
@@ -678,9 +687,9 @@ class BackedByRegistry(gl.contract.Contract):
     def _gap(self, vaults: list, dests: list) -> int:
         return gap_for([v["kind"] for v in vaults] + [d.get("kind", "") for d in dests])
 
-    def _chains(self, p: Pair) -> list:
+    def _chains(self, dests: list) -> list:
         out = [SOURCE_CHAIN]
-        for d in self._dests(p):
+        for d in dests:
             if d["chain"] not in out:
                 out.append(d["chain"])
         return out
@@ -701,8 +710,9 @@ class BackedByRegistry(gl.contract.Contract):
             return "AUTH_" + str(aid) + "_HAS_NO_ANCHORS"
         return a
 
-    def _request(self, c: Check, rnd: int) -> dict:
-        req = json.loads(self._cs(c, "request_json"))
+    def _request(self, c: Check, rnd: int, base: dict) -> dict:
+        """The request for round rnd, from the check's request already read (base, not mutated)."""
+        req = json.loads(_canon(base))
         req["ok"] = True
         req["round"] = rnd
         req["check_id"] = int(c.check_id)
@@ -710,8 +720,7 @@ class BackedByRegistry(gl.contract.Contract):
         req["read_by"] = int(c.read_deadline) if rnd == 1 else int(c.contest_read_deadline)
         return req
 
-    def _terms(self, p: Pair, c: Check) -> dict:
-        req = json.loads(self._cs(c, "request_json"))
+    def _terms(self, p: Pair, req: dict) -> dict:
         return {"source_decimals": int(p.source_decimals), "tolerance_bps": int(p.tolerance_bps),
                 "max_gap_s": int(req["terms_max_gap_s"]), "vaults": req["vaults"], "dests": req["terms_dests"],
                 "anchors": req["terms_anchors"], "ledgers": req.get("ledgers", []),
@@ -723,8 +732,7 @@ class BackedByRegistry(gl.contract.Contract):
         b = self.bonds[c.bond_id]
         return [int(b.since), int(b.unbond_at)]
 
-    def _new_check(self, p: Pair, purpose: str, bond_id: int, stake: int, blocks: dict, now: int) -> int:
-        dests = self._dests(p)
+    def _new_check(self, p: Pair, purpose: str, bond_id: int, stake: int, blocks: dict, now: int, dests: list) -> int:
         vaults = self._vaults(p)
         anchors = json.loads(self._ps(p, "anchors_json"))
         req = {"source_chain": SOURCE_CHAIN, "vaults": [v["vault"] for v in vaults],
@@ -749,7 +757,8 @@ class BackedByRegistry(gl.contract.Contract):
             final_at=u64(0), source_time=u64(0), payouts_json="")
         self.n_checks = u64(cid)
         p.open_check = u64(cid)
-        p.checks_csv = (self._ps(p, "checks_csv") + "," if self._ps(p, "checks_csv") != "" else "") + str(cid)
+        csv = self._ps(p, "checks_csv")
+        p.checks_csv = (csv + "," if csv != "" else "") + str(cid)
         self._bump("filed:" + purpose)
         return cid
 
@@ -778,7 +787,7 @@ class BackedByRegistry(gl.contract.Contract):
         self._bump("verdict:" + verdict)
         self._bump("how:" + how)
 
-    def _settle(self, c: Check, p: Pair, verdict: str, now: int, how: str, reason: str,
+    def _settle(self, c: Check, p: Pair, verdict: str, now: int, how: str, r1: dict, req: dict,
                 contest_to: str) -> dict:
         """Moves the money for a FINAL verdict. contest_to: who receives a lost
         contest stake ("" = refund it to the contester)."""
@@ -825,16 +834,14 @@ class BackedByRegistry(gl.contract.Contract):
             else:
                 self._credit(contest_to, cst)
                 pay["contest_lost"] = str(cst)
-        self._close(c, p, ST_FINAL, verdict, reason, how, now, pay, True)
-        self._history(c, p, verdict, now)
+        self._close(c, p, ST_FINAL, verdict, str(r1.get("reason", "")), how, now, pay, True)
+        self._history(c, p, verdict, now, r1, req)
         return pay
 
-    def _history(self, c: Check, p: Pair, verdict: str, now: int) -> None:
+    def _history(self, c: Check, p: Pair, verdict: str, now: int, r: dict, req: dict) -> None:
         """Every FINAL ruling becomes one point of the pair's time series."""
-        r = json.loads(self._cs(c, "ruling1_json")) if self._cs(c, "ruling1_json") != "" else {}
         cov = r.get("coverage") or {}
         por = r.get("por") or {}
-        req = json.loads(self._cs(c, "request_json"))
         pt = {"check_id": int(c.check_id), "purpose": c.purpose, "source_time": int(c.source_time), "final_at": now,
               "verdict": verdict, "ratio_bps": r.get("ratio_bps", -1), "locked_norm": r.get("locked_norm", ""),
               "supply_norm": r.get("supply_norm", ""), "scale_decimals": r.get("scale_decimals", -1),
@@ -1070,7 +1077,8 @@ class BackedByRegistry(gl.contract.Contract):
                                     deposited=u256(value), won=u256(0), slashed=u256(0), since=u64(now),
                                     unbond_at=u64(0), status=B_ACTIVE, open_check=u64(0), closed_at=u64(0))
         self.n_bonds = u64(bid)
-        p.bonds_csv = (self._ps(p, "bonds_csv") + "," if self._ps(p, "bonds_csv") != "" else "") + str(bid)
+        csv = self._ps(p, "bonds_csv")
+        p.bonds_csv = (csv + "," if csv != "" else "") + str(bid)
         self.received_total = u256(int(self.received_total) + value)
         self.bonds_total = u256(int(self.bonds_total) + value)
         self._bump("bonds")
@@ -1164,7 +1172,8 @@ class BackedByRegistry(gl.contract.Contract):
         if value > MAX_AMOUNT:
             return self._reject(value, "STAKE_TOO_LARGE")
         p = self.pairs[b.pair_id]
-        bl = parse_blocks(blocks, self._chains(p))
+        dests = self._dests(p)
+        bl = parse_blocks(blocks, self._chains(dests))
         if isinstance(bl, str):
             return self._reject(value, bl)
         sup = None
@@ -1178,7 +1187,7 @@ class BackedByRegistry(gl.contract.Contract):
             self._refund_all(sup, p, "SUPERSEDED_BY_A_CHALLENGE", "SUPERSEDED", now, False)
         self.received_total = u256(int(self.received_total) + value)
         self.open_total = u256(int(self.open_total) + value)
-        cid = self._new_check(p, P_CHALLENGE, int(b.bond_id), value, bl, now)
+        cid = self._new_check(p, P_CHALLENGE, int(b.bond_id), value, bl, now, dests)
         b.open_check = u64(cid)
         return {"ok": True, "check_id": cid, "stake": str(value),
                 "superseded": int(sup.check_id) if sup is not None else 0}
@@ -1198,11 +1207,12 @@ class BackedByRegistry(gl.contract.Contract):
             raise gl.vm.UserError("REFUSED: CHECK_" + str(int(p.open_check)) + "_IS_OPEN_ON_THIS_PAIR")
         if int(p.last_monitor_at) > 0 and now < int(p.last_monitor_at) + int(self.monitor_interval_s):
             raise gl.vm.UserError("REFUSED: RATE_LIMITED_UNTIL_" + str(int(p.last_monitor_at) + int(self.monitor_interval_s)))
-        bl = parse_blocks(blocks, self._chains(p))
+        dests = self._dests(p)
+        bl = parse_blocks(blocks, self._chains(dests))
         if isinstance(bl, str):
             raise gl.vm.UserError("REFUSED: " + bl)
         # --- writes
-        cid = self._new_check(p, P_MONITOR, 0, 0, bl, now)
+        cid = self._new_check(p, P_MONITOR, 0, 0, bl, now, dests)
         return {"ok": True, "check_id": cid}
 
     @gl.public.view
@@ -1212,9 +1222,9 @@ class BackedByRegistry(gl.contract.Contract):
         if c is None:
             return {"ok": False, "why": "NO_SUCH_CHECK"}
         if c.status == ST_OPEN:
-            return self._request(c, 1)
+            return self._request(c, 1, json.loads(self._cs(c, "request_json")))
         if c.status == ST_CONT:
-            return self._request(c, 2)
+            return self._request(c, 2, json.loads(self._cs(c, "request_json")))
         return {"ok": False, "why": "CHECK_IS_" + c.status}
 
     @gl.public.write
@@ -1229,14 +1239,17 @@ class BackedByRegistry(gl.contract.Contract):
         if c.status != ST_OPEN and c.status != ST_CONT:
             raise gl.vm.UserError("REFUSED: NOTHING_TO_RULE_ON_IN_" + c.status)
         rnd = 1 if c.status == ST_OPEN else 2
+        # every long field of the check is read once, here, before any other lookup
+        req0 = json.loads(self._cs(c, "request_json"))
+        r1 = json.loads(self._cs(c, "ruling1_json")) if rnd == 2 else {}
         me = gl.message.contract_address.as_hex.lower()
         r = self._ext("get_reading", [me, int(c.check_id), rnd])
         if not isinstance(r, dict) or r.get("found") is not True:
             raise gl.vm.UserError("REFUSED: NOT_READ_YET_CALL_CHAINREADER_READ_CHECK")
-        if r.get("request_sha") != _sha(_canon(self._request(c, rnd))):
+        if r.get("request_sha") != _sha(_canon(self._request(c, rnd, req0))):
             raise gl.vm.UserError("REFUSED: READING_IS_FOR_ANOTHER_REQUEST")
         p = self.pairs[c.pair_id]
-        out = compute(r.get("reading"), self._terms(p, c), self._cover(c))
+        out = compute(r.get("reading"), self._terms(p, req0), self._cover(c))
         # --- writes (nothing below can refuse)
         if rnd == 1:
             c.ruling1_json = _canon(out)
@@ -1263,8 +1276,7 @@ class BackedByRegistry(gl.contract.Contract):
         if out["verdict"] != c.verdict1:
             pay = self._refund_all(c, p, "CONTEST_DISAGREES", "CONTEST_DISAGREES", now, True)
             return {"ok": True, "check_id": int(c.check_id), "status": ST_INC, "payouts": pay}
-        pay = self._settle(c, p, c.verdict1, now, "CONTEST_UPHELD_RULING", json.loads(self._cs(c, "ruling1_json"))["reason"],
-                           self._lost_contest_to(c, c.verdict1))
+        pay = self._settle(c, p, c.verdict1, now, "CONTEST_UPHELD_RULING", r1, req0, self._lost_contest_to(c, c.verdict1))
         return {"ok": True, "check_id": int(c.check_id), "status": ST_FINAL, "verdict": c.verdict1, "payouts": pay}
 
     @gl.public.write.payable
@@ -1312,9 +1324,11 @@ class BackedByRegistry(gl.contract.Contract):
             raise gl.vm.UserError("REFUSED: NOT_PROVISIONAL_" + c.status)
         if now < int(c.contest_deadline):
             raise gl.vm.UserError("REFUSED: CONTESTABLE_UNTIL_" + str(int(c.contest_deadline)))
+        req0 = json.loads(self._cs(c, "request_json"))
+        r1 = json.loads(self._cs(c, "ruling1_json"))
         p = self.pairs[c.pair_id]
         # --- writes
-        pay = self._settle(c, p, c.verdict1, now, "WINDOW_PASSED", json.loads(self._cs(c, "ruling1_json"))["reason"], "")
+        pay = self._settle(c, p, c.verdict1, now, "WINDOW_PASSED", r1, req0, "")
         return {"ok": True, "check_id": int(c.check_id), "status": ST_FINAL, "verdict": c.verdict1, "payouts": pay}
 
     @gl.public.write
@@ -1332,6 +1346,8 @@ class BackedByRegistry(gl.contract.Contract):
         if c.status != ST_OPEN and c.status != ST_CONT:
             raise gl.vm.UserError("REFUSED: NOTHING_TO_EXPIRE_IN_" + c.status)
         rnd = 1 if c.status == ST_OPEN else 2
+        req0 = json.loads(self._cs(c, "request_json")) if rnd == 2 else {}
+        r1 = json.loads(self._cs(c, "ruling1_json")) if rnd == 2 else {}
         deadline = int(c.read_deadline) if rnd == 1 else int(c.contest_read_deadline)
         if now < deadline:
             raise gl.vm.UserError(("REFUSED: READ_DEADLINE_AT_" if rnd == 1 else "REFUSED: REREAD_DEADLINE_AT_") + str(deadline))
@@ -1343,7 +1359,7 @@ class BackedByRegistry(gl.contract.Contract):
         if rnd == 1:
             pay = self._refund_all(c, p, "NO_READING_BEFORE_DEADLINE", "TIMEOUT_UNREAD", now, False)
             return {"ok": True, "check_id": int(c.check_id), "status": ST_INC, "payouts": pay}
-        pay = self._settle(c, p, c.verdict1, now, "TIMEOUT_CONTEST_UNREAD", json.loads(self._cs(c, "ruling1_json"))["reason"], "")
+        pay = self._settle(c, p, c.verdict1, now, "TIMEOUT_CONTEST_UNREAD", r1, req0, "")
         return {"ok": True, "check_id": int(c.check_id), "status": ST_FINAL, "verdict": c.verdict1, "payouts": pay}
 
     @gl.public.write
@@ -1384,8 +1400,7 @@ class BackedByRegistry(gl.contract.Contract):
                 "registered_at": int(p.registered_at), "last_bad_time": int(p.last_bad_time),
                 "open_check": int(p.open_check), "latest_check": int(p.latest_check), "latest_time": int(p.latest_time),
                 "last_monitor_at": int(p.last_monitor_at), "history_points": int(p.hist_n),
-                "checks": [int(x) for x in self._ps(p, "checks_csv").split(",")] if self._ps(p, "checks_csv") != "" else [],
-                "bonds": [int(x) for x in self._ps(p, "bonds_csv").split(",")] if self._ps(p, "bonds_csv") != "" else []}
+                "checks": _csv_ints(self._ps(p, "checks_csv")), "bonds": _csv_ints(self._ps(p, "bonds_csv"))}
 
     def _bond_view(self, b: Bond) -> dict:
         return {"bond_id": int(b.bond_id), "pair_id": int(b.pair_id), "operator": b.operator,
@@ -1400,13 +1415,13 @@ class BackedByRegistry(gl.contract.Contract):
                 "bond_id": int(c.bond_id), "filer": c.filer, "stake": str(int(c.stake)), "blocks": req["blocks"],
                 "vaults": req["vaults"], "dests": req["terms_dests"], "max_gap_s": int(req["terms_max_gap_s"]), "filed_at": int(c.filed_at), "read_deadline": int(c.read_deadline),
                 "status": c.status, "round": int(c.round), "verdict1": c.verdict1,
-                "ruling1": json.loads(self._cs(c, "ruling1_json")) if self._cs(c, "ruling1_json") != "" else None, "ruled_at": int(c.ruled_at),
+                "ruling1": _json_or_none(self._cs(c, "ruling1_json")), "ruled_at": int(c.ruled_at),
                 "contest_deadline": int(c.contest_deadline), "contester": c.contester,
                 "contest_stake": str(int(c.contest_stake)), "contested_at": int(c.contested_at),
                 "contest_read_deadline": int(c.contest_read_deadline),
-                "ruling2": json.loads(self._cs(c, "ruling2_json")) if self._cs(c, "ruling2_json") != "" else None, "verdict": c.verdict,
+                "ruling2": _json_or_none(self._cs(c, "ruling2_json")), "verdict": c.verdict,
                 "reason": c.reason, "how": c.how, "final_at": int(c.final_at), "source_time": int(c.source_time),
-                "payouts": json.loads(self._cs(c, "payouts_json")) if self._cs(c, "payouts_json") != "" else None}
+                "payouts": _json_or_none(self._cs(c, "payouts_json"))}
 
     @gl.public.view
     def get_pair(self, pair_id: int) -> typing.Any:
@@ -1449,7 +1464,7 @@ class BackedByRegistry(gl.contract.Contract):
                     "source_token": p.source_token,
                     "dests": [{"chain": d["chain"], "token": d["token"]} for d in self._dests(p)]}
         c = self.checks[u64(lc)]
-        r = json.loads(self._cs(c, "ruling1_json")) if self._cs(c, "ruling1_json") != "" else {}
+        r = _json_or_none(self._cs(c, "ruling1_json")) or {}
         cov = r.get("coverage") or {}
         por = r.get("por") or {}
         return {"found": True, "pair": True, "check_id": lc, "verdict": c.verdict, "status": c.status,

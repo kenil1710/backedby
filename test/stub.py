@@ -76,13 +76,21 @@ LONG_STRING = 8000
 LOOKUPS = [0]
 
 
+READS = {}
+
+
+def new_call():
+    """A transaction or view starts: nothing has been read yet."""
+    READS.clear()
+
+
 class _Ref:
-    """A struct read out of a TreeMap, as the runner hands it out. Measured on
-    Studio (test/probe/RuleProbe.py): a long string field (>= ~10 KB) read
-    through a reference AFTER another struct was looked up in the same call
-    comes back corrupted; small fields and writes are fine; a fresh lookup
-    reads correctly. This reference reproduces that, so code that re-reads a
-    long field through a stale reference fails here as it fails on chain."""
+    """A struct read out of a TreeMap, as Studio's runner hands it out.
+    Measured on chain (demo checks 4 and 16, test/probe/RuleProbe.py): reading
+    the SAME long string field a second time in one call, after any struct was
+    looked up since the first read, returns it corrupted, even through a fresh
+    lookup. Small fields and writes are fine. This reproduces it, so code that
+    reads a long field twice fails here as it fails on chain."""
 
     __slots__ = ("_obj", "_gen")
 
@@ -91,13 +99,21 @@ class _Ref:
         object.__setattr__(self, "_gen", gen)
 
     def __getattr__(self, name):
-        v = getattr(object.__getattribute__(self, "_obj"), name)
-        if isinstance(v, str) and len(v) >= LONG_STRING and object.__getattribute__(self, "_gen") < LOOKUPS[0]:
-            return v[:LONG_STRING - 500] + "\x01" + v[LONG_STRING - 499:]
+        obj = object.__getattribute__(self, "_obj")
+        v = getattr(obj, name)
+        if isinstance(v, str) and len(v) >= LONG_STRING:
+            key = (id(obj), name)
+            first = READS.get(key)
+            if first is None:
+                READS[key] = LOOKUPS[0]
+            elif first < LOOKUPS[0]:
+                return v[:LONG_STRING - 500] + "\x01" + v[LONG_STRING - 499:]
         return v
 
     def __setattr__(self, name, value):
-        setattr(object.__getattribute__(self, "_obj"), name, value)
+        obj = object.__getattribute__(self, "_obj")
+        READS.pop((id(obj), name), None)
+        setattr(obj, name, value)
 
 
 def _is_struct(v):

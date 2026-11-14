@@ -1,0 +1,73 @@
+{
+ "registry": "0x3D957588dC1Ee60B1D50678f721aaCc5FceC1f1F",
+ "commit": "61a08f80d875fb868032effff3539b93a5450c39",
+ "at": "2026-11-14T17:38:31.051Z",
+ "eth_get_balance_after": "0",
+ "ledger": {
+  "bonds": "0",
+  "bonds_recomputed_match": true,
+  "bounties": "25000000000000000",
+  "claimable": "0",
+  "claimed": "140000000000000000",
+  "held_now": "0",
+  "invariant_holds": true,
+  "on_chain_balance": "0",
+  "open_recomputed_match": true,
+  "open_stakes": "0",
+  "received": "140000000000000000",
+  "slashed": "50000000000000000"
+ },
+ "payouts": [
+  {
+   "label": "operator",
+   "payee": "0x00BB59efE7cD069Df92C711EF80908473A36b814",
+   "amount": "70000000000000000",
+   "tx": "0x7741db64594bbe0c3db8280b2d4eeac1a3d1a17fdeef0b26f7d0da8bdb9422a9",
+   "registry": "0x3D957588dC1Ee60B1D50678f721aaCc5FceC1f1F",
+   "ok": true,
+   "why": "",
+   "status": "FINALIZED",
+   "registry_before": "140000000000000000",
+   "registry_after": "70000000000000000",
+   "payee_before": "499637408615899968838",
+   "payee_after": "499707582189999977544",
+   "net_fee": "126306500000823",
+   "payee_delta_matches": false,
+   "payee_note": "payee balance moved by 70173574100008706, expected 69873693499999177"
+  },
+  {
+   "label": "challenger",
+   "payee": "0xfE86fC89b5a04D699198d03Afe4b0686aCF5C0d6",
+   "amount": "45000000000000000",
+   "tx": "0x5700b866fa857c1aca195fac9897fa0016b0bb729ee1e46f9e69125590f8ef18",
+   "registry": "0x3D957588dC1Ee60B1D50678f721aaCc5FceC1f1F",
+   "ok": true,
+   "why": "",
+   "status": "FINALIZED",
+   "registry_before": "70000000000000000",
+   "registry_after": "25000000000000000",
+   "payee_before": "499938227706749983540",
+   "payee_after": "499983101400249982717",
+   "net_fee": "126306500000823",
+   "payee_delta_matches": true,
+   "payee_note": ""
+  },
+  {
+   "label": "treasury",
+   "payee": "0x8c47a9AD90Ab7aEF4e160d274bb6f0782fb3071E",
+   "amount": "25000000000000000",
+   "tx": "0x342014776ebb187ccfc2ac3fab495898a0386208418c610512f882469a6d79e2",
+   "registry": "0x3D957588dC1Ee60B1D50678f721aaCc5FceC1f1F",
+   "ok": true,
+   "why": "",
+   "status": "FINALIZED",
+   "registry_before": "25000000000000000",
+   "registry_after": "0",
+   "payee_before": "500044985609499949327",
+   "payee_after": "500069859302499948504",
+   "net_fee": "126307000000823",
+   "payee_delta_matches": true,
+   "payee_note": ""
+  }
+ ]
+}

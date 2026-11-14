@@ -95,6 +95,7 @@ class World:
         if value > 0 and not getattr(fn, "_payable", False):
             raise Reverted("not payable")
         snap = self._snapshot()
+        stub.new_call()
         before = len(stub.TRANSFERS)
         prev = self.current
         self.current = address
@@ -118,6 +119,7 @@ class World:
         return json.loads(json.dumps(out))
 
     def view(self, address, method, *args):
+        stub.new_call()
         inst = self.instances[address]
         self._msg("0x" + "0" * 40, 0, address)
         return json.loads(json.dumps(getattr(type(inst), method)(inst, *args)))
