@@ -672,3 +672,65 @@ class Families(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LongStringFields(Base):
+    """Studio's runner corrupts a long string field read through a struct
+    reference after another struct lookup (test/probe/RuleProbe.py, demo check 4
+    on 0xACf1d85b). The stub reproduces it above LONG_STRING; with the threshold
+    at 300 characters every request, ruling, pair list and anchor set counts as
+    long, and every path must still work."""
+
+    def setUp(self):
+        super().setUp()
+        self.saved = stub.LONG_STRING
+        stub.LONG_STRING = 300
+
+    def tearDown(self):
+        stub.LONG_STRING = self.saved
+        super().tearDown()
+
+    def test_monitor_rule_finalize_history(self):
+        pid = self.wh_pair()
+        c = self.final(pid)
+        self.assertEqual((c["status"], c["verdict"]), ("FINAL", "BACKED"))
+        self.assertEqual(self.s.view(self.s.reg, "get_history", pid, 0, 5)["total"], 1)
+        self.assertEqual(self.s.view(self.s.reg, "get_latest", pid)["coverage"], "COMPLETE")
+
+    def test_challenge_contest_reread_settle(self):
+        pid = self.gho_pair()
+        bid = self.s.bond(pid)["bond_id"]
+        self.s.after_bond()
+        cid = self.s.challenge(bid, self.s.blocks(pid))["check_id"]
+        self.s.read(cid)
+        self.s.rule(cid)
+        self.s.call(self.s.reg, "contest", cid, sender=F.CONTESTER, value=int(self.s.cfg()["min_stake"]))
+        self.s.read(cid, 2)
+        out = self.s.rule(cid)
+        self.assertEqual((out["status"], out["verdict"]), ("FINAL", "BACKED"))
+        self.assertTrue(self.s.ledger()["invariant_holds"])
+
+    def test_add_destination_and_vault_then_check(self):
+        a = self.auth("polygon", F.USDT, F.POL_USDT)
+        pid = self.register(a)
+        self.s.call(self.s.reg, "add_vault", pid, self.auth("oft_polygon", F.USDT, F.POL_USDT)["auth_id"])
+        self.s.call(self.s.reg, "add_destination", pid, self.auth("oft_arbitrum", F.USDT, F.ARB_USDT0)["auth_id"])
+        c = self.ruled(pid)
+        self.assertEqual(c["status"], "PROVISIONAL")
+        self.assertEqual(len(self.s.view(self.s.reg, "get_pair", pid)["dests"]), 2)
+
+    def test_expire_and_views(self):
+        pid = self.wh_pair()
+        self.s.after_bond()
+        cid = self.s.monitor(pid, self.s.blocks(pid))["check_id"]
+        self.s.w.set_time(self.s.check(cid)["read_deadline"] + 1)
+        self.assertEqual(self.s.call(self.s.reg, "expire", cid, sender=STRANGER)["status"], "INCONCLUSIVE")
+        self.assertEqual(self.s.view(self.s.reg, "get_pairs", 0, 50)["pairs"][0]["pair_id"], pid)
+        self.assertEqual(self.s.view(self.s.reg, "get_checks", 0, 50)["total"], cid)
+
+    def test_no_long_field_is_read_through_a_stale_reference(self):
+        import re
+        src = (F.world.ROOT / "build" / "BackedByRegistry.py").read_text()
+        fields = "request_json|ruling1_json|ruling2_json|payouts_json|dests_json|vaults_json|anchors_json|checks_csv|bonds_csv"
+        reads = [m.group(0) for m in re.finditer(r"\b(?!self\b)[a-z][a-z0-9]*\.(" + fields + r")\b(?!\s*=(?!=))", src)]
+        self.assertEqual(reads, [])

@@ -948,3 +948,67 @@ GenLayer RPC error (sim_estimateTransactionFees): execution failed
 
 RESULT demo: eth_getBalance 0, ledger held_now 0 (received 140000000000000000 = claimed 140000000000000000), 3/3 payouts delivered, invariant true
 CLAIMS EXIT 0
+
+# Demo, part 2 2026-11-14T12:39:58.207Z on 0xACf1d85bF09a50078ac422A3af69eAe8B10AB384
+
+## 18. A check left OPEN by an interrupted step is driven to its end by anyone: read (PENDING is retried inside its window), rule, or expire  (2026-11-14T12:39:58.211Z)
+   check 4: OPEN, reading recorded, read window until 2026-11-14T10:28:07.000Z
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for rule (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  rule([4]) -> FAILED ACCEPTED 13s tx 0x00221bf0db89456321914256e7b581fc8cb9bdc5d0f0f8f19692e85788f685b5 revert: exit_code 1
+   -> check 4: OPEN    coverage - alert -
+
+## 19. Fresh rulings, finalized, and the gate asked at once (its max age is 30 minutes)  (2026-11-14T12:40:31.496Z)
+  monitor([1,"{\"ethereum\":26413201,\"arbitrum\":524151795}"]) -> ok ACCEPTED 16s tx 0x69eb233fcd6b1672276eb109ad895ee04f870b287157f8e5fd987e4f0838e49a {"check_id":14,"ok":true}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",14,1]) -> ok ACCEPTED 17s tx 0x245f09edcaf71ea5ec2806f874849e9d59b13e60148ab39e4715406b0975c14a {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|14|1","reason":"","status":"OK"}
+  rule([14]) -> ok ACCEPTED 21s tx 0x4ca11f2c9aa6be436a09e83e447f2d76d585cfb51f6dad1b9e20c6bcc88fc6ee {"check_id":14,"contestable_until":1794660169,"ok":true,"ratio_bps":10020,"status":"PROVISIONAL","verdict":"BACKED"}
+   LINK on Arbitrum (complete mapping):
+   -> check 14: PROVISIONAL BACKED ratio_bps 10020  coverage COMPLETE alert OK
+  monitor([7,"{\"ethereum\":26413201,\"arbitrum\":524151795,\"polygon\":97302364}"]) -> ok ACCEPTED 15s tx 0x02adce7225c63c7ed538dd5160144766963bf471f0afbf56195b64083980a5cc {"check_id":15,"ok":true}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",15,1]) -> ok ACCEPTED 26s tx 0xac3cef05741270695ad21738de95b174bf9ba5fe4fe7a63280d18aba908da333 {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|15|1","reason":"","status":"OK"}
+  rule([15]) -> ok ACCEPTED 14s tx 0xaa284fcf6006c66651da5ec29c70f9b7cc82fdc395b963f2dad373742664a98e {"check_id":15,"contestable_until":1794660246,"ok":true,"ratio_bps":10001,"status":"PROVISIONAL","verdict":"BACKED"}
+   USDC through Wormhole (ledger):
+   -> check 15: PROVISIONAL BACKED ratio_bps 10001  coverage COMPLETE alert ALERT
+  monitor([8,"{\"ethereum\":26413181,\"base\":57341968,\"arbitrum\":524151066}"]) -> ok ACCEPTED 14s tx 0xa9a105c7cc14a68aea9bbb3404e73d4b26a683bfcd8c85196a10f1c9f2021e91 {"check_id":16,"ok":true}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",16,1]) -> ok ACCEPTED 25s tx 0xa8f310d43f443d41f1c5f2a29879ce2bdcece446232832638faf7966340d08e9 {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|16|1","reason":"","status":"OK"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for rule (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  rule([16]) -> FAILED ACCEPTED 15s tx 0xe0b1a76ad6fd123901463dc290d463c293fed43ecfc0845c58711fc24fa0166c revert: exit_code 1
+   GHO through CCIP (CCIP pool with unlisted chains):
+   -> check 16: OPEN    coverage - alert -
+  monitor([4,"{\"ethereum\":26413171,\"optimism\":159529938}"]) -> ok ACCEPTED 21s tx 0x177e9bfcca99a49202d4dac8c7500a283f23385f6e2c6920383f9a409beb9baa {"check_id":17,"ok":true}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",17,1]) -> ok ACCEPTED 23s tx 0xd4ff98186c81637255271d308941fefd189fb08e97b66a13ede227978c1ceb1f {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|17|1","reason":"","status":"OK"}
+  rule([17]) -> ok ACCEPTED 13s tx 0x24bcc20e55be18e99881d8a529a44ac7661b29d3e48e1dbf576f25a886f95419 {"check_id":17,"contestable_until":1794660391,"ok":true,"ratio_bps":10002,"status":"PROVISIONAL","verdict":"BACKED"}
+   USDC.e on OP Mainnet (OP Standard Bridge escrow):
+   -> check 17: PROVISIONAL BACKED ratio_bps 10002  coverage OPEN alert ALERT
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for monitor (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  monitor([2,"{\"ethereum\":26413192,\"polygon\":97302292,\"arbitrum\":524151483,\"optimism\":159530065,\"mantle\":103264294,\"xlayer\":75889871,\"sei) -> FAILED ACCEPTED 15s tx 0x5fe4062245734423dc8577b50b070fee86cdb2323925db78d43ac2074161661e revert: REFUSED: CHECK_4_IS_OPEN_ON_THIS_PAIR
+   USDT on Polygon (PoS predicate and USDT0 adapter):
+   -> check undefined: undefined    coverage - alert -
+   ... waiting 8s (window of check 14)
+  finalize([14]) -> ok ACCEPTED 16s tx 0xf6cc8f1c332fddd8f50350412346b3e29d8b9bbf8e062d960583e8beebe8b34e {"check_id":14,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 14: FINAL BACKED ratio_bps 10020 LOCKED_COVERS_SUPPLY coverage COMPLETE alert OK
+   ... waiting 8s (window of check 15)
+  finalize([15]) -> ok ACCEPTED 15s tx 0xec782aead4d24ff5cc1e3c05291016cf78c5cbea42a18e40eeada9b3f768736d {"check_id":15,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 15: FINAL BACKED ratio_bps 10001 LOCKED_COVERS_SUPPLY coverage COMPLETE alert ALERT
+   ... waiting 8s (window of check 17)
+  finalize([17]) -> ok ACCEPTED 15s tx 0x9c2efa7f7d07d42bf0fad36d0c70a36b2b5bca56a86bde8df62317956b6e715d {"check_id":17,"ok":true,"payouts":{"bond_in":"0","bounty":"0","challenger":"0","contest_lost":"0","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 17: FINAL BACKED ratio_bps 10002 LOCKED_COVERS_SUPPLY coverage OPEN alert ALERT
+   borrow on pair 1 (LINK on Arbitrum (demo)): tx 0x2bb7fea81c524f19cc9221501d676c2e68b1f45122e367af6a7c88ecbafc0ee3 -> "{\"allowed\":true\"attempt_id\":11\"reason\":\"BACKED\"\"state\":\"BACKED\"}"
+   borrow on pair 7 (USDC through Wormhole (demo)): tx 0xfd9958b03f5852828c05a4e13448ffbace82805a5ed85c01bab130273827fd9a -> "{\"allowed\":true\"attempt_id\":12\"reason\":\"BACKED_ALERT\"\"state\":\"BACKED_ALERT\"}"
+   borrow on pair 4 (USDC.e on OP Mainnet (demo)): tx 0x822851bbe25e5f3f79003e80277ad4fd1727a40aef2460fe9d69f99c4f7a5494 -> "{\"allowed\":false\"attempt_id\":13\"reason\":\"STALE\"\"state\":\"STALE\"}"
+   borrow on pair 1 (LINK on Arbitrum (demo), naming another token): tx 0x0ce867be364e3c236ca8ccef1cba6880c4490ef9b6b1e76e477ef26a05f25b85 -> "{\"allowed\":false\"attempt_id\":14\"reason\":\"NOT_THIS_PAIR\"\"state\":\"NOT_THIS_PAIR\"}"
+   attempts: {"allowed":3,"attempts":[{"allowed":false,"amount":"1000","at":1794660548,"attempt_id":14,"check_id":0,"dest_chain":"arbitrum","dest_token":"0x7f5c764cbc14f9669b88837ca1490cca17c31607","note":"LINK on Arbitrum (demo), naming another token","pair_id":1,"reason":"NOT_THIS_PAIR","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1794660534,"attempt_id":13,"check_id":17,"dest_chain":"optimism","dest_token":"0x7f5c764cbc14f9669b88837ca1490cca17c31607","note":"USDC.e on OP Mainnet (demo)","pair_id":4,"reason":"STALE","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":true,"amount":"1000","at":1794660520,"attempt_id":12,"check_id":15,"dest_chain":"arbitrum","dest_token":"0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18","note":"USDC through Wormhole (demo)","pair_id":7,"reason":"BACKED_ALERT","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":true,"amount":"1000","at":1794660506,"attempt_id":11,"check_id":14,"dest_chain":"arbitrum","dest_token":"0xf97f4df75117a78c1a5a0dbb814af92458539fb4","note":"LINK on Arbitrum (demo)","pair_id":1,"reason":"BACKED","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1794659574,"attempt_id":10,"check_id":0,"dest_chain":"arbitrum","dest_token":"0xf97f4df75117a78c1a5a0dbb814af92458539fb4","note":"demo no such pair","pair_id":99,"reason":"NO_SUCH_PAIR","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1794659554,"attempt_id":9,"check_id":0,"dest_chain":"arbitrum","dest_token":"0x7f5c764cbc14f9669b88837ca1490cca17c31607","note":"demo copycat token","pair_id":1,"reason":"NOT_THIS_PAIR","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1794659534,"attempt_id":8,"check_id":12,"dest_chain":"base","dest_token":"0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee","note":"demo gho","pair_id":8,"reason":"STALE","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"},{"allowed":false,"amount":"1000","at":1794659519,"attempt_id":7,"check_id":9,"dest_chain":"optimism","dest_token":"0x7f5c764cbc14f9669b88837ca1490cca17c31607","note":"demo op","pair_id":4,"reason":"STALE","sender":"0xf873cdd4ba6e2ca7bb1ef5acb38eb7cd3e3f2515"}],"refused":11,"total":14}
+
+RESULT demo part 2: gate states shown above; registry eth_getBalance 0, ledger held_now 0, invariant true
+GATE EXIT 0

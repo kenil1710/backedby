@@ -72,6 +72,45 @@ class _Addr:
         return hash(self._v)
 
 
+LONG_STRING = 8000
+LOOKUPS = [0]
+
+
+class _Ref:
+    """A struct read out of a TreeMap, as the runner hands it out. Measured on
+    Studio (test/probe/RuleProbe.py): a long string field (>= ~10 KB) read
+    through a reference AFTER another struct was looked up in the same call
+    comes back corrupted; small fields and writes are fine; a fresh lookup
+    reads correctly. This reference reproduces that, so code that re-reads a
+    long field through a stale reference fails here as it fails on chain."""
+
+    __slots__ = ("_obj", "_gen")
+
+    def __init__(self, obj, gen):
+        object.__setattr__(self, "_obj", obj)
+        object.__setattr__(self, "_gen", gen)
+
+    def __getattr__(self, name):
+        v = getattr(object.__getattribute__(self, "_obj"), name)
+        if isinstance(v, str) and len(v) >= LONG_STRING and object.__getattribute__(self, "_gen") < LOOKUPS[0]:
+            return v[:LONG_STRING - 500] + "\x01" + v[LONG_STRING - 499:]
+        return v
+
+    def __setattr__(self, name, value):
+        setattr(object.__getattribute__(self, "_obj"), name, value)
+
+
+def _is_struct(v):
+    return hasattr(type(v), "__annotations__") and bool(getattr(type(v), "__annotations__")) and not isinstance(v, (dict, list, str))
+
+
+def _ref(v):
+    if v is None or not _is_struct(v):
+        return v
+    LOOKUPS[0] += 1
+    return _Ref(v, LOOKUPS[0])
+
+
 class _TreeMap(dict):
     """Models the runtime's TreeMap, INCLUDING what it returns for a key that is
     not there."""
@@ -102,7 +141,7 @@ class _TreeMap(dict):
     def get(self, key, default=_UNSET):
         k = self._k(key)
         if k in self:
-            return dict.__getitem__(self, k)
+            return _ref(dict.__getitem__(self, k))
         if default is not _UNSET:
             return default
         return self._missing()
@@ -123,7 +162,7 @@ class _TreeMap(dict):
         on the one path that had already banked a deposit. `get_or_insert_default`
         is the spelling that inserts. A stub that is more forgiving than the
         runner is a stub that certifies bugs."""
-        return dict.__getitem__(self, self._k(key))
+        return _ref(dict.__getitem__(self, self._k(key)))
 
     def __delitem__(self, key):
         dict.__delitem__(self, self._k(key))
