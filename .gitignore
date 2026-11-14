@@ -18,3 +18,4 @@ test/.patrol_secret
 docs/demo/.work-*/
 frontend/.next/
 frontend/node_modules/
+.venv-gl/
