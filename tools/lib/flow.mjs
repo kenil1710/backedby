@@ -119,13 +119,20 @@ export function actor({ set = "final", role, registry = "BackedByRegistry", log 
       const n = (await rv("get_stats")).bonds;
       return { ...o, bond_id: o.ok && o.ret?.ok !== false ? (o.ret?.bond_id ?? n) : 0 };
     },
-    async read(cid, rnd = 1, tries = 3) {
+    /** read_check until a reading is recorded. A PENDING answer (an RPC down or
+     *  throttled, or a chain's two RPCs differing) stores nothing; it is retried
+     *  until the round's fixed read window closes. */
+    async read(cid, rnd = 1, tries = 12) {
       for (let i = 1; i <= tries; i++) {
         const o = await send("reader", "read_check", [regAddr, cid, rnd]);
         const r = await cv("get_reading", [regAddr, cid, rnd]);
         if (r.found) return { ...o, reading: r };
-        if (/ALREADY_READ|NOT_THIS_ROUND|REQUEST_NOT_READABLE/.test(String(o.revertReason))) return { ...o, reading: r };
-        if (i < tries) { log(`  ... read attempt ${i} did not record, retrying in 20s`); await sleep(20000); }
+        if (/ALREADY_READ|NOT_THIS_ROUND|REQUEST_NOT_READABLE|READ_WINDOW_CLOSED/.test(String(o.revertReason))) return { ...o, reading: r };
+        if (i < tries) {
+          const wait = o.ret?.status === "PENDING" ? 60 : 20;
+          log(`  ... read attempt ${i}: ${o.ret?.status === "PENDING" ? `PENDING (${r.pending} so far)` : "not recorded"}, retrying in ${wait}s`);
+          await sleep(wait * 1000);
+        }
       }
       return { ok: false, reading: { found: false } };
     },

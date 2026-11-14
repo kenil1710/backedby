@@ -34,11 +34,13 @@ const USDT_POL = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f";
 const USDT_ARB = "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9";
 const RECENT_L1 = "0x59d1e836f7b7210a978b25a855085cc46fd090b5";   // bridged to OP Mainnet on 2026-09-01
 const RECENT_OP = "0x16d375422a1d6b069c1958848746b97cc053c69e";   // created at OP block 156278236
+const GHO = "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f";
+const GHO_ARB = "0x7dff72693f6a4149b17e7c6314655f6a9f7c8b33";
 
 log(`\n# Demo run ${new Date().toISOString()} on ${dep[REG].address} (commit ${dep[REG].commit})`);
 log(`config: window ${cfg.window_s}s, read timeout ${cfg.read_timeout_s}s, unbond delay ${cfg.unbond_delay_s}s, min bond ${cfg.min_bond}, min stake ${cfg.min_stake}, fast gap ${cfg.fast_gap_s}s`);
 
-step("1. Register five real pairs, each authenticated by its bridge's own mapping");
+step("1. Register eight real pairs, each authenticated by its bridge's own mapping");
 const P = {};
 for (const [key, kind, sym, l2, label] of [
   ["arb", "arbitrum", "LINK", "0xf97f4df75117a78c1a5a0dbb814af92458539fb4", "LINK on Arbitrum (demo)"],
@@ -46,12 +48,15 @@ for (const [key, kind, sym, l2, label] of [
   ["nomad", "nomad", "USDC", "0x8f552a71efe5eefc207bf75485b356a0b3f01ec9", "madUSDC on Moonbeam (demo)"],
   ["op", "optimism", "USDC", "0x7f5c764cbc14f9669b88837ca1490cca17c31607", "USDC.e on OP Mainnet (demo)"],
   ["recent", "optimism", null, RECENT_OP, "A token bridged to OP on 2026-09-01 (demo)"],
+  ["wbtc", "arbitrum", "WBTC", "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f", "WBTC on Arbitrum, with Chainlink PoR (demo)"],
+  ["wh", "wh_arbitrum", "USDC", "0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18", "USDC through Wormhole (demo)"],
+  ["gho", "ccip_base", null, "0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee", "GHO through CCIP, one destination listed (demo)"],
 ]) {
   const have = (await seeder.rv("get_pairs", [0, 50])).pairs.find((p) => p.label === label);
   if (have) { P[key] = have.pair_id; log(`   -> pair ${have.pair_id}: ${label} (registered earlier)`); continue; }
   let r = { pair_id: 0 };
   for (let i = 0; i < 3 && !r.pair_id; i++) {
-    const au = await seeder.authenticateP(kind, sym ? L1[sym] : RECENT_L1, l2);
+    const au = await seeder.authenticateP(kind, sym ? L1[sym] : key === "gho" ? GHO : RECENT_L1, l2);
     if (au.auth_id) r = await seeder.register([au.auth_id], 0, label);
   }
   P[key] = r.pair_id;
@@ -184,18 +189,48 @@ for (const key of ["nomad", "op", "arb"]) {
 }
 for (const [cid, dl] of finals) { await waitUntil(dl, `window of check ${cid}`); show(await pt.finalize(cid)); }
 
-step("14. CollateralGate: allowed on a fresh BACKED pair; refused on INCONCLUSIVE, UNDER_BACKED, a recent non-BACKED ruling, stale, and unknown pairs");
-for (const key of ["arb", "recent", "nomad", "pol", "op"]) {
-  const o = await gate.send("borrow", [P[key], "1000", `demo ${key}`]);
+step("14. v2: Wormhole's ledger, CCIP coverage and discovery, Chainlink PoR, history and alerts");
+{
+  log("   Wormhole: a second destination is added; the ruling counts the bridge's own ledger (every chain it owes), not only the listed tokens");
+  const d = await ct.authenticateP("wh_polygon", L1.USDC, "0x4318cb63a2b8edf2de971e2f17f77097e499459d");
+  if (d.auth_id) await ct.send("reg", "add_destination", [P.wh, d.auth_id]);
+  const w = (await pt.fileReadRule("monitor wormhole", async () => pt.monitor(P.wh, (await pt.pins(P.wh, 30)).blocks))).check;
+  show(w);
+  log(`   ledgers ${JSON.stringify(w.ruling1?.ledgers)} coverage ${w.ruling1?.coverage?.state}`);
+  log("   CCIP: GHO's pool supports more chains than the pair lists -> coverage GAP, every unlisted chain named");
+  const g = (await pt.fileReadRule("monitor gho", async () => pt.monitor(P.gho, (await pt.pins(P.gho, 30)).blocks))).check;
+  show(g);
+  log(`   coverage ${g.ruling1?.coverage?.state}, unlisted ${JSON.stringify(g.ruling1?.coverage?.unlisted?.map((u) => u.id))}`);
+  log("   discovery: the pool's own getRemoteToken names Arbitrum's token; anyone proves it and adds it");
+  const ga = await ct.authenticateP("ccip_arbitrum", GHO, GHO_ARB);
+  if (ga.auth_id) await ct.send("reg", "add_destination", [P.gho, ga.auth_id]);
+  log(`   -> pair ${P.gho} vault remotes ${JSON.stringify((await ct.rv("get_pair", [P.gho])).vaults[0].remotes)}`);
+  log("   Chainlink PoR next to the ratio (WBTC on Arbitrum):");
+  const b = (await pt.fileReadRule("monitor wbtc", async () => pt.monitor(P.wbtc, (await pt.pins(P.wbtc, 30)).blocks))).check;
+  show(b);
+  log(`   por ${JSON.stringify(b.ruling1?.por)}`);
+  const fin = [w, g, b].filter((c) => c?.status === "PROVISIONAL");
+  for (const c of fin) { await waitUntil(c.contest_deadline, `window of check ${c.check_id}`); show(await pt.finalize(c.check_id)); }
+  for (const key of ["arb", "wh", "wbtc"]) log(`   history of pair ${P[key]}: ${JSON.stringify(await pt.rv("get_history", [P[key], 0, 10]))}`);
+  for (const key of ["arb", "wh", "gho", "wbtc", "op"]) log(`   latest of pair ${P[key]}: ${JSON.stringify(await pt.rv("get_latest", [P[key]]))}`);
+}
+
+step("15. CollateralGate, bound to (pair, source token, destination): BACKED on fresh complete pairs; refused on UNDER_BACKED, INCONCLUSIVE, coverage GAP or OPEN, a recent non-BACKED ruling, copycat tokens and unknown pairs");
+for (const key of ["arb", "wh", "wbtc", "recent", "nomad", "pol", "op", "gho"]) {
+  const p = await pt.rv("get_pair", [P[key]]);
+  const o = await gate.send("borrow", [P[key], p.source_token, p.dests[0].chain, p.dests[0].token, "1000", `demo ${key}`]);
   log(`   borrow on pair ${P[key]} (${key}): tx ${o.hash} -> ${JSON.stringify(o.returned)}`);
 }
 {
-  const o = await gate.send("borrow", [99, "1000", "demo no such pair"]);
-  log(`   borrow on pair 99: tx ${o.hash} -> ${JSON.stringify(o.returned)}`);
+  const p = await pt.rv("get_pair", [P.arb]);
+  const o = await gate.send("borrow", [P.arb, p.source_token, p.dests[0].chain, "0x7f5c764cbc14f9669b88837ca1490cca17c31607", "1000", "demo copycat token"]);
+  log(`   borrow on pair ${P.arb} naming another token: tx ${o.hash} -> ${JSON.stringify(o.returned)}`);
+  const n = await gate.send("borrow", [99, p.source_token, p.dests[0].chain, p.dests[0].token, "1000", "demo no such pair"]);
+  log(`   borrow on pair 99: tx ${n.hash} -> ${JSON.stringify(n.returned)}`);
 }
-log(`   attempts: ${JSON.stringify(await gate.view("get_attempts", [0, 10]))}`);
+log(`   attempts: ${JSON.stringify(await gate.view("get_attempts", [0, 12]))}`);
 
-step("15. Unbond and withdraw the surviving bond");
+step("16. Unbond and withdraw the surviving bond");
 {
   await op.send("reg", "request_unbond", [bA.bond_id]);
   await waitUntil((await op.rv("get_bond", [bA.bond_id])).withdrawable_at, "unbond delay");
@@ -203,7 +238,7 @@ step("15. Unbond and withdraw the surviving bond");
   log(`   bond ${bA.bond_id}: ${JSON.stringify(await op.rv("get_bond", [bA.bond_id]))}`);
 }
 
-step("16. Everyone claims; each payout is proved on chain; the registry drains to 0");
+step("17. Everyone claims; each payout is proved on chain; the registry drains to 0");
 const payouts = [];
 for (const role of ["operator", "challenger", "contester", "patrol", "borrower", "deployer"]) {
   const r = await as(role).claimVerified(role === "deployer" ? "treasury" : role);
