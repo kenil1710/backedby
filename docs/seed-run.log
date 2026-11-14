@@ -384,3 +384,6 @@ RESULT DAI through Wormhole (Portal): check 22 PROVISIONAL BACKED ratio_bps 1000
   ... read attempt 3: PENDING (3 so far), retrying in 60s
   read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",23,1]) -> ok ACCEPTED 51s tx 0x6a461e8a2f4ff7c81dcbfc825267d71986932db3c102671ef8eb95b9812b41ed {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|23|1","retry_until":1794685399,"status":"PENDING"}
   ... read attempt 4: PENDING (4 so far), retrying in 60s
+  read_check(["0x2162246f0412bBCb7F7Af9C37D0a2972Cf2813E2",23,1]) -> ok ACCEPTED 52s tx 0x1c3c06a766b5be1908faf9c8ea3d9317b174cb50f550f1be6ab532b96c631971 {"key":"0x2162246f0412bbcb7f7af9c37d0a2972cf2813e2|23|1","retry_until":1794685399,"status":"PENDING"}
+  ... read attempt 5: PENDING (5 so far), retrying in 60s
+SEED STOPPED 2026-11-14T17:51:52Z: H6 needed a second fix; v2 redeploy follows
