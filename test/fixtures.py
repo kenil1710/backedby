@@ -285,6 +285,93 @@ class Net:
                 lambda d, b, a=adapter.lower(): F_wa(peers[a].get(arg(d, 0), "0x" + "0" * 40)))
         return adapter
 
+    def scan_rpcs(self):
+        for u in CR.SCAN_RPCS:
+            stub.WEB.chains[u] = self.mc["ethereum"]
+        self.fn("ethereum", CR.MULTICALL3, CR.S_AGGREGATE3, lambda d, b: _mc_answer(self, d, b))
+
+    def wormhole(self, dest, l1, l2, origin=None, wrapped_map=None, eth_registers=True, dest_registers=True,
+                 is_wrapped=True):
+        wid, tb = CR.WH_DESTS[dest]
+        ethreg = getattr(self, "_wh_eth", {})
+        ethreg[wid] = tb if eth_registers else "0x" + "0" * 40
+        self._wh_eth = ethreg
+        self.fn("ethereum", CR.WH_ETH_BRIDGE, CR.S_WH_BRIDGE_OF, lambda d, b: wa(ethreg.get(arg(d, 0), "0x" + "0" * 40)))
+        self.fn("ethereum", CR.WH_ETH_BRIDGE, CR.S_WH_OUTSTANDING,
+                lambda d, b: w(self.val("ethereum", ("whled", arg_addr(d, 0)), b, 0)))
+        wm = getattr(self, "_wh_wrapped", {})
+        wm[(dest, l1.lower())] = wrapped_map or l2
+        self._wh_wrapped = wm
+        self.fn(dest, tb, CR.S_WH_WRAPPED,
+                lambda d, b, dest=dest: wa(wm.get((dest, arg_addr(d, 1)), "0x" + "0" * 40)) if arg(d, 0) == 2 else wa("0x" + "0" * 40))
+        iw = getattr(self, "_wh_is", set())
+        if is_wrapped:
+            iw.add((dest, l2.lower()))
+        self._wh_is = iw
+        self.fn(dest, tb, CR.S_WH_IS_WRAPPED, lambda d, b, dest=dest: w(1 if (dest, arg_addr(d, 0)) in iw else 0))
+        self.fn(dest, tb, CR.S_WH_BRIDGE_OF,
+                lambda d, b: wa(CR.WH_ETH_BRIDGE if dest_registers and arg(d, 0) == 2 else "0x" + "0" * 40))
+        o = origin or (2, l1)
+        self.fn(dest, l2, CR.S_WH_CHAIN_ID, lambda d, b: w(o[0]))
+        self.fn(dest, l2, CR.S_WH_NATIVE, lambda d, b: wa(o[1]))
+        return CR.WH_ETH_BRIDGE
+
+    def wh_ledger(self, l1, amount, from_block=0):
+        self.set("ethereum", ("whled", l1.lower()), amount, from_block)
+
+    def ccip(self, dest, l1, l2, pool, dpool, src_type="LockReleaseTokenPool 1.5.1", dst_type="BurnMintTokenPool 1.5.1",
+             remote_token=None, back_token=None, src_names_dest=True, dest_names_src=True):
+        dsel, dtar = CR.CCIP_DESTS[dest]
+        es = CR.CCIP_ETH_SELECTOR
+        pools = getattr(self, "_ccip_pools", {})
+        pools[l1.lower()] = pool
+        self._ccip_pools = pools
+        self.fn("ethereum", CR.CCIP_ETH_TAR, CR.S_CCIP_GET_POOL, lambda d, b: wa(pools.get(arg_addr(d, 0), "0x" + "0" * 40)))
+        self.fn("ethereum", pool, CR.S_CCIP_TYPE, lambda d, b: abi_string(src_type))
+        self.fn("ethereum", pool, CR.S_CCIP_GET_TOKEN, lambda d, b: wa(l1))
+        rt = getattr(self, "_ccip_rt", {})
+        rt[(pool.lower(), dsel)] = remote_token or l2
+        self._ccip_rt = rt
+        self.fn("ethereum", pool, CR.S_CCIP_REMOTE_TOKEN,
+                lambda d, b, pool=pool: abi_bytes(wa(rt[(pool.lower(), arg(d, 0))])) if (pool.lower(), arg(d, 0)) in rt else abi_bytes("0x"))
+        rp = getattr(self, "_ccip_rp", set())
+        if src_names_dest:
+            rp.add(("ethereum", pool.lower(), dsel, dpool.lower()))
+        if dest_names_src:
+            rp.add((dest, dpool.lower(), es, pool.lower()))
+        self._ccip_rp = rp
+        self.fn("ethereum", pool, CR.S_CCIP_IS_REMOTE_POOL,
+                lambda d, b, pool=pool: w(1 if ("ethereum", pool.lower(), arg(d, 0), "0x" + d[10 + 64 * 4 - 40:10 + 64 * 4]) in rp else 0))
+        self.fn(dest, dpool, CR.S_CCIP_IS_REMOTE_POOL,
+                lambda d, b, dest=dest, dpool=dpool: w(1 if (dest, dpool.lower(), arg(d, 0), "0x" + d[10 + 64 * 4 - 40:10 + 64 * 4]) in rp else 0))
+        sup = getattr(self, "_ccip_sup", {})
+        sup.setdefault(pool.lower(), [])
+        if dsel not in sup[pool.lower()]:
+            sup[pool.lower()].append(dsel)
+        self._ccip_sup = sup
+        self.fn("ethereum", pool, CR.S_CCIP_CHAINS, lambda d, b, pool=pool: abi_u64s(sup[pool.lower()]))
+        dp = getattr(self, "_ccip_dp", {})
+        dp[(dest, l2.lower())] = dpool
+        self._ccip_dp = dp
+        self.fn(dest, dtar, CR.S_CCIP_GET_POOL, lambda d, b, dest=dest: wa(dp.get((dest, arg_addr(d, 0)), "0x" + "0" * 40)))
+        self.fn(dest, dpool, CR.S_CCIP_TYPE, lambda d, b: abi_string(dst_type))
+        self.fn(dest, dpool, CR.S_CCIP_GET_TOKEN, lambda d, b: wa(l2))
+        self.fn(dest, dpool, CR.S_CCIP_REMOTE_TOKEN,
+                lambda d, b: abi_bytes(wa(back_token or l1)) if arg(d, 0) == es else abi_bytes("0x"))
+        return pool
+
+    def ccip_support(self, pool, selectors):
+        self._ccip_sup[pool.lower()] = list(selectors)
+
+    def por(self, l1, answer, updated_at, decimals=8, supply_token=None, feed=None):
+        feed = feed or POR_FEED
+        CR.POR_FEEDS[l1.lower()] = (feed, (supply_token or l1).lower())
+        self.set("ethereum", ("por", feed), (answer, updated_at))
+        self.fn("ethereum", feed, CR.S_LATEST_ROUND,
+                lambda d, b: "0x" + "%064x" % 7 + "%064x" % self.val("ethereum", ("por", feed), b)[0] + "%064x" % 1
+                + "%064x" % self.val("ethereum", ("por", feed), b)[1] + "%064x" % 7)
+        self.fn("ethereum", feed, CR.S_DECIMALS, lambda d, b: w(decimals))
+
     def nomad(self, l1, rep, remote=None, domain=None):
         dom = domain or CR.NOMAD_ETH_DOMAIN
         rem = remote or CR.NOMAD_ETH_ROUTER
@@ -298,6 +385,64 @@ class Net:
         self.fn("ethereum", NOMAD_ETH_REG, CR.S_GET_TOKEN_ID,
                 lambda d, b: w(CR.NOMAD_ETH_DOMAIN) + wa(arg_addr(d, 0))[2:])
         return CR.NOMAD_ETH_ROUTER
+
+
+def abi_bytes(h):
+    d = h[2:] if h.startswith("0x") else h
+    return "0x" + "%064x" % 32 + "%064x" % (len(d) // 2) + d + "0" * ((64 - len(d) % 64) % 64)
+
+
+def abi_string(s):
+    return abi_bytes("0x" + s.encode().hex())
+
+
+def abi_u64s(xs):
+    return "0x" + "%064x" % 32 + "%064x" % len(xs) + "".join("%064x" % int(x) for x in xs)
+
+
+# v2 fixtures: source tokens and their bridged tokens
+GHO = addr(0x6e0)
+ARB_GHO = addr(0x6e1)
+BASE_GHO = addr(0x6e2)
+GHO_POOL = addr(0x6e3)
+ARB_GHO_POOL = addr(0x6e4)
+BASE_GHO_POOL = addr(0x6e5)
+WH_ARB_USDC = addr(0x7e1)
+WH_POL_USDC = addr(0x7e2)
+WH_ARB_WETH = addr(0x7e3)
+WETH = addr(0x7e0)
+POR_FEED = addr(0x9f0)
+
+
+def _mc_answer(net, data, blk):
+    """Multicall3.aggregate3 on the mock Ethereum: decode the calls, answer
+    each from the chain itself, encode (bool, bytes)[]."""
+    t = data[10:]
+    base = int(t[0:64], 16) * 2
+    n = int(t[base:base + 64], 16)
+    start = base + 64
+    res = []
+    for i in range(n):
+        o = start + int(t[start + 64 * i:start + 64 * (i + 1)], 16) * 2
+        target = "0x" + t[o + 24:o + 64]
+        bo = o + int(t[o + 128:o + 192], 16) * 2
+        ln = int(t[bo:bo + 64], 16)
+        cd = "0x" + t[bo + 64:bo + 64 + 2 * ln]
+        a = net.mc["ethereum"].answer({"jsonrpc": "2.0", "id": 0, "method": "eth_call",
+                                       "params": [{"to": target, "data": cd}, hex(blk)]})
+        r = a.get("result")
+        res.append((r is not None and "error" not in a, (r or "0x")[2:]))
+    head = "%064x" % 32 + "%064x" % n
+    offs = ""
+    body = ""
+    cur = n * 32
+    for ok, r in res:
+        offs += "%064x" % cur
+        padded = r + "0" * ((64 - len(r) % 64) % 64)
+        el = "%064x" % (1 if ok else 0) + "%064x" % 64 + "%064x" % (len(r) // 2) + padded
+        body += el
+        cur += len(el) // 2
+    return "0x" + head + offs + body
 
 
 class Setup:
