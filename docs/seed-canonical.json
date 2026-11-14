@@ -83,6 +83,17 @@
       "ratio_bps": 10024,
       "contest_deadline": 1794665003,
       "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "USDC.e on OP Mainnet": {
+      "kind": "optimism",
+      "sym": "USDC",
+      "l1": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "l2": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+      "label": "USDC.e on OP Mainnet",
+      "auth_id": 11,
+      "auth_tx": "0x7ac8fbc3402dc82cde455e5ae625ad740d3a4773ab8adecab57db0f176a5b7be",
+      "pair_id": 5,
+      "register_tx": "0x052e26f28e9af70ca281e0d941536bb81027ac2553cc6fa3cae24615aa12cfd0"
     }
   }
 }

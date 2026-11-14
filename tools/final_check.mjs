@@ -6,13 +6,16 @@
  *   2. addresses: every address in deployments.json appears, identically, in README, docs, the site's
  *      deployments.json, and nowhere is a contract address that is not in deployments.json
  *   3. links: every http(s) link in README and docs/*.md answers HTTP 200 (GET, redirects followed)
- *   4. seeds: every canonical pair has a FINAL ruling; every UNDER_BACKED found in FEASIBILITY.md is seeded
+ *   4. seeds: every v1 pair is re-seeded and every v2 template has pairs, all with FINAL rulings; every
+ *      UNDER_BACKED found in FEASIBILITY.md is seeded; history, coverage and PoR recorded; v1 untouched
  *   5. demo: the demo registry's eth_getBalance is 0 (only then "drained"), its ledger agrees, and every demo
  *      payout in docs/payouts.json is re-read from chain: finalized, value effect delivered and not skipped,
  *      registry balance down by exactly the amount; every registry's eth_getBalance equals its ledger
  *   6. tests: the offline suite passes
  *   7. docs truth: the numbers RULES.md states equal the deployed contracts' get_config
  *   8. site: the live site answers, /api/verify says all identical, /api/backed answers for a seeded pair
+ *   9. keeper: a scheduled run finished after the deployment, nothing failed, every unlisted destination is
+ *      listed or recorded unmatched; e2e: the Playwright run on the live site passed
  */
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -51,7 +54,7 @@ const addrs = Object.entries(dep.contracts).map(([k, v]) => [k, v.address]);
     const t = readFileSync(root + f, "utf8");
     for (const m of t.matchAll(studio)) if (!known.has(m[1].toLowerCase()) && !/demo-run|seed-run/.test(f)) bad.push(`${f} links unknown contract ${m[1]}`);
   }
-  for (const f of ["tools/lib/flow.mjs", "tools/patrol.mjs"]) {
+  for (const f of ["tools/lib/flow.mjs", "tools/keeper.mjs", "tools/lib/keeper_core.mjs"]) {
     const t = readFileSync(root + f, "utf8");
     if (/0x[0-9a-fA-F]{40}/.test(t.replace(/0x0+\b/g, ""))) bad.push(`${f} hardcodes an address`);
   }
@@ -94,14 +97,39 @@ const addrs = Object.entries(dep.contracts).map(([k, v]) => [k, v.address]);
 const canon = actor({ role: "patrol", registry: "BackedByRegistry", log: () => {} });
 const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () => {} });
 {
-  const pairs = (await canon.rv("get_pairs", [0, 50])).pairs;
+  const pairs = [];
+  for (let off = 0; ; off += 50) { const pg = await canon.rv("get_pairs", [off, 50]); pairs.push(...pg.pairs); if (off + 50 >= pg.total) break; }
   const notFinal = pairs.filter((p) => !p.latest || p.latest.status !== "FINAL").map((p) => p.pair_id);
+  const v1 = Object.values(JSON.parse(readFileSync(root + "docs/superseded/047d340/seed-canonical.json", "utf8")).seeds).map((s) => s.label);
+  const byLabel = new Map(pairs.map((p) => [p.label, p]));
+  const v1miss = v1.filter((l) => byLabel.get(l)?.latest?.status !== "FINAL");
+  check("seeds: every v1 pair is re-seeded on v2 with a FINAL ruling", v1miss.length === 0, v1miss.length ? `not FINAL: ${v1miss.join(", ")}` : `${v1.length}/${v1.length} v1 pairs FINAL on v2`);
+  const fam = (p) => p.vaults.map((v) => v.family);
+  const tmpl = { Wormhole: pairs.filter((p) => fam(p).includes("LEDGER")), CCIP: pairs.filter((p) => fam(p).includes("CCIP")),
+    "LayerZero (new adapters)": pairs.filter((p) => fam(p).includes("LZ") && !p.vaults.some((v) => v.vault === "0x6c96de32cea08842dcc4058c14d3aaad7fa41dee")) };
+  const tbad = Object.entries(tmpl).filter(([, ps]) => ps.length === 0 || ps.some((p) => p.latest?.status !== "FINAL")).map(([k]) => k);
+  check("seeds: every v2 bridge template has real pairs, all FINAL", tbad.length === 0,
+    tbad.length ? `incomplete: ${tbad.join(", ")}` : Object.entries(tmpl).map(([k, ps]) => `${k} ${ps.length} pairs (${ps.reduce((s, p) => s + p.dests.length, 0)} destinations)`).join("; "));
+  check("seeds: every canonical pair has a FINAL ruling", notFinal.length === 0, notFinal.length ? `not FINAL: pairs ${notFinal.join(", ")}` : `${pairs.length} pairs`);
+  const noHist = pairs.filter((p) => p.latest?.status === "FINAL" && !(p.history_points > 0)).map((p) => p.pair_id);
+  const noCov = pairs.filter((p) => p.latest?.ruling1 && !p.latest.ruling1.coverage).map((p) => p.pair_id);
+  const porPairs = pairs.filter((p) => p.latest?.ruling1?.por);
+  const porBad = porPairs.filter((p) => !["MATCH", "DIFF", "STALE", "UNREAD"].includes(p.latest.ruling1.por.status) || (p.latest.ruling1.por.status !== "MATCH" && !p.latest.ruling1.por.explain));
+  check("history, coverage, PoR: every FINAL ruling has a history point and coverage; every PoR DIFF is explained", noHist.length === 0 && noCov.length === 0 && porBad.length === 0 && porPairs.length > 0,
+    `history missing [${noHist}], coverage missing [${noCov}]; PoR on ${porPairs.length} pairs: ${porPairs.map((p) => `${p.pair_id} ${p.latest.ruling1.por.status} ${p.latest.ruling1.por.delta_bps} bps`).join(", ")}`);
+  const base = JSON.parse(readFileSync(root + "docs/base-proof.json", "utf8"));
+  const vb = spawnSync("node", [root + "tools/base_proof.mjs", base.base], { encoding: "utf8" });
+  const nowProof = JSON.parse(readFileSync(root + "docs/base-proof.json", "utf8"));
+  const same = base.registries.every((r) => nowProof.registries.find((x) => x.address === r.address)?.eth_getBalance_wei === r.eth_getBalance_wei);
+  check("v1 untouched: every v1 contract still byte-identical to BASE's build, v1 registry balances as recorded", vb.status === 0 && same,
+    `${nowProof.contracts.length} v1 contracts identical: ${vb.status === 0}; balances unchanged: ${same}`);
   const feas = JSON.parse(readFileSync(root + "docs/feasibility.json", "utf8")).rows.filter((r) => r.verdict === "UNDER_BACKED");
   const final = new Map();
   for (const p of pairs) for (const d of p.dests) final.set(d.token, p.latest?.status === "FINAL" ? p.latest.verdict : null);
   const missing = feas.filter((r) => !final.get(r.dest[0].token)).map((r) => `${r.kind} ${r.sym}`);
   const verdicts = feas.map((r) => `${r.kind} ${r.sym}: ${final.get(r.dest[0].token)}`);
   const ADAPTER = "0x6c96de32cea08842dcc4058c14d3aaad7fa41dee";
+  void ADAPTER;
   const shared = pairs.filter((p) => p.vaults.some((v) => v.vault === ADAPTER));
   const want = ["polygon", ...USDT0_DESTS.map(([k]) => k.slice(4))];
   const have = shared[0] ? shared[0].dests.map((d) => d.chain) : [];
@@ -121,7 +149,7 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
     const l = await (name === "BackedByRegistry" ? canon : demo).rv("get_ledger");
     regs.push([name, await bal(a), l.held_now]);
   }
-  check("balances: every registry's eth_getBalance equals what its ledger holds", regs.every(([, b, h]) => b === h),
+  check("balances: every v2 registry's eth_getBalance equals what its ledger holds", regs.every(([, b, h]) => b === h),
     regs.map(([n, b, h]) => `${n} eth_getBalance ${b} / ledger ${h}`).join("; "));
   const pay = JSON.parse(readFileSync(root + "docs/payouts.json", "utf8"));
   const bad = [];
@@ -152,7 +180,14 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
     [c.min_stake === "100000000000000000" && d.min_stake === "10000000000000000", "minimum stake 0.1 GEN canonical, 0.01 GEN demo"],
     [c.max_tolerance_bps === 1000, "0 to 1000 bps"],
     [c.auth_max_age_s === 3600, "at most 1 hour old"],
+    [c.alert_margin_bps === 10, "within **10 bps** of the line"],
+    [c.por_match_bps === 50 && c.por_max_age_s === 172800, "within **50 bps** of it"],
+    [c.por_max_age_s === 172800, "more than **48 h** older"],
   ];
+  const rc = await canon.cv("get_config");
+  for (const [ok, text] of [[rc.lz_scan[0] === 30101 && rc.lz_scan[1] === 31101 && rc.lz_guard[1] === 31301, "every eid from 30101 to 31100"],
+    [rc.scan_rpcs.join(",") === "https://rpc.mevblocker.io,https://eth-mainnet.public.blastapi.io", "rpc.mevblocker.io, eth-mainnet.public.blastapi.io"],
+    [JSON.stringify(rc.transient) === JSON.stringify(["RPC_UNREADABLE", "RPC_DISAGREE"]), "(`RPC_UNREADABLE`, `RPC_DISAGREE`)"]]) claims.push([ok, text]);
   const wrong = claims.filter(([ok, text]) => !ok || !rules.includes(text)).map(([, t]) => t);
   check("docs truth: RULES.md numbers equal the deployed get_config", wrong.length === 0, wrong.length ? wrong.join("; ") : `${claims.length} statements`);
 }
@@ -162,7 +197,12 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
   const r = spawnSync("sh", [root + "test/run_offline.sh"], { encoding: "utf8" });
   const ran = Number((r.stderr.match(/Ran (\d+) tests/) ?? [])[1] ?? 0);
   const node = Number((r.stdout.match(/# pass (\d+)/) ?? [])[1] ?? 0);
-  check("tests: offline suite passes", r.status === 0, `${ran + node} tests (${ran} Python, ${node} node) ${r.status === 0 ? "OK" : "FAILED"}`);
+  const k = spawnSync("node", ["--test", root + "test/keeper.test.mjs"], { encoding: "utf8" });
+  const kn = Number((k.stdout.match(/# pass (\d+)/) ?? [])[1] ?? 0);
+  const d = spawnSync(root + ".venv-gl/bin/python", ["-m", "pytest", "tests/direct", "-q"], { cwd: root, encoding: "utf8" });
+  const dn = Number((d.stdout.match(/(\d+) passed/) ?? [])[1] ?? 0);
+  check("tests: offline, keeper and Direct Mode suites pass", r.status === 0 && k.status === 0 && d.status === 0,
+    `offline ${ran} Python + ${node - kn} payout; keeper ${kn}; Direct Mode ${dn}; all pass: ${r.status === 0 && k.status === 0 && d.status === 0}`);
 }
 
 // 8. site
@@ -173,6 +213,32 @@ const demo = actor({ role: "patrol", registry: "BackedByRegistryDemo", log: () =
   check("site: /api/backed answers from chain", Boolean(b?.latest), b?.latest ? `pair 1 ${b.latest.verdict} ${b.latest.status}` : "no ruling");
   const s = await fetch(`${SITE}/api/backed?pair=1&format=svg`).then((r) => r.text()).catch(() => "");
   check("site: SVG badge renders", s.startsWith("<svg"), `${s.length} bytes`);
+}
+
+// 9. keeper and e2e
+{
+  const s = await fetch("https://raw.githubusercontent.com/kenil1710/backedby/keeper-state/status.json", { cache: "no-store" }).then((r) => r.json()).catch(() => null);
+  const deployedAt = Date.parse(dep.contracts.BackedByRegistry.deployed_at);
+  const sched = (s?.history ?? []).filter((h) => h.trigger === "schedule" && Date.parse(h.started_at) > deployedAt);
+  const cs = Object.values(s?.contracts ?? {}).filter((c) => [dep.contracts.BackedByRegistry.address, dep.contracts.BackedByRegistryDemo.address].includes(c.address));
+  const failed = cs.reduce((n, c) => n + (c.totals?.failed ?? 0), 0);
+  check("keeper: a scheduled run finished after the deployment; no failed actions", sched.length > 0 && cs.length > 0 && failed === 0,
+    sched.length ? `${sched.length} scheduled runs since deployment, latest ${sched.at(-1).started_at} ${sched.at(-1).run_url}; failed actions ${failed}` : "no scheduled run since deployment");
+  const pairs = [];
+  for (let off = 0; ; off += 50) { const pg = await canon.rv("get_pairs", [off, 50]); pairs.push(...pg.pairs); if (off + 50 >= pg.total) break; }
+  const canonK = cs.find((c) => c.address === dep.contracts.BackedByRegistry.address);
+  const hidden = [];
+  for (const p of pairs) for (const u of p.latest?.ruling1?.coverage?.unlisted ?? []) {
+    const listed = p.vaults.some((v) => (v.remotes ?? []).includes(u.id));
+    if (!listed && !canonK?.unmatched?.[p.pair_id]?.[u.id]) hidden.push(`${p.pair_id}:${u.id}`);
+  }
+  check("coverage: every unlisted destination is now listed or recorded unmatched (shown on the site)", hidden.length === 0,
+    hidden.length ? `neither: ${hidden.slice(0, 12).join(", ")}` : `${pairs.reduce((n, p) => n + (p.latest?.ruling1?.coverage?.unlisted?.length ?? 0), 0)} unlisted items accounted for`);
+  let e2e = null;
+  try { e2e = JSON.parse(readFileSync(root + "docs/e2e/results.json", "utf8")); } catch { /* not run */ }
+  const st = e2e?.stats ?? {};
+  check("e2e: Playwright on the live site passed", Boolean(e2e) && (st.expected ?? 0) > 0 && (st.unexpected ?? 1) === 0,
+    e2e ? `${st.expected} passed, ${st.unexpected} failed, started ${st.startTime}` : "docs/e2e/results.json missing");
 }
 
 const head = execFileSync("git", ["-C", root, "rev-parse", "HEAD"]).toString().trim();
@@ -189,5 +255,6 @@ const md = `# Final check
 ${results.map((r, i) => `| ${i + 1} | ${r.name} | ${r.ok ? "PASS" : "FAIL"} | ${String(r.detail).replace(/\|/g, "/").slice(0, 300)} |`).join("\n")}
 `;
 writeFileSync(root + "docs/FINAL_CHECK.md", md);
+writeFileSync(root + "docs/final_check.json", JSON.stringify({ at: new Date().toISOString(), head, passed: pass, total: results.length, checks: results }, null, 1) + "\n");
 console.log(`\n${pass}/${results.length} PASS`);
 process.exit(pass === results.length ? 0 : 1);

@@ -39,3 +39,8 @@ Details: exec)
    -> pair 5: A token bridged to OP on 2026-09-01 (demo)
   authenticate(["arbitrum","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"]) -> FAILED ACCEPTED 28s tx 0x649cca7ca9ada1478ff0cd940a523da11e10fb9b1eb8cfeffb5283506580e437 revert: REFUSED: RPC_UNREADABLE
   ... authenticate arbitrum: RPC throttled from GenVM (attempt 1), retrying in 105s
+  authenticate(["arbitrum","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"]) -> ok ACCEPTED 14s tx 0x8932a17e28e12561c447d76cbc0799d5e21502ddba70789c6f126f3356375985 {"auth_id":10,"dest_decimals":8,"dest_token":"0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":8,"vault":"0xa3a7b6f88361f48403514059f1f16c8e78d60eec"}
+  register_pair(["10",0,"WBTC on Arbitrum, with Chainlink PoR (demo)"]) -> ok ACCEPTED 13s tx 0xd9b0fa1dccdefb12b4cf829e3041acf8046d320fbd78e0ee99f121a74d222735 {"destinations":1,"ok":true,"pair_id":6,"vaults":1}
+   -> pair 6: WBTC on Arbitrum, with Chainlink PoR (demo)
+  authenticate(["wh_arbitrum","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18"]) -> FAILED ACCEPTED 15s tx 0x00de4ffa9b69fe69596c59072c5de765be35eb6e12b9da7b4edcd721379cc4bf revert: REFUSED: RPC_UNREADABLE
+  ... authenticate wh_arbitrum: RPC throttled from GenVM (attempt 1), retrying in 105s
