@@ -289,6 +289,8 @@ class Net:
         for u in CR.SCAN_RPCS:
             stub.WEB.chains[u] = self.mc["ethereum"]
         self.fn("ethereum", CR.MULTICALL3, CR.S_AGGREGATE3, lambda d, b: _mc_answer(self, d, b))
+        self.lz_supported = set()
+        self.fn("ethereum", CR.LZ_ENDPOINT, CR.S_IS_SUPPORTED_EID, lambda d, b: w(1 if arg(d, 0) in self.lz_supported else 0))
 
     def wormhole(self, dest, l1, l2, origin=None, wrapped_map=None, eth_registers=True, dest_registers=True,
                  is_wrapped=True):

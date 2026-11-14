@@ -90,7 +90,11 @@ MULTICALL3 = "0xca11bde05977b3631167028862be2a173976ca11"
 # Multicall3 call at the pinned Ethereum block; the check RPCs refuse a body
 # that large, so scans use their own pair (two operators), answers identical.
 SCAN_RPCS = ("https://rpc.mevblocker.io", "https://eth-mainnet.public.blastapi.io")
-LZ_SCAN = (30101, 30700)
+LZ_SCAN = (30101, 31101)
+# ...and Ethereum's endpoint must support no eid in LZ_GUARD, or the range no
+# longer covers every chain a peer could be on and the scan is UNREAD
+LZ_GUARD = (31101, 31301)
+S_IS_SUPPORTED_EID = "0x6750cd4c"  # isSupportedEid(uint32)
 WH_ETH_BRIDGE = "0x3ee18b2214aff97000d974cf647e7c347e8fa585"
 WH_ETH_ID = 2
 # chain -> (wormhole chain id, token bridge on that chain)
@@ -946,23 +950,23 @@ def _auth_ccip(dest: str, l1: str, l2: str, be: int, bd: int) -> dict:
             "anchors": anchors}
 
 
-def mc_encode(target: str, datas: list) -> str:
+def mc_encode(items: list) -> str:
     """Multicall3.aggregate3 calldata: one (target, allowFailure=true, data)
-    per entry; every data is exactly 36 bytes (a selector and one word)."""
-    n = len(datas)
+    per [target, data]; every data is exactly 36 bytes (a selector and one word)."""
+    n = len(items)
     head = _u(32) + _u(n)
     offs = ""
     body = ""
     for i in range(n):
         offs += _u(n * 32 + i * 192)
-        d = datas[i][2:]
-        body += _pad(target) + _u(1) + _u(96) + _u(len(d) // 2) + (d + "0" * 128)[0:128]
+        d = items[i][1][2:]
+        body += _pad(items[i][0]) + _u(1) + _u(96) + _u(len(d) // 2) + (d + "0" * 128)[0:128]
     return S_AGGREGATE3 + head + offs + body
 
 
 def mc_decode(h: str, n: int) -> typing.Any:
     """aggregate3's (bool success, bytes returnData)[] -> [first word as int,
-    or -1 for a failed or empty call], or None if malformed."""
+    -1 for an empty answer, -2 for a call that failed], or None if malformed."""
     if not isinstance(h, str) or not h.startswith("0x"):
         return None
     t = h[2:]
@@ -978,7 +982,9 @@ def mc_decode(h: str, n: int) -> typing.Any:
             ok = int(t[o:o + 64], 16)
             bo = o + int(t[o + 64:o + 128], 16) * 2
             ln = int(t[bo:bo + 64], 16)
-            if ok != 1 or ln < 32:
+            if ok != 1:
+                out.append(-2)
+            elif ln < 32:
                 out.append(-1)
             else:
                 out.append(int(t[bo + 64:bo + 128], 16))
@@ -991,7 +997,9 @@ def lz_scan(adapter: str, block: int) -> typing.Any:
     """Every eid in LZ_SCAN whose peer on the adapter is set, at `block`, from
     both scan RPCs, identical. -> sorted [eid] or a reason string."""
     eids = list(range(LZ_SCAN[0], LZ_SCAN[1]))
-    data = mc_encode(adapter, [S_PEERS + _u(e) for e in eids])
+    guard = list(range(LZ_GUARD[0], LZ_GUARD[1]))
+    items = [[adapter, S_PEERS + _u(e)] for e in eids] + [[LZ_ENDPOINT, S_IS_SUPPORTED_EID + _u(e)] for e in guard]
+    data = mc_encode(items)
     got = []
     for url in SCAN_RPCS:
         try:
@@ -1000,9 +1008,16 @@ def lz_scan(adapter: str, block: int) -> typing.Any:
             return "SCAN_UNREADABLE"
         if r[0][0] != "ok":
             return "SCAN_REVERTED"
-        dec = mc_decode(r[0][1], len(eids))
+        dec = mc_decode(r[0][1], len(items))
         if dec is None:
             return "SCAN_MALFORMED"
+        for i in range(len(eids)):
+            if dec[i] == -2:
+                # a standard OApp's peers() never reverts: a reverting entry could hide a peer
+                return "SCAN_ENTRY_REVERTED"
+        for i in range(len(guard)):
+            if dec[len(eids) + i] != 0:
+                return "SCAN_RANGE_OUTDATED"
         got.append([eids[i] for i in range(len(eids)) if dec[i] > 0])
     if _canon(got[0]) != _canon(got[1]):
         return "SCAN_RPCS_DISAGREE"
@@ -1178,6 +1193,45 @@ def _req_ok(req: typing.Any) -> str:
         if not isinstance(a[2], str) or not a[2].startswith("0x") or len(a[2]) > 330 or not _is_hex(a[2][2:]):
             return "BAD_ANCHOR_DATA"
     return ""
+
+
+def reading_agrees(mine: typing.Any, got: typing.Any) -> bool:
+    """A validator's acceptance of the leader's reading. Everything that
+    decides the verdict must be identical. The coverage scans and PoR never
+    decide it: a leader's entry that is an error (UNREAD) is accepted, since it
+    can only make the answer less favorable; a leader's entry with data must be
+    identical to the validator's own, so it can never be invented."""
+    if not isinstance(mine, dict) or not isinstance(got, dict):
+        return False
+    a = dict(mine)
+    b = dict(got)
+    ca = a.pop("coverage", None)
+    cb = b.pop("coverage", None)
+    pa = a.pop("por", None)
+    pb = b.pop("por", None)
+    if _canon(a) != _canon(b):
+        return False
+    if (ca is None) != (cb is None):
+        return False
+    if ca is not None:
+        if not isinstance(cb, list) or not isinstance(ca, list) or len(ca) != len(cb):
+            return False
+        for i in range(len(ca)):
+            x = ca[i]
+            y = cb[i]
+            if not isinstance(y, dict) or y.get("vault") != x.get("vault") or y.get("family") != x.get("family"):
+                return False
+            if str(y.get("error", "")) != "":
+                if y.get("ids") != []:
+                    return False
+                continue
+            if _canon(x) != _canon(y):
+                return False
+    if pb is None or pa is None:
+        return pa is None and pb is None
+    if isinstance(pb, dict) and set(pb.keys()) == {"error"}:
+        return True
+    return _canon(pa) == _canon(pb)
 
 
 def read_at(req: dict) -> dict:
@@ -1490,7 +1544,7 @@ class ChainReader(gl.contract.Contract):
         def validator(res: gl.vm.Result) -> bool:
             if not isinstance(res, gl.vm.Return):
                 return False
-            return _canon(read_at(frozen)) == _canon(res.calldata)
+            return reading_agrees(read_at(frozen), res.calldata)
 
         r = gl.vm.run_nondet(leader, validator)
         if not isinstance(r, dict) or r.get("status") not in ("OK", "INCONCLUSIVE", "PENDING"):
@@ -1561,7 +1615,7 @@ class ChainReader(gl.contract.Contract):
                 "layerzero_endpoint": LZ_ENDPOINT, "layerzero_endpoints": LZ_ENDPOINTS, "layerzero_eids": LZ_EID,
                 "arbitrum_escrow_gateways": ARB_ESCROW_GATEWAYS, "polygon_erc20_type": POL_ERC20_TYPE,
                 "auths": int(self.n_auth), "readings": int(self.n_readings), "pending_attempts": int(self.n_pending),
-                "scan_rpcs": list(SCAN_RPCS), "lz_scan": list(LZ_SCAN), "multicall3": MULTICALL3,
+                "scan_rpcs": list(SCAN_RPCS), "lz_scan": list(LZ_SCAN), "lz_guard": list(LZ_GUARD), "multicall3": MULTICALL3,
                 "wormhole": {"ethereum_bridge": WH_ETH_BRIDGE, "dests": WH_DESTS},
                 "ccip": {"ethereum_selector": str(CCIP_ETH_SELECTOR), "ethereum_registry": CCIP_ETH_TAR,
                          "dests": {c: [str(CCIP_DESTS[c][0]), CCIP_DESTS[c][1]] for c in CCIP_DESTS}},

@@ -297,19 +297,109 @@ class LayerZeroScan(Base):
         self.assertEqual(r["unlisted"], [{"vault": F.USDT0_ADAPTER, "id": "lz:30110"}])
 
     def test_multicall_encoding_round_trip(self):
-        data = CR.mc_encode(F.USDT0_ADAPTER, [CR.S_PEERS + CR._u(e) for e in (30109, 30110, 30111)])
+        data = CR.mc_encode([[F.USDT0_ADAPTER, CR.S_PEERS + CR._u(e)] for e in (30109, 30110, 30111)])
         self.s.net.mine_to(self.s.w.now())
         blk = self.s.net.mc["ethereum"].finalized
         out = CR.mc_decode(F._mc_answer(self.s.net, data, blk), 3)
         self.assertEqual([x > 0 for x in out], [True, True, False])
 
     def test_decode_rejects_a_count_mismatch(self):
-        data = CR.mc_encode(F.USDT0_ADAPTER, [CR.S_PEERS + CR._u(30109)])
+        data = CR.mc_encode([[F.USDT0_ADAPTER, CR.S_PEERS + CR._u(30109)]])
         self.assertIsNone(CR.mc_decode(F._mc_answer(self.s.net, data, self.s.net.mc["ethereum"].finalized), 2))
+
+    def test_a_reverting_peer_entry_is_unread(self):
+        pid = self.usdt0()
+        self.s.net.fn("ethereum", F.USDT0_ADAPTER, CR.S_PEERS,
+                      lambda d, b: F.REVERT if F.arg(d, 0) == 30777 else F.wa(self.s.net._oft_peers[F.USDT0_ADAPTER.lower()].get(F.arg(d, 0), "0x" + "0" * 40)))
+        self.assertEqual(self.ruled(pid)["ruling1"]["coverage"]["state"], "UNREAD")
+
+    def test_endpoint_supporting_an_eid_above_the_range_makes_the_scan_unread(self):
+        pid = self.usdt0()
+        self.s.net.lz_supported.add(CR.LZ_GUARD[0] + 7)
+        r = self.ruled(pid)["ruling1"]
+        self.assertEqual(r["coverage"]["state"], "UNREAD")
+        self.assertEqual(r["coverage"]["by_vault"][0]["state"], "UNREAD")
+
+    def test_scan_covers_the_whole_range(self):
+        self.assertEqual(CR.LZ_SCAN, (30101, 31101))
+        self.assertEqual(CR.LZ_GUARD[0], CR.LZ_SCAN[1])
 
     def test_decode_rejects_junk(self):
         for junk in ("", "0x", "0x12", None, "0x" + "f" * 64):
             self.assertIsNone(CR.mc_decode(junk, 1))
+
+
+class ValidatorTolerance(Base):
+    """A validator takes a leader's UNREAD scan or PoR (it can only make the
+    answer less favorable) but never a leader's scan or PoR data it did not read itself."""
+
+    def filed(self):
+        a = self.auth("oft_polygon", F.USDT, F.POL_USDT)
+        b = self.auth("oft_arbitrum", F.USDT, F.ARB_USDT0)
+        pid = self.register(a, b)
+        self.s.after_bond()
+        return self.s.monitor(pid, self.s.blocks(pid))["check_id"]
+
+    def test_leader_scan_error_is_accepted(self):
+        cid = self.filed()
+
+        def unread(r):
+            r["coverage"][0] = dict(r["coverage"][0], ids=[], error="SCAN_UNREADABLE")
+            return r
+        stub.FORGE["mutate"] = unread
+        self.assertEqual(self.s.read(cid)["status"], "OK")
+        stub.FORGE["mutate"] = None
+        self.s.rule(cid)
+        self.assertEqual(self.s.check(cid)["ruling1"]["coverage"]["state"], "UNREAD")
+
+    def test_leader_scan_data_must_match(self):
+        cid = self.filed()
+
+        def hide(r):
+            r["coverage"][0]["ids"] = r["coverage"][0]["ids"][:1]
+            return r
+        stub.FORGE["mutate"] = hide
+        with self.assertRaises(Reverted):
+            self.s.read(cid)
+
+    def test_leader_cannot_turn_an_error_into_data(self):
+        cid = self.filed()
+        stub.WEB.validator_hook = lambda: stub.WEB.down.add(CR.SCAN_RPCS[1])
+        with self.assertRaises(Reverted):
+            self.s.read(cid)
+        stub.WEB.validator_hook = None
+        stub.WEB.down.clear()
+
+    def test_leader_cannot_drop_a_scan(self):
+        cid = self.filed()
+
+        def drop(r):
+            r["coverage"] = []
+            return r
+        stub.FORGE["mutate"] = drop
+        with self.assertRaises(Reverted):
+            self.s.read(cid)
+
+    def test_verdict_fields_must_be_identical(self):
+        cid = self.filed()
+
+        def more(r):
+            r["locked_by_vault"][0] = str(int(r["locked_by_vault"][0]) + 1)
+            return r
+        stub.FORGE["mutate"] = more
+        with self.assertRaises(Reverted):
+            self.s.read(cid)
+
+    def test_agrees_pure(self):
+        x = {"status": "OK", "coverage": [{"vault": "a", "family": "LZ", "ids": [1], "error": ""}], "por": {"answer": "1"}}
+        self.assertTrue(CR.reading_agrees(x, x))
+        self.assertTrue(CR.reading_agrees(x, dict(x, por={"error": "POR_UNREADABLE"})))
+        self.assertFalse(CR.reading_agrees(x, dict(x, por={"answer": "2"})))
+        self.assertFalse(CR.reading_agrees(x, dict(x, por=None)))
+        self.assertFalse(CR.reading_agrees(dict(x, por=None), dict(x, por={"error": "x"})))
+        self.assertFalse(CR.reading_agrees(x, dict(x, coverage=[{"vault": "a", "family": "LZ", "ids": [1, 2], "error": "SCAN_UNREADABLE"}])))
+        self.assertFalse(CR.reading_agrees(x, dict(x, coverage=[{"vault": "b", "family": "LZ", "ids": [], "error": "E"}])))
+        self.assertFalse(CR.reading_agrees(x, "junk"))
 
 
 class Por(Base):
