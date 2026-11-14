@@ -27,6 +27,8 @@ def _raw(res: typing.Any) -> bytes:
 
 
 def rpc_url_allowed(url: str) -> bool:
+    if url in SCAN_RPCS:
+        return True
     for ch in CHAINS:
         if url in CHAINS[ch][1]:
             return True

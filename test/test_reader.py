@@ -255,6 +255,9 @@ class Read(Base):
         cid = self.s.monitor(pid, blocks)["check_id"]
         return pid, cid, blocks
 
+    def reading_found(self, cid, rnd=1):
+        return self.s.view(self.s.reader, "get_reading", self.s.reg, cid, rnd)["found"]
+
     def reading(self, cid, rnd=1):
         return self.s.view(self.s.reader, "get_reading", self.s.reg, cid, rnd)
 
@@ -348,7 +351,8 @@ class Read(Base):
             return ans
         stub.WEB.tamper[CR.CHAINS["arbitrum"][1][1]] = lie
         out = self.s.read(cid)
-        self.assertEqual((out["status"], out["reason"]), ("INCONCLUSIVE", "RPC_DISAGREE"))
+        self.assertEqual(out["status"], "PENDING")
+        self.assertFalse(self.reading_found(cid))
 
     def test_block_hash_disagreement_inconclusive(self):
         pid, cid, blocks = self.pair_check()
@@ -360,18 +364,19 @@ class Read(Base):
                 return dict(ans, result=r)
             return ans
         stub.WEB.tamper[CR.CHAINS["ethereum"][1][0]] = lie
-        self.assertEqual(self.s.read(cid)["reason"], "RPC_DISAGREE")
+        self.assertEqual(self.s.read(cid)["status"], "PENDING")
 
     def test_rpc_down_inconclusive_round1(self):
         pid, cid, blocks = self.pair_check()
         stub.WEB.down.add(CR.CHAINS["arbitrum"][1][0])
         out = self.s.read(cid)
-        self.assertEqual((out["status"], out["reason"]), ("INCONCLUSIVE", "RPC_UNREADABLE"))
+        self.assertEqual(out["status"], "PENDING")
+        self.assertFalse(self.reading_found(cid))
 
     def test_rpc_error_object_inconclusive(self):
         pid, cid, blocks = self.pair_check()
         self.s.net.mc["arbitrum"].fail = lambda m, p: {"code": -32000, "message": "missing trie node"} if m == "eth_call" else None
-        self.assertEqual(self.s.read(cid)["reason"], "RPC_UNREADABLE")
+        self.assertEqual(self.s.read(cid)["status"], "PENDING")
 
     def test_transient_jsonrpc_error_is_retried(self):
         pid, cid, blocks = self.pair_check()
@@ -475,7 +480,7 @@ class Read(Base):
         # the cap table is what keeps dRPC answering: without it the batch is refused
         pid, cid, blocks = self.pair_check("base_usdc")
         stub.WEB.caps["https://base.drpc.org"] = 2
-        self.assertEqual(self.s.read(cid)["reason"], "RPC_UNREADABLE")
+        self.assertEqual(self.s.read(cid)["status"], "PENDING")
 
     def test_reading_view_shape(self):
         pid, cid, blocks = self.pair_check()

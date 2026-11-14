@@ -71,6 +71,16 @@ BEAM_USDC = addr(0x5001)
 PRED_TYPE = "0x8ae85d849167ff996c04040c44924fd364217285e4cad818292c7ac37c0a345b"
 
 
+def data_fault(chain, on=True):
+    """Both RPCs of `chain` answer every eth_call with an empty result: a
+    deterministic CALL_FAILED (about the pair, not the transport)."""
+    for u in CR.CHAINS[chain][1]:
+        if on:
+            stub.WEB.tamper[u] = lambda req, ans: dict(ans, result="0x") if req["method"] == "eth_call" else ans
+        else:
+            stub.WEB.tamper.pop(u, None)
+
+
 def w(n):
     return "0x" + ("%064x" % int(n))
 

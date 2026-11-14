@@ -119,9 +119,10 @@ class Safety(unittest.TestCase):
         t = src("ChainReader")
         urls = re.findall(r'"(https?://[^"]+)"', t)
         stub_mod = __import__("fixtures").CR
-        allowed = {u for c in stub_mod.CHAINS.values() for u in c[1]}
+        allowed = {u for c in stub_mod.CHAINS.values() for u in c[1]} | set(stub_mod.SCAN_RPCS)
         self.assertTrue(set(urls) <= allowed, set(urls) - allowed)
-        self.assertEqual(len(allowed), 2 * len(stub_mod.CHAINS))
+        self.assertEqual(len(stub_mod.SCAN_RPCS), 2)
+        self.assertEqual(len({u for c in stub_mod.CHAINS.values() for u in c[1]}), 2 * len(stub_mod.CHAINS))
         self.assertEqual(len(stub_mod.CHAINS), 17)
 
     def test_no_owner_or_setter(self):

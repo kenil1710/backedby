@@ -39,7 +39,7 @@ import typing
 #   3. Nothing is written before the last check that can refuse.
 #   4. Records are immutable. No owner, no setter, no payable method.
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 SOURCE_CHAIN = "ethereum"
 
 S_BALANCE = "0x70a08231"
@@ -68,6 +68,60 @@ S_TOKEN = "0xfc0c546a"            # token()
 S_ENDPOINT = "0x5e280f11"         # endpoint()
 S_PEERS = "0xbb0b6a53"            # peers(uint32)
 S_OFT_CONTRACT = "0x232849c3"     # oftContract()
+
+# v2: Wormhole token bridge, Chainlink CCIP token pools, Multicall3 coverage scans, Proof of Reserve
+S_WH_BRIDGE_OF = "0xad66a5f1"     # bridgeContracts(uint16)
+S_WH_WRAPPED = "0x1ff1e286"       # wrappedAsset(uint16,bytes32)
+S_WH_IS_WRAPPED = "0x1a2be4da"    # isWrappedAsset(address)
+S_WH_CHAIN_ID = "0x9a8a0592"      # chainId()
+S_WH_NATIVE = "0x3d6c043b"        # nativeContract()
+S_WH_OUTSTANDING = "0xb96c7e4d"   # outstandingBridged(address)
+S_CCIP_GET_POOL = "0xbbe4f6db"    # getPool(address)
+S_CCIP_TYPE = "0x181f5a77"        # typeAndVersion()
+S_CCIP_GET_TOKEN = "0x21df0da7"   # getToken()
+S_CCIP_REMOTE_TOKEN = "0xb7946580"   # getRemoteToken(uint64)
+S_CCIP_IS_REMOTE_POOL = "0x4c5ef0ed"  # isRemotePool(uint64,bytes)
+S_CCIP_CHAINS = "0xc4bffe2b"      # getSupportedChains()
+S_LATEST_ROUND = "0xfeaf968c"     # latestRoundData()
+S_AGGREGATE3 = "0x82ad56cb"       # aggregate3((address,bool,bytes)[])
+
+MULTICALL3 = "0xca11bde05977b3631167028862be2a173976ca11"
+# Coverage scans of LayerZero adapters ask for every eid in LZ_SCAN in ONE
+# Multicall3 call at the pinned Ethereum block; the check RPCs refuse a body
+# that large, so scans use their own pair (two operators), answers identical.
+SCAN_RPCS = ("https://rpc.mevblocker.io", "https://eth-mainnet.public.blastapi.io")
+LZ_SCAN = (30101, 30700)
+WH_ETH_BRIDGE = "0x3ee18b2214aff97000d974cf647e7c347e8fa585"
+WH_ETH_ID = 2
+# chain -> (wormhole chain id, token bridge on that chain)
+WH_DESTS = {"polygon": (5, "0x5a58505a96d1dbf8df91cb21b54419fc36e93fde"),
+            "arbitrum": (23, "0x0b2402144bb366a632d14b83f244d2e0e21bd39c"),
+            "optimism": (24, "0x1d68124e65fafc907325e3edbf8c4d84499daa8b"),
+            "base": (30, "0x8d2de8d2f73f1f4cab472ac9a881c9b123c79627")}
+CCIP_ETH_SELECTOR = 5009297550715157269
+CCIP_ETH_TAR = "0xb22764f98dd05c789929716d677382df22c05cb6"
+# chain -> (CCIP chain selector, TokenAdminRegistry on that chain)
+CCIP_DESTS = {"arbitrum": (4949039107694359620, "0x39ae1032cf4b334a1ed41cdd0833bdd7c7e7751e"),
+              "base": (15971525489660198786, "0x6f6c373d09c07425baae72317863d7f6bb731e37"),
+              "optimism": (3734403246176062136, "0x657c42abe4cd8aa731aec322f871b5b90cf6274f"),
+              "polygon": (4051577828743386545, "0x00f027ea6d0fb03256a15e9182b2b9227a4931d8"),
+              "mantle": (1556008542357238666, "0x000a744940eb5d857c0d61d97015dfc83107404f"),
+              "xlayer": (3016212468291539606, "0xecf1eaee01e82f3388decd7f4c3792374f3f72f3"),
+              "monad": (8481857512324358265, "0x11acd984dd680363117b310f6ebdf78fd6c0195f"),
+              "ink": (3461204551265785888, "0xeb062d21c713a3d940bb0faecfdc387d6ea23697"),
+              "unichain": (1923510103922296319, "0xab3ee2e897cf23c10e76d26ab4674fefa376bc0d"),
+              "sei": (9027416829622342829, "0x910a46ca93e8086bf1d7d65190ee6aee5256bd61"),
+              "berachain": (1294465214383781161, "0x0944c3fb1db7d165336569221995b31cbe6c8a55"),
+              "hyperevm": (2442541497099098535, "0xce44363496abc3a9e53b3f404a740f992d977bdf")}
+CCIP_SOURCE_POOLS = ("LockReleaseTokenPool ",)
+CCIP_DEST_POOLS = ("BurnMintTokenPool ", "BurnFromMintTokenPool ", "BurnWithFromMintTokenPool ")
+# Chainlink Proof of Reserve on Ethereum: source token -> (feed, token whose supply the feed covers)
+POR_FEEDS = {"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599": ("0xa81fe04086865e63e12dd3776978e49deea2ea4e", "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"),
+             "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0": ("0xad410e655c0fe4741f573152592eeb766e686ce7", "0xae7ab96520de3a18e5e111b5eaab095312d7fe84"),
+             "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee": ("0xc8cd82067ea907ea4af81b625d2bb653e21b5156", "0x35fa164735182de50811e8e2e824cfb9b6118ac2")}
+# transport-class reasons: never stored as a reading; the check stays OPEN (PENDING) until its fixed deadline
+TRANSIENT = ("RPC_UNREADABLE", "RPC_DISAGREE")
+MAX_SCAN_IDS = 64
 
 ARB_L1_ROUTER = "0x72ce9c846789fdb6fc1f34ac4ad25dd9ef7031ef"
 ARB_L2_ROUTER = "0x5288c571fd7ad117bea99bf60fe0846c4e84f933"
@@ -114,6 +168,42 @@ MAX_ANCHORS = 96
 KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
          "polygon": "polygon", "nomad": "moonbeam", "oft_polygon": "polygon", "oft_arbitrum": "arbitrum",
          "oft_optimism": "optimism", "oft_base": "base", "oft_mantle": "mantle", "oft_xlayer": "xlayer", "oft_sei": "sei", "oft_flare": "flare", "oft_hedera": "hedera", "oft_unichain": "unichain", "oft_morph": "morph", "oft_ink": "ink", "oft_berachain": "berachain", "oft_hyperevm": "hyperevm", "oft_monad": "monad"}
+for _c in WH_DESTS:
+    KINDS["wh_" + _c] = _c
+for _c in CCIP_DESTS:
+    KINDS["ccip_" + _c] = _c
+
+
+def family(kind: str) -> str:
+    """How a vault of this kind proves it backs nothing unlisted:
+    MAPPING  the bridge maps the source token to exactly one destination token
+    LEDGER   the bridge keeps its own total owed across every chain (Wormhole)
+    LZ       every LayerZero eid in LZ_SCAN is scanned for a peer (Multicall3)
+    CCIP     the pool lists its supported chains (getSupportedChains)
+    OPEN     no on-chain enumeration exists (OP/Base escrows, Nomad's router)"""
+    k = str(kind)
+    if k.startswith("oft_"):
+        return "LZ"
+    if k.startswith("wh_"):
+        return "LEDGER"
+    if k.startswith("ccip_"):
+        return "CCIP"
+    if k in ("arbitrum", "polygon", "op_dai"):
+        return "MAPPING"
+    return "OPEN"
+
+
+def remote_id(kind: str) -> str:
+    """The id under which the vault's own config names this destination."""
+    k = str(kind)
+    dest = KINDS.get(k, "")
+    if k.startswith("oft_"):
+        return "lz:" + str(LZ_EID[dest])
+    if k.startswith("ccip_"):
+        return "ccip:" + str(CCIP_DESTS[dest][0])
+    if k.startswith("wh_"):
+        return "wh:" + str(WH_DESTS[dest][0])
+    return k + ":" + dest
 # kinds whose L1 bridge keeps a per-token ledger (deposits(l1, l2)); a
 # destination's supply is counted as max(totalSupply, deposits) - see RULES.md
 DEPOSIT_KINDS = ("optimism", "base")
@@ -375,6 +465,257 @@ def _auth_oft(dest: str, l1: str, l2: str, be: int, bd: int) -> dict:
             "anchors": anchors, "dest_token": token}
 
 
+def _u(n: int) -> str:
+    return ("0" * 64 + hex(int(n))[2:])[-64:]
+
+
+def _abi_bytes(r: typing.Any) -> str:
+    """An ABI-encoded `bytes` return value as lowercase 0x hex, or ""."""
+    if not isinstance(r, list) or r[0] != "ok" or not isinstance(r[1], str) or len(r[1]) < 130:
+        return ""
+    h = r[1][2:]
+    off = int(h[0:64], 16) * 2
+    if off + 64 > len(h):
+        return ""
+    n = int(h[off:off + 64], 16) * 2
+    if off + 64 + n > len(h) or n > 4096:
+        return ""
+    return "0x" + h[off + 64:off + 64 + n]
+
+
+def _abi_string(r: typing.Any) -> str:
+    b = _abi_bytes(r)
+    if b == "":
+        return ""
+    try:
+        return bytes.fromhex(b[2:]).decode("utf-8", errors="replace")[:80]
+    except Exception:
+        return ""
+
+
+def _abi_u64s(r: typing.Any) -> typing.Any:
+    """An ABI-encoded uint64[] -> [int], or None."""
+    if not isinstance(r, list) or r[0] != "ok" or not isinstance(r[1], str) or len(r[1]) < 130:
+        return None
+    h = r[1][2:]
+    off = int(h[0:64], 16) * 2
+    if off + 64 > len(h):
+        return None
+    n = int(h[off:off + 64], 16)
+    if n > MAX_SCAN_IDS or off + 64 + 64 * n > len(h):
+        return None
+    return [int(h[off + 64 + 64 * i:off + 128 + 64 * i], 16) for i in range(n)]
+
+
+def _auth_wormhole(dest: str, l1: str, l2: str, be: int, bd: int) -> dict:
+    """Wormhole token bridge: Ethereum's bridge registers this chain's bridge;
+    this chain's bridge maps (Ethereum, l1) to l2, which is one of its wrapped
+    assets and whose origin is (Ethereum, l1); this chain's bridge registers
+    Ethereum's. The vault is Ethereum's token bridge; its ledger
+    outstandingBridged(l1) is what it owes across every chain."""
+    wid = WH_DESTS[dest][0]
+    tb = WH_DESTS[dest][1]
+    e = _q(SOURCE_CHAIN, be, [[WH_ETH_BRIDGE, S_WH_BRIDGE_OF + _u(wid)], [l1, S_DECIMALS],
+                             [WH_ETH_BRIDGE, S_WH_OUTSTANDING + _pad(l1)]])
+    if _w32(e[0]) != _aw(tb):
+        raise Refuse("ETH_TOKEN_BRIDGE_DOES_NOT_REGISTER_" + dest.upper())
+    if _word(e[2]) < 0:
+        raise Refuse("ETH_TOKEN_BRIDGE_HAS_NO_LEDGER")
+    d = _q(dest, bd, [[tb, S_WH_WRAPPED + _u(WH_ETH_ID) + _pad(l1)], [tb, S_WH_IS_WRAPPED + _pad(l2)],
+                      [l2, S_WH_CHAIN_ID], [l2, S_WH_NATIVE], [tb, S_WH_BRIDGE_OF + _u(WH_ETH_ID)], [l2, S_DECIMALS]])
+    if _addr_w(d[0]) != l2:
+        raise Refuse("WRAPPED_ASSET_OF_SOURCE_IS_" + _addr_w(d[0]))
+    if _word(d[1]) != 1:
+        raise Refuse("NOT_A_WRAPPED_ASSET_OF_THE_BRIDGE")
+    if _word(d[2]) != WH_ETH_ID or _w32(d[3]) != _aw(l1):
+        raise Refuse("WRAPPED_ORIGIN_IS_NOT_THE_SOURCE_TOKEN")
+    if _w32(d[4]) != _aw(WH_ETH_BRIDGE):
+        raise Refuse("DEST_BRIDGE_DOES_NOT_REGISTER_ETHEREUM")
+    proof = ["Ethereum TokenBridge.bridgeContracts(" + str(wid) + ")=" + tb,
+             "TokenBridge.wrappedAsset(2,l1)=" + l2, "TokenBridge.isWrappedAsset(l2)=true",
+             "l2.chainId()=2", "l2.nativeContract()=" + l1, "TokenBridge.bridgeContracts(2)=" + WH_ETH_BRIDGE,
+             "Ethereum TokenBridge.outstandingBridged(l1)=" + str(_word(e[2]))]
+    anchors = [[SOURCE_CHAIN, WH_ETH_BRIDGE, S_WH_BRIDGE_OF + _u(wid), _aw(tb)],
+               [dest, tb, S_WH_WRAPPED + _u(WH_ETH_ID) + _pad(l1), _aw(l2)],
+               [dest, l2, S_WH_NATIVE, _aw(l1)],
+               [dest, tb, S_WH_BRIDGE_OF + _u(WH_ETH_ID), _aw(WH_ETH_BRIDGE)]]
+    return {"vault": WH_ETH_BRIDGE, "source_decimals": _decimals(e[1]), "dest_decimals": _decimals(d[5]),
+            "proof": proof, "anchors": anchors}
+
+
+def _remote_pool_call(sel_id: int, pool: str) -> str:
+    return S_CCIP_IS_REMOTE_POOL + _u(sel_id) + _u(64) + _u(32) + _pad(pool)
+
+
+def _auth_ccip(dest: str, l1: str, l2: str, be: int, bd: int) -> dict:
+    """Chainlink CCIP: Ethereum's TokenAdminRegistry names l1's pool, a
+    lock-release pool whose token is l1, whose remote token for this chain is
+    l2 and whose remote pools include this chain's pool; this chain's registry
+    names l2's pool, a burn-mint pool whose token is l2, whose remote token for
+    Ethereum is l1 and whose remote pools include Ethereum's. The vault is the
+    lock-release pool."""
+    dsel = CCIP_DESTS[dest][0]
+    dtar = CCIP_DESTS[dest][1]
+    e = _q(SOURCE_CHAIN, be, [[CCIP_ETH_TAR, S_CCIP_GET_POOL + _pad(l1)], [l1, S_DECIMALS]])
+    pool = _addr_w(e[0])
+    if not _nonzero(pool):
+        raise Refuse("NO_CCIP_POOL_FOR_SOURCE_TOKEN")
+    p = _q(SOURCE_CHAIN, be, [[pool, S_CCIP_TYPE], [pool, S_CCIP_GET_TOKEN], [pool, S_CCIP_REMOTE_TOKEN + _u(dsel)]])
+    tv = _abi_string(p[0])
+    ok = False
+    for pre in CCIP_SOURCE_POOLS:
+        if tv.startswith(pre):
+            ok = True
+    if not ok:
+        raise Refuse("SOURCE_POOL_IS_NOT_LOCK_RELEASE")
+    if _addr_w(p[1]) != l1:
+        raise Refuse("SOURCE_POOL_TOKEN_IS_NOT_THE_SOURCE_TOKEN")
+    if _abi_bytes(p[2]) != _aw(l2):
+        raise Refuse("SOURCE_POOL_REMOTE_TOKEN_IS_NOT_THE_DEST_TOKEN")
+    d = _q(dest, bd, [[dtar, S_CCIP_GET_POOL + _pad(l2)], [l2, S_DECIMALS]])
+    dp = _addr_w(d[0])
+    if not _nonzero(dp):
+        raise Refuse("NO_CCIP_POOL_FOR_DEST_TOKEN")
+    x = _q(dest, bd, [[dp, S_CCIP_TYPE], [dp, S_CCIP_GET_TOKEN], [dp, S_CCIP_REMOTE_TOKEN + _u(CCIP_ETH_SELECTOR)],
+                      [dp, _remote_pool_call(CCIP_ETH_SELECTOR, pool)]])
+    dtv = _abi_string(x[0])
+    ok = False
+    for pre in CCIP_DEST_POOLS:
+        if dtv.startswith(pre):
+            ok = True
+    if not ok:
+        raise Refuse("DEST_POOL_IS_NOT_BURN_MINT")
+    if _addr_w(x[1]) != l2:
+        raise Refuse("DEST_POOL_TOKEN_IS_NOT_THE_DEST_TOKEN")
+    if _abi_bytes(x[2]) != _aw(l1):
+        raise Refuse("DEST_POOL_REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN")
+    if _word(x[3]) != 1:
+        raise Refuse("DEST_POOL_DOES_NOT_NAME_THE_SOURCE_POOL")
+    back = _q(SOURCE_CHAIN, be, [[pool, _remote_pool_call(dsel, dp)]])
+    if _word(back[0]) != 1:
+        raise Refuse("SOURCE_POOL_DOES_NOT_NAME_THE_DEST_POOL")
+    proof = ["Ethereum TokenAdminRegistry.getPool(l1)=" + pool, "pool.typeAndVersion()=" + tv,
+             "pool.getRemoteToken(" + str(dsel) + ")=" + l2, "pool.isRemotePool(" + str(dsel) + "," + dp + ")=true",
+             dest + " TokenAdminRegistry.getPool(l2)=" + dp, "dest pool.typeAndVersion()=" + dtv,
+             "dest pool.getRemoteToken(Ethereum)=" + l1, "dest pool.isRemotePool(Ethereum," + pool + ")=true"]
+    anchors = [[SOURCE_CHAIN, CCIP_ETH_TAR, S_CCIP_GET_POOL + _pad(l1), _aw(pool)],
+               [SOURCE_CHAIN, pool, S_CCIP_GET_TOKEN, _aw(l1)],
+               [SOURCE_CHAIN, pool, _remote_pool_call(dsel, dp), _aw("0x1")],
+               [dest, dtar, S_CCIP_GET_POOL + _pad(l2), _aw(dp)],
+               [dest, dp, S_CCIP_GET_TOKEN, _aw(l2)],
+               [dest, dp, _remote_pool_call(CCIP_ETH_SELECTOR, pool), _aw("0x1")]]
+    return {"vault": pool, "source_decimals": _decimals(e[1]), "dest_decimals": _decimals(d[1]), "proof": proof,
+            "anchors": anchors}
+
+
+def mc_encode(target: str, datas: list) -> str:
+    """Multicall3.aggregate3 calldata: one (target, allowFailure=true, data)
+    per entry; every data is exactly 36 bytes (a selector and one word)."""
+    n = len(datas)
+    head = _u(32) + _u(n)
+    offs = ""
+    body = ""
+    for i in range(n):
+        offs += _u(n * 32 + i * 192)
+        d = datas[i][2:]
+        body += _pad(target) + _u(1) + _u(96) + _u(len(d) // 2) + (d + "0" * 128)[0:128]
+    return S_AGGREGATE3 + head + offs + body
+
+
+def mc_decode(h: str, n: int) -> typing.Any:
+    """aggregate3's (bool success, bytes returnData)[] -> [first word as int,
+    or -1 for a failed or empty call], or None if malformed."""
+    if not isinstance(h, str) or not h.startswith("0x"):
+        return None
+    t = h[2:]
+    try:
+        base = int(t[0:64], 16) * 2
+        cnt = int(t[base:base + 64], 16)
+        if cnt != n:
+            return None
+        start = base + 64
+        out = []
+        for i in range(n):
+            o = start + int(t[start + 64 * i:start + 64 * (i + 1)], 16) * 2
+            ok = int(t[o:o + 64], 16)
+            bo = o + int(t[o + 64:o + 128], 16) * 2
+            ln = int(t[bo:bo + 64], 16)
+            if ok != 1 or ln < 32:
+                out.append(-1)
+            else:
+                out.append(int(t[bo + 64:bo + 128], 16))
+        return out
+    except Exception:
+        return None
+
+
+def lz_scan(adapter: str, block: int) -> typing.Any:
+    """Every eid in LZ_SCAN whose peer on the adapter is set, at `block`, from
+    both scan RPCs, identical. -> sorted [eid] or a reason string."""
+    eids = list(range(LZ_SCAN[0], LZ_SCAN[1]))
+    data = mc_encode(adapter, [S_PEERS + _u(e) for e in eids])
+    got = []
+    for url in SCAN_RPCS:
+        try:
+            r = rpc_send(url, [eth_call(MULTICALL3, data, block)])
+        except ReadFailed:
+            return "SCAN_UNREADABLE"
+        if r[0][0] != "ok":
+            return "SCAN_REVERTED"
+        dec = mc_decode(r[0][1], len(eids))
+        if dec is None:
+            return "SCAN_MALFORMED"
+        got.append([eids[i] for i in range(len(eids)) if dec[i] > 0])
+    if _canon(got[0]) != _canon(got[1]):
+        return "SCAN_RPCS_DISAGREE"
+    if len(got[0]) > MAX_SCAN_IDS:
+        return "SCAN_TOO_MANY"
+    return got[0]
+
+
+def ccip_scan(pool: str, block: int) -> typing.Any:
+    try:
+        r = dual_read(SOURCE_CHAIN, [eth_call(pool, S_CCIP_CHAINS, block)])
+    except ReadFailed:
+        return "SCAN_UNREADABLE"
+    except Disagree:
+        return "SCAN_RPCS_DISAGREE"
+    ids = _abi_u64s(r[0])
+    if ids is None:
+        return "SCAN_MALFORMED"
+    return sorted(ids)
+
+
+def por_read(source_token: str, block: int) -> typing.Any:
+    """Chainlink PoR for the source token at the pinned Ethereum block, from
+    both RPCs: {feed, answer, decimals, updated_at, supply, supply_decimals},
+    None if the token has no feed, or a reason string."""
+    f = POR_FEEDS.get(source_token)
+    if f is None:
+        return None
+    try:
+        r = dual_read(SOURCE_CHAIN, [eth_call(f[0], S_LATEST_ROUND, block), eth_call(f[0], S_DECIMALS, block),
+                                     eth_call(f[1], S_SUPPLY, block), eth_call(f[1], S_DECIMALS, block)])
+    except ReadFailed:
+        return "POR_UNREADABLE"
+    except Disagree:
+        return "POR_RPCS_DISAGREE"
+    if not isinstance(r[0], list) or r[0][0] != "ok" or len(r[0][1]) < 2 + 64 * 5:
+        return "POR_MALFORMED"
+    h = r[0][1][2:]
+    ans = int(h[64:128], 16)
+    if ans >= 2 ** 255:
+        return "POR_NEGATIVE"
+    upd = int(h[192:256], 16)
+    dec = _word(r[1])
+    sup = _word(r[2])
+    sdec = _word(r[3])
+    if dec < 0 or dec > MAX_DECIMALS or sup < 0 or sdec < 0 or sdec > MAX_DECIMALS:
+        return "POR_MALFORMED"
+    return {"feed": f[0], "token": f[1], "answer": str(ans), "decimals": dec, "updated_at": upd, "supply": str(sup),
+            "supply_decimals": sdec}
+
+
 def pin_final(chain: str, block: int) -> dict:
     """Leader (block < 0): the lower of the two RPCs' finalized blocks.
     Validator: the leader's block, if final on both of its own RPCs and not
@@ -425,6 +766,10 @@ def authenticate_at(p: dict, be: int, bd: int) -> dict:
             a = _auth_polygon(p["source_token"], p["dest_token"], ne, nd)
         elif kind.startswith("oft_"):
             a = _auth_oft(dest, p["source_token"], p["dest_token"], ne, nd)
+        elif kind.startswith("wh_"):
+            a = _auth_wormhole(dest, p["source_token"], p["dest_token"], ne, nd)
+        elif kind.startswith("ccip_"):
+            a = _auth_ccip(dest, p["source_token"], p["dest_token"], ne, nd)
         else:
             a = _auth_nomad(p["source_token"], p["dest_token"], ne, nd)
     except Refuse as e:
@@ -474,13 +819,25 @@ def _req_ok(req: typing.Any) -> str:
         b = _as_int(blocks[c], -1)
         if b <= 0 or b > 10 ** 12:
             return "BAD_BLOCK_NUMBER"
+    scans = req.get("scans", [])
+    if not isinstance(scans, list) or len(scans) > MAX_VAULTS:
+        return "BAD_SCANS"
+    for s in scans:
+        if not isinstance(s, list) or len(s) != 2 or s[0] not in vaults or s[1] not in ("LZ", "CCIP"):
+            return "BAD_SCANS"
+    ledgers = req.get("ledgers", [])
+    if not isinstance(ledgers, list) or len(ledgers) > MAX_VAULTS:
+        return "BAD_LEDGERS"
+    for v in ledgers:
+        if v != WH_ETH_BRIDGE or v not in vaults or ledgers.count(v) != 1:
+            return "BAD_LEDGERS"
     anchors = req.get("anchors", [])
     if not isinstance(anchors, list) or len(anchors) > MAX_ANCHORS:
         return "BAD_ANCHORS"
     for a in anchors:
         if not isinstance(a, list) or len(a) != 3 or a[0] not in blocks or _addr(a[1]) == "":
             return "BAD_ANCHOR"
-        if not isinstance(a[2], str) or not a[2].startswith("0x") or len(a[2]) > 202 or not _is_hex(a[2][2:]):
+        if not isinstance(a[2], str) or not a[2].startswith("0x") or len(a[2]) > 330 or not _is_hex(a[2][2:]):
             return "BAD_ANCHOR_DATA"
     return ""
 
@@ -507,11 +864,9 @@ def read_at(req: dict) -> dict:
                 return out
             heads[c] = h["header"]
     except ReadFailed:
-        out["reason"] = "RPC_UNREADABLE"
-        return out
+        return {"status": "PENDING"}
     except Disagree:
-        out["reason"] = "RPC_DISAGREE"
-        return out
+        return {"status": "PENDING"}
     except Exception:
         out["reason"] = "MALFORMED_ANSWER"
         return out
@@ -527,6 +882,9 @@ def read_at(req: dict) -> dict:
         for d in req["dests"]:
             if d.get("deposits_vault", "") != "":
                 calls.append(eth_call(d["deposits_vault"], S_DEPOSITS + _pad(req["source_token"]) + _pad(d["token"]), be))
+        ledgers = req.get("ledgers", [])
+        for v in ledgers:
+            calls.append(eth_call(v, S_WH_OUTSTANDING + _pad(req["source_token"]), be))
         n_src = len(calls)
         for a in anchors:
             if a[0] == src:
@@ -561,6 +919,15 @@ def read_at(req: dict) -> dict:
                 deps.append(str(v))
             else:
                 deps.append("")
+        led = {}
+        for v in ledgers:
+            x = _word(r[k])
+            k += 1
+            if x < 0:
+                out["reason"] = "CALL_FAILED:ledger"
+                return out
+            # outstandingBridged is kept in 8 decimals for tokens with more
+            led[v] = str(x * (10 ** (sdec - 8)) if sdec > 8 else x)
         rows = []
         for c in names:
             if c == src:
@@ -596,17 +963,26 @@ def read_at(req: dict) -> dict:
         out["anchors"] = [got.get(i, "") for i in range(len(anchors))]
         out["locked_by_vault"] = held
         out["source_decimals"] = sdec
-        out["status"] = "OK"
-        return out
+        out["ledgers"] = led
     except ReadFailed:
-        out["reason"] = "RPC_UNREADABLE"
-        return out
+        return {"status": "PENDING"}
     except Disagree:
-        out["reason"] = "RPC_DISAGREE"
-        return out
+        return {"status": "PENDING"}
     except Exception:
         out["reason"] = "MALFORMED_ANSWER"
         return out
+    # phase 3: coverage scans and Proof of Reserve. They never decide the
+    # verdict; an unreadable one is recorded as such (and never counts as complete).
+    cov = []
+    for s in req.get("scans", []):
+        ids = lz_scan(s[0], be) if s[1] == "LZ" else ccip_scan(s[0], be)
+        cov.append({"vault": s[0], "family": s[1], "ids": ids if isinstance(ids, list) else [],
+                    "error": ids if isinstance(ids, str) else ""})
+    out["coverage"] = cov
+    por = por_read(req["source_token"], be)
+    out["por"] = por if isinstance(por, dict) else ({"error": por} if isinstance(por, str) else None)
+    out["status"] = "OK"
+    return out
 
 
 # =============================================================================
@@ -650,15 +1026,28 @@ class Reading:
     reader: str
 
 
+@gl.storage.allow
+@dataclass
+class Pending:
+    key: str
+    attempts: u64
+    first_at: u64
+    last_at: u64
+    last_by: str
+
+
 class ChainReader(gl.contract.Contract):
     n_auth: u64
     auths: gl.storage.TreeMap[u64, Auth]
     readings: gl.storage.TreeMap[str, Reading]
     n_readings: u64
+    pendings: gl.storage.TreeMap[str, Pending]
+    n_pending: u64
 
     def __init__(self) -> None:
         self.n_auth = u64(0)
         self.n_readings = u64(0)
+        self.n_pending = u64(0)
 
     def _now(self) -> int:
         return _epoch_from_iso(gl.message.raw.get("datetime", ""))
@@ -716,7 +1105,8 @@ class ChainReader(gl.contract.Contract):
             anchors_json=_canon(a["anchors"]), read_at=u64(now),
             reader=gl.message.sender_address.as_hex.lower())
         self.n_auth = u64(aid)
-        return {"auth_id": aid, "vault": a["vault"], "dest_token": a.get("dest_token", l2),
+        return {"auth_id": aid, "vault": a["vault"], "dest_token": a.get("dest_token", l2), "family": family(k),
+                "remote": remote_id(k),
                 "source_decimals": int(a["source_decimals"]),
                 "dest_decimals": int(a["dest_decimals"])}
 
@@ -748,6 +1138,12 @@ class ChainReader(gl.contract.Contract):
             raise gl.vm.UserError("REFUSED: REQUEST_" + bad)
         if _as_int(req.get("round"), -1) != rnd or _as_int(req.get("check_id"), -1) != cid:
             raise gl.vm.UserError("REFUSED: NOT_THIS_ROUND")
+        read_by = _as_int(req.get("read_by"), -1)
+        if read_by <= 0 or now > read_by:
+            raise gl.vm.UserError("REFUSED: READ_WINDOW_CLOSED_AT_" + str(read_by))
+        # the request (blocks, vaults, tokens, anchors) comes from the registry's
+        # state, read here before the non-deterministic block: every validator
+        # reads exactly these, never a range or a block the leader names
         frozen = json.loads(_canon(req))
 
         def leader() -> dict:
@@ -759,11 +1155,24 @@ class ChainReader(gl.contract.Contract):
             return _canon(read_at(frozen)) == _canon(res.calldata)
 
         r = gl.vm.run_nondet(leader, validator)
-        if not isinstance(r, dict) or r.get("status") not in ("OK", "INCONCLUSIVE"):
+        if not isinstance(r, dict) or r.get("status") not in ("OK", "INCONCLUSIVE", "PENDING"):
             raise gl.vm.UserError("REFUSED: UNREADABLE")
-        if rnd >= 2 and r["status"] == "INCONCLUSIVE" and str(r.get("reason", "")) == "RPC_UNREADABLE":
-            # a contest re-read is not settled by an outage; retry until the contest times out
-            raise gl.vm.UserError("RETRY: RPC_UNREADABLE")
+        if r["status"] == "PENDING":
+            # a transport failure (an RPC down, throttling, or its two RPCs
+            # answering differently) is no reading: nothing is stored for the
+            # check, which stays open until its fixed deadline; anyone retries.
+            # A validator agrees with a PENDING leader only when its own read
+            # failed the same way.
+            pd = self.pendings.get(key)
+            if pd is None:
+                self.pendings[key] = Pending(key=key, attempts=u64(1), first_at=u64(now), last_at=u64(now),
+                                             last_by=gl.message.sender_address.as_hex.lower())
+            else:
+                pd.attempts = u64(int(pd.attempts) + 1)
+                pd.last_at = u64(now)
+                pd.last_by = gl.message.sender_address.as_hex.lower()
+            self.n_pending = u64(int(self.n_pending) + 1)
+            return {"key": key, "status": "PENDING", "retry_until": read_by}
         # --- writes
         self.readings[key] = Reading(key=key, registry=reg, check_id=u64(cid), round=u64(rnd),
                                      request_sha=_sha(_canon(frozen)), status=r["status"], reason=str(r["reason"]),
@@ -781,7 +1190,7 @@ class ChainReader(gl.contract.Contract):
                 "source_block": int(a.source_block), "source_time": int(a.source_time),
                 "dest_block": int(a.dest_block), "dest_time": int(a.dest_time),
                 "proof": json.loads(a.proof_json), "anchors": json.loads(a.anchors_json), "read_at": int(a.read_at),
-                "reader": a.reader}
+                "reader": a.reader, "family": family(a.kind), "remote": remote_id(a.kind)}
 
     @gl.public.view
     def get_auth(self, auth_id: int) -> typing.Any:
@@ -797,7 +1206,11 @@ class ChainReader(gl.contract.Contract):
         key = _addr(registry) + "|" + str(_as_int(check_id, -1)) + "|" + str(_as_int(round_no, -1))
         r = self.readings.get(key)
         if r is None:
-            return {"found": False}
+            pd = self.pendings.get(key)
+            if pd is None:
+                return {"found": False, "pending": 0}
+            return {"found": False, "pending": int(pd.attempts), "pending_first_at": int(pd.first_at),
+                    "pending_last_at": int(pd.last_at)}
         return {"found": True, "key": r.key, "registry": r.registry, "check_id": int(r.check_id),
                 "round": int(r.round), "request_sha": r.request_sha, "status": r.status, "reason": r.reason,
                 "reading": json.loads(r.reading_json), "read_at": int(r.read_at), "reader": r.reader}
@@ -809,4 +1222,9 @@ class ChainReader(gl.contract.Contract):
                 "kinds": KINDS, "deposit_kinds": list(DEPOSIT_KINDS), "leader_lag_s": LEADER_LAG_S,
                 "layerzero_endpoint": LZ_ENDPOINT, "layerzero_endpoints": LZ_ENDPOINTS, "layerzero_eids": LZ_EID,
                 "arbitrum_escrow_gateways": ARB_ESCROW_GATEWAYS, "polygon_erc20_type": POL_ERC20_TYPE,
-                "auths": int(self.n_auth), "readings": int(self.n_readings)}
+                "auths": int(self.n_auth), "readings": int(self.n_readings), "pending_attempts": int(self.n_pending),
+                "scan_rpcs": list(SCAN_RPCS), "lz_scan": list(LZ_SCAN), "multicall3": MULTICALL3,
+                "wormhole": {"ethereum_bridge": WH_ETH_BRIDGE, "dests": WH_DESTS},
+                "ccip": {"ethereum_selector": str(CCIP_ETH_SELECTOR), "ethereum_registry": CCIP_ETH_TAR,
+                         "dests": {c: [str(CCIP_DESTS[c][0]), CCIP_DESTS[c][1]] for c in CCIP_DESTS}},
+                "por_feeds": POR_FEEDS, "transient": list(TRANSIENT)}

@@ -216,10 +216,9 @@ class M3InFlightDepositFlash(Base):
 
     def test_data_inconclusive_counts_as_not_backed(self):
         pid = self.s.pair("arb_usdc")
-        stub.WEB.tamper[CR.CHAINS["arbitrum"][1][1]] = lambda req, ans: dict(ans, result=F.w(1)) \
-            if req["method"] == "eth_call" else ans
+        F.data_fault("arbitrum")
         self.final_monitor(pid)
-        stub.WEB.tamper.clear()
+        F.data_fault("arbitrum", False)
         self.final_monitor(pid)
         self.assertTrue(self.s.view(self.s.gate, "is_backed", pid, self.s.w.now())["reason"].startswith("A_RULING_"))
 
@@ -295,7 +294,9 @@ class Decimals(Base):
             return ans
         stub.WEB.tamper[CR.CHAINS["arbitrum"][1][0]] = lie
         cid = self.s.challenge(bid, self.s.blocks(pid))["check_id"]
-        self.assertEqual(self.provisional(cid)["reason"], "RPC_DISAGREE")
+        # one RPC lying is transport: no reading, the check stays OPEN (PENDING)
+        self.assertEqual(self.s.read(cid)["status"], "PENDING")
+        self.assertEqual(self.s.check(cid)["status"], "OPEN")
 
     def test_source_decimals_upgraded(self):
         pid, bid = self.bonded()

@@ -507,10 +507,9 @@ class Challenge(Base):
 
     def test_data_inconclusive_refunds_and_becomes_latest(self):
         pid, bid, cid = self.challenged()
-        stub.WEB.tamper[CR.CHAINS["arbitrum"][1][1]] = lambda req, ans: dict(ans, result=F.w(1)) \
-            if req["method"] == "eth_call" else ans
+        F.data_fault("arbitrum")
         out = self.provisional(cid)
-        self.assertEqual((out["status"], out["reason"]), ("INCONCLUSIVE", "RPC_DISAGREE"))
+        self.assertEqual((out["status"], out["reason"]), ("INCONCLUSIVE", "CALL_FAILED:arbitrum"))
         self.assertEqual(self.s.claimable(CHALLENGER), MIN_STAKE)
         self.assertEqual(self.s.view(self.s.reg, "get_latest", pid)["check_id"], cid)
         self.assertLedger()
@@ -580,12 +579,11 @@ class Monitor(Base):
 
     def ruled_inconclusive(self, pid, bl, sender=PATROL):
         """A monitoring check that is RULED (data INCONCLUSIVE: the RPCs
-        disagree) closes at once and counts against the rate limit."""
-        url = CR.CHAINS["arbitrum"][1][1]
-        stub.WEB.tamper[url] = lambda req, ans: dict(ans, result=F.w(1)) if req["method"] == "eth_call" else ans
+        answer no supply) closes at once and counts against the rate limit."""
+        F.data_fault("arbitrum")
         cid = self.s.monitor(pid, bl, sender=sender)["check_id"]
         self.provisional(cid)
-        del stub.WEB.tamper[url]
+        F.data_fault("arbitrum", False)
         self.assertEqual(self.s.check(cid)["status"], "INCONCLUSIVE")
         return cid
 
@@ -807,21 +805,20 @@ class Contest(Base):
 
     def test_contest_reread_data_inconclusive(self):
         pid, bid, cid = self.contested()
-        stub.WEB.tamper[CR.CHAINS["ethereum"][1][1]] = lambda req, ans: dict(ans, result=F.w(1)) \
-            if req["method"] == "eth_call" else ans
+        F.data_fault("ethereum")
         self.s.read(cid, 2)
         out = self.s.rule(cid)
         self.assertEqual(out["status"], "INCONCLUSIVE")
-        self.assertTrue(self.s.check(cid)["reason"].startswith("CONTEST_REREAD_INCONCLUSIVE:RPC_DISAGREE"))
+        self.assertTrue(self.s.check(cid)["reason"].startswith("CONTEST_REREAD_INCONCLUSIVE:CALL_FAILED:ethereum"))
         self.assertLedger()
 
     def test_contest_reread_outage_retries_not_recorded(self):
         pid, bid, cid = self.contested()
         stub.WEB.down.add(CR.CHAINS["ethereum"][1][0])
-        with self.assertRaises(Reverted) as e:
-            self.s.read(cid, 2)
-        self.assertIn("RETRY: RPC_UNREADABLE", e.exception.msg)
-        self.assertFalse(self.s.view(self.s.reader, "get_reading", self.s.reg, cid, 2)["found"])
+        self.assertEqual(self.s.read(cid, 2)["status"], "PENDING")
+        g = self.s.view(self.s.reader, "get_reading", self.s.reg, cid, 2)
+        self.assertFalse(g["found"])
+        self.assertEqual(g["pending"], 1)
         stub.WEB.down.clear()
         self.s.read(cid, 2)
         self.assertEqual(self.s.rule(cid)["status"], "FINAL")
@@ -991,8 +988,7 @@ class StuckStates(Base):
         self.provisional(cid)
         self.s.call(self.s.reg, "contest", cid, sender=CONTESTER, value=MIN_STAKE)
         stub.WEB.down.add("*")
-        with self.assertRaises(Reverted):
-            self.s.read(cid, 2)
+        self.assertEqual(self.s.read(cid, 2)["status"], "PENDING")
         self.assertEqual(self.drive(cid)["status"], "FINAL")
         self.assertLedger()
 
@@ -1044,8 +1040,7 @@ class Gate(Base):
     def test_newer_data_inconclusive_overrides(self):
         pid = self.s.pair()
         self.final_monitor(pid)
-        stub.WEB.tamper[CR.CHAINS["arbitrum"][1][1]] = lambda req, ans: dict(ans, result=F.w(1)) \
-            if req["method"] == "eth_call" else ans
+        F.data_fault("arbitrum")
         self.final_monitor(pid)
         self.assertEqual(self.gate(pid)["reason"], "INCONCLUSIVE")
 

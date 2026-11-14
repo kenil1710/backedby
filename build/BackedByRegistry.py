@@ -50,7 +50,7 @@ import typing
 #   4. Ledger: received = bonds + open stakes + claimable + claimed, always.
 #   5. No owner, no setter, no pause.
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 SOURCE_CHAIN = "ethereum"
 
 V_BACKED = "BACKED"
@@ -74,7 +74,17 @@ B_SLASHED = "SLASHED"
 KINDS = {"arbitrum": "arbitrum", "optimism": "optimism", "base": "base", "op_dai": "optimism",
          "polygon": "polygon", "nomad": "moonbeam", "oft_polygon": "polygon", "oft_arbitrum": "arbitrum",
          "oft_optimism": "optimism", "oft_base": "base", "oft_mantle": "mantle", "oft_xlayer": "xlayer", "oft_sei": "sei", "oft_flare": "flare", "oft_hedera": "hedera", "oft_unichain": "unichain", "oft_morph": "morph", "oft_ink": "ink", "oft_berachain": "berachain", "oft_hyperevm": "hyperevm", "oft_monad": "monad"}
+for _c in ("polygon", "arbitrum", "optimism", "base"):
+    KINDS["wh_" + _c] = _c
+for _c in ("arbitrum", "base", "optimism", "polygon", "mantle", "xlayer", "monad", "ink", "unichain", "sei",
+           "berachain", "hyperevm"):
+    KINDS["ccip_" + _c] = _c
 DEPOSIT_KINDS = ("optimism", "base")
+WH_ETH_BRIDGE = "0x3ee18b2214aff97000d974cf647e7c347e8fa585"
+ALERT_MARGIN_BPS = 10         # BACKED but within this of the tolerance line -> ALERT
+POR_MAX_AGE_S = 172800        # a Proof of Reserve answer older than this at the pinned block is STALE
+POR_MATCH_BPS = 50            # |BackedBy ratio - PoR ratio| within this -> MATCH
+MAX_HISTORY_PAGE = 100
 MAX_GAP_S = 600
 FAST_GAP_S = 120              # any pair holding a fast-bridge (LayerZero OFT) vault
 KIND_MAX_GAP_S = {"polygon": 300}
@@ -95,6 +105,143 @@ MAX_PAGE = 50
 DATA_REASONS = ("RPC_DISAGREE", "CALL_FAILED", "MALFORMED_ANSWER", "DECIMALS_MISMATCH", "MAPPING_CHANGED",
                 "CONTEST_DISAGREES", "CONTEST_REREAD_INCONCLUSIVE")
 MAX_ANCHORS = 96
+
+def family(kind: str) -> str:
+    """How a vault of this kind proves it backs nothing unlisted (as ChainReader.family)."""
+    k = str(kind)
+    if k.startswith("oft_"):
+        return "LZ"
+    if k.startswith("wh_"):
+        return "LEDGER"
+    if k.startswith("ccip_"):
+        return "CCIP"
+    if k in ("arbitrum", "polygon", "op_dai"):
+        return "MAPPING"
+    return "OPEN"
+
+
+LZ_EID = {"ethereum": 30101, "polygon": 30109, "arbitrum": 30110, "optimism": 30111, "base": 30184, "mantle": 30181,
+          "xlayer": 30274, "sei": 30280, "flare": 30295, "hedera": 30316, "unichain": 30320, "morph": 30322,
+          "ink": 30339, "berachain": 30362, "hyperevm": 30367, "monad": 30390}
+CCIP_SEL = {"arbitrum": 4949039107694359620, "base": 15971525489660198786, "optimism": 3734403246176062136,
+            "polygon": 4051577828743386545, "mantle": 1556008542357238666, "xlayer": 3016212468291539606,
+            "monad": 8481857512324358265, "ink": 3461204551265785888, "unichain": 1923510103922296319,
+            "sei": 9027416829622342829, "berachain": 1294465214383781161, "hyperevm": 2442541497099098535}
+WH_ID = {"polygon": 5, "arbitrum": 23, "optimism": 24, "base": 30}
+
+
+def remote_of(kind: str, chain: str) -> str:
+    """The id under which a vault's own config names a destination chain."""
+    f = family(kind)
+    if f == "LZ":
+        return "lz:" + str(LZ_EID.get(chain, 0))
+    if f == "CCIP":
+        return "ccip:" + str(CCIP_SEL.get(chain, 0))
+    if f == "LEDGER":
+        return "wh:" + str(WH_ID.get(chain, 0))
+    return str(kind) + ":" + str(chain)
+
+
+def coverage_of(vaults: list, scans: typing.Any) -> dict:
+    """Is every destination each vault's own config says it backs listed in
+    the pair? vaults: [{vault, family, remotes}]; scans: the reading's
+    coverage [{vault, family, ids, error}]. -> {state, unlisted, by_vault}.
+    state: COMPLETE, or the first of GAP (unlisted destinations found),
+    UNREAD (a scan failed or is missing) and OPEN (the bridge cannot be
+    enumerated on chain). Only COMPLETE is ever favorable."""
+    sc = {}
+    if isinstance(scans, list):
+        for s in scans:
+            if isinstance(s, dict) and "vault" in s:
+                sc[str(s["vault"])] = s
+    unlisted = []
+    states = []
+    by = []
+    for v in vaults:
+        fam = str(v.get("family", "OPEN"))
+        st = "COMPLETE"
+        extra = []
+        if fam == "OPEN":
+            st = "OPEN"
+        elif fam == "LZ" or fam == "CCIP":
+            s = sc.get(str(v.get("vault", "")))
+            if s is None or str(s.get("error", "")) != "" or not isinstance(s.get("ids"), list):
+                st = "UNREAD"
+            else:
+                pre = "lz:" if fam == "LZ" else "ccip:"
+                listed = v.get("remotes") or []
+                for i in s["ids"]:
+                    if pre + str(i) not in listed:
+                        extra.append(pre + str(i))
+                st = "GAP" if len(extra) > 0 else "COMPLETE"
+        for x in extra:
+            unlisted.append({"vault": v.get("vault", ""), "id": x})
+        states.append(st)
+        by.append({"vault": v.get("vault", ""), "family": fam, "state": st, "unlisted": extra})
+    state = "COMPLETE"
+    for s in ("GAP", "UNREAD", "OPEN"):
+        if s in states:
+            state = s
+            break
+    return {"state": state, "unlisted": unlisted, "by_vault": by}
+
+
+def alert_state(verdict: str, ratio_bps: int, tol: int) -> str:
+    """BREACH (UNDER_BACKED), ALERT (BACKED, within ALERT_MARGIN_BPS of the
+    tolerance line), OK (BACKED above it), or "" for no verdict."""
+    if verdict == V_UNDER:
+        return "BREACH"
+    if verdict != V_BACKED:
+        return ""
+    if int(ratio_bps) < 10000 - int(tol) + ALERT_MARGIN_BPS:
+        return "ALERT"
+    return "OK"
+
+
+def por_compare(por: typing.Any, ratio_bps: int, source_time: int) -> typing.Any:
+    """Chainlink PoR next to BackedBy's ratio. por: the reading's PoR (None:
+    the token has no feed). -> None or {status: MATCH | DIFF | STALE | UNREAD,
+    por_ratio_bps, delta_bps, explain}. A DIFF always carries its explanation."""
+    if por is None:
+        return None
+    if not isinstance(por, dict) or "answer" not in por:
+        return {"status": "UNREAD", "por_ratio_bps": -1, "delta_bps": 0,
+                "explain": "POR_" + str(por.get("error", "MISSING") if isinstance(por, dict) else "MISSING")}
+    ans = _as_int(por.get("answer"), -1)
+    sup = _as_int(por.get("supply"), -1)
+    dec = _as_int(por.get("decimals"), -1)
+    sdec = _as_int(por.get("supply_decimals"), -1)
+    upd = _as_int(por.get("updated_at"), -1)
+    if ans < 0 or sup <= 0 or dec < 0 or sdec < 0 or upd < 0 or dec > MAX_DECIMALS or sdec > MAX_DECIMALS:
+        return {"status": "UNREAD", "por_ratio_bps": -1, "delta_bps": 0, "explain": "POR_MALFORMED"}
+    pr = (ans * (10 ** sdec) * 10000) // (sup * (10 ** dec))
+    out = {"status": "", "por_ratio_bps": pr, "delta_bps": int(ratio_bps) - pr, "age_s": int(source_time) - upd,
+           "feed": por.get("feed", ""), "reserves": str(ans), "reserves_decimals": dec, "supply": str(sup),
+           "supply_decimals": sdec, "explain": ""}
+    if int(source_time) - upd > POR_MAX_AGE_S:
+        out["status"] = "STALE"
+        out["explain"] = "POR_ANSWER_OLDER_THAN_" + str(POR_MAX_AGE_S) + "S_AT_THE_PINNED_BLOCK"
+        return out
+    if int(ratio_bps) < 0:
+        out["status"] = "DIFF"
+        out["explain"] = "NO_BRIDGE_RATIO"
+        return out
+    d = out["delta_bps"]
+    if -POR_MATCH_BPS <= d <= POR_MATCH_BPS:
+        out["status"] = "MATCH"
+        out["explain"] = "BOTH_LAYERS_WITHIN_" + str(POR_MATCH_BPS) + "BPS"
+        return out
+    out["status"] = "DIFF"
+    # PoR = custodian reserves / the token's whole supply; BackedBy = bridge
+    # vault / the supply minted against it. They measure different layers.
+    if d > 0:
+        out["explain"] = "BRIDGE_VAULT_SURPLUS_EXCEEDS_CUSTODY_SURPLUS"
+    else:
+        out["explain"] = "BRIDGE_VAULT_BELOW_CUSTODY_RATIO"
+    if pr < 10000:
+        out["explain"] = out["explain"] + ";CUSTODY_RESERVES_BELOW_SUPPLY"
+    return out
+
 
 def gap_for(kinds: list) -> int:
     g = MAX_GAP_S
@@ -311,7 +458,8 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
     open-ended). Locked is the sum over every vault; a destination with a
     per-token bridge ledger counts max(totalSupply, deposits)."""
     out = {"verdict": V_INC, "reason": "", "cls": "", "source_time": 0, "locked_norm": "", "supply_norm": "",
-           "ratio_bps": -1, "scale_decimals": -1, "counted": []}
+           "ratio_bps": -1, "scale_decimals": -1, "counted": [], "ledgers": {}, "coverage": None, "alert": "",
+           "por": None}
     if not isinstance(reading, dict) or reading.get("status") not in ("OK", "INCONCLUSIVE"):
         out["reason"] = "MALFORMED_ANSWER"
         out["cls"] = "DATA"
@@ -319,6 +467,10 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
     blocks = reading.get("blocks") or {}
     if SOURCE_CHAIN in blocks:
         out["source_time"] = int(blocks[SOURCE_CHAIN]["timestamp"])
+    if reading["status"] != "OK" and reading["status"] != "INCONCLUSIVE":
+        out["reason"] = "MALFORMED_ANSWER"
+        out["cls"] = "DATA"
+        return out
     if reading["status"] != "OK":
         out["reason"] = str(reading.get("reason", ""))
         out["cls"] = reason_class(out["reason"])
@@ -389,6 +541,11 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
     locked_n = locked * (10 ** (big - sd))
     supply_n = 0
     counted = []
+    ledgers = terms.get("ledgers") or []
+    rled = reading.get("ledgers") or {}
+    group = {}
+    for v in ledgers:
+        group[v] = 0
     for i in range(len(dests)):
         d = dests[i]
         sup = _as_int(d.get("supply", ""), -1)
@@ -407,7 +564,25 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
             if dv > c:
                 c = dv
         counted.append(str(c))
-        supply_n += c * (10 ** (big - int(d["decimals"])))
+        cn = c * (10 ** (big - int(d["decimals"])))
+        dv_ = str(tdests[i].get("vault", ""))
+        if dv_ in group:
+            group[dv_] += cn
+        else:
+            supply_n += cn
+    # a vault with its own ledger (Wormhole's outstandingBridged: what it owes
+    # on every chain) counts the larger of that ledger and its listed tokens
+    led_out = {}
+    for v in ledgers:
+        lv = _as_int(rled.get(v, ""), -1)
+        if lv < 0:
+            out["reason"] = "MALFORMED_ANSWER"
+            out["cls"] = "DATA"
+            return out
+        ln = lv * (10 ** (big - sd))
+        cnt = ln if ln > group[v] else group[v]
+        supply_n += cnt
+        led_out[v] = {"ledger_norm": str(ln), "listed_norm": str(group[v]), "counted_norm": str(cnt)}
     tol = int(terms["tolerance_bps"])
     backed = locked_n * 10000 >= supply_n * (10000 - tol)
     out["verdict"] = V_BACKED if backed else V_UNDER
@@ -418,6 +593,10 @@ def compute(reading: dict, terms: dict, cover: typing.Any) -> dict:
     out["ratio_bps"] = (locked_n * 10000) // supply_n if supply_n > 0 else -1
     out["scale_decimals"] = big
     out["counted"] = counted
+    out["ledgers"] = led_out
+    out["coverage"] = coverage_of(terms.get("vault_cov") or [], reading.get("coverage"))
+    out["alert"] = alert_state(out["verdict"], out["ratio_bps"], tol)
+    out["por"] = por_compare(reading.get("por"), out["ratio_bps"], s)
     return out
 
 
@@ -466,6 +645,7 @@ class Pair:
     last_monitor_at: u64
     checks_csv: str
     bonds_csv: str
+    hist_n: u64
 
 
 @gl.storage.allow
@@ -536,6 +716,7 @@ class BackedByRegistry(gl.contract.Contract):
     dest_owner: gl.storage.TreeMap[str, u64]
     bonds: gl.storage.TreeMap[u64, Bond]
     checks: gl.storage.TreeMap[u64, Check]
+    history: gl.storage.TreeMap[str, str]
     counts: gl.storage.TreeMap[str, u64]
     claimable: gl.storage.TreeMap[str, u256]
     claimed: gl.storage.TreeMap[str, u256]
@@ -645,13 +826,16 @@ class BackedByRegistry(gl.contract.Contract):
         req["ok"] = True
         req["round"] = rnd
         req["check_id"] = int(c.check_id)
+        # the read window is fixed when the round opens; retries and junk never move it
+        req["read_by"] = int(c.read_deadline) if rnd == 1 else int(c.contest_read_deadline)
         return req
 
     def _terms(self, p: Pair, c: Check) -> dict:
         req = json.loads(c.request_json)
         return {"source_decimals": int(p.source_decimals), "tolerance_bps": int(p.tolerance_bps),
                 "max_gap_s": int(req["terms_max_gap_s"]), "vaults": req["vaults"], "dests": req["terms_dests"],
-                "anchors": req["terms_anchors"]}
+                "anchors": req["terms_anchors"], "ledgers": req.get("ledgers", []),
+                "vault_cov": req.get("terms_vault_cov", [])}
 
     def _cover(self, c: Check) -> typing.Any:
         if c.purpose != P_CHALLENGE:
@@ -661,14 +845,20 @@ class BackedByRegistry(gl.contract.Contract):
 
     def _new_check(self, p: Pair, purpose: str, bond_id: int, stake: int, blocks: dict, now: int) -> int:
         dests = self._dests(p)
+        vaults = self._vaults(p)
         anchors = json.loads(p.anchors_json)
-        req = {"source_chain": SOURCE_CHAIN, "vaults": [v["vault"] for v in self._vaults(p)],
+        req = {"source_chain": SOURCE_CHAIN, "vaults": [v["vault"] for v in vaults],
                "source_token": p.source_token,
                "dests": [{"chain": d["chain"], "token": d["token"], "deposits_vault": d.get("deposits_vault", "")}
                          for d in dests],
                "blocks": blocks, "anchors": [[a[0], a[1], a[2]] for a in anchors],
-               "terms_dests": [{"chain": d["chain"], "token": d["token"], "decimals": int(d["decimals"])} for d in dests],
-               "terms_anchors": anchors, "terms_max_gap_s": int(p.max_gap_s)}
+               "terms_dests": [{"chain": d["chain"], "token": d["token"], "decimals": int(d["decimals"]),
+                                "vault": d.get("vault", "")} for d in dests],
+               "terms_anchors": anchors, "terms_max_gap_s": int(p.max_gap_s),
+               "scans": [[v["vault"], v["family"]] for v in vaults if v.get("family") in ("LZ", "CCIP")],
+               "ledgers": [v["vault"] for v in vaults if v.get("family") == "LEDGER"],
+               "terms_vault_cov": [{"vault": v["vault"], "family": v.get("family", "OPEN"),
+                                    "remotes": v.get("remotes", [])} for v in vaults]}
         cid = int(self.n_checks) + 1
         self.checks[u64(cid)] = Check(
             check_id=u64(cid), pair_id=p.pair_id, purpose=purpose, bond_id=u64(bond_id), filer=self._sender(),
@@ -756,7 +946,25 @@ class BackedByRegistry(gl.contract.Contract):
                 self._credit(contest_to, cst)
                 pay["contest_lost"] = str(cst)
         self._close(c, p, ST_FINAL, verdict, reason, how, now, pay, True)
+        self._history(c, p, verdict, now)
         return pay
+
+    def _history(self, c: Check, p: Pair, verdict: str, now: int) -> None:
+        """Every FINAL ruling becomes one point of the pair's time series."""
+        r = json.loads(c.ruling1_json) if c.ruling1_json != "" else {}
+        cov = r.get("coverage") or {}
+        por = r.get("por") or {}
+        req = json.loads(c.request_json)
+        pt = {"check_id": int(c.check_id), "purpose": c.purpose, "source_time": int(c.source_time), "final_at": now,
+              "verdict": verdict, "ratio_bps": r.get("ratio_bps", -1), "locked_norm": r.get("locked_norm", ""),
+              "supply_norm": r.get("supply_norm", ""), "scale_decimals": r.get("scale_decimals", -1),
+              "alert": alert_state(verdict, int(r.get("ratio_bps", -1)), int(p.tolerance_bps)),
+              "coverage": cov.get("state", ""), "unlisted": len(cov.get("unlisted") or []),
+              "por": por.get("status", ""), "por_ratio_bps": por.get("por_ratio_bps", -1),
+              "blocks": req.get("blocks", {})}
+        n = int(p.hist_n)
+        self.history[str(int(p.pair_id)) + "|" + str(n)] = _canon(pt)
+        p.hist_n = u64(n + 1)
 
     def _refund_all(self, c: Check, p: Pair, reason: str, how: str, now: int, update_latest: bool) -> dict:
         stake = int(c.stake)
@@ -781,11 +989,20 @@ class BackedByRegistry(gl.contract.Contract):
     def _dest_of(self, a: dict, now: int) -> dict:
         return {"chain": a["dest_chain"], "token": a["dest_token"], "decimals": int(a["dest_decimals"]),
                 "kind": a["kind"], "deposits_vault": a["vault"] if a["kind"] in DEPOSIT_KINDS else "",
+                "vault": a["vault"], "remote": remote_of(a["kind"], a["dest_chain"]),
                 "auth_id": int(a["auth_id"]), "added_by": self._sender(), "added_at": now}
 
     def _vault_of(self, a: dict, now: int) -> dict:
-        return {"vault": a["vault"], "kind": a["kind"], "auth_id": int(a["auth_id"]), "added_by": self._sender(),
-                "added_at": now}
+        return {"vault": a["vault"], "kind": a["kind"], "family": family(a["kind"]),
+                "remotes": [remote_of(a["kind"], a["dest_chain"])], "auth_id": int(a["auth_id"]),
+                "added_by": self._sender(), "added_at": now}
+
+    def _list_remote(self, vaults: list, vault: str, kind: str, chain: str) -> None:
+        """The vault's config names this destination: record it as listed."""
+        r = remote_of(kind, chain)
+        for v in vaults:
+            if v["vault"] == vault and family(kind) == v.get("family") and r not in v["remotes"]:
+                v["remotes"].append(r)
 
     def _merge_anchors(self, have: list, more: list) -> typing.Any:
         out = [x for x in have]
@@ -847,6 +1064,8 @@ class BackedByRegistry(gl.contract.Contract):
                 raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
         dests = [self._dest_of(a, now) for a in auths]
         vaults = [self._vault_of(f, now)]
+        for a in auths:
+            self._list_remote(vaults, a["vault"], a["kind"], a["dest_chain"])
         # --- writes
         pid = int(self.n_pairs) + 1
         self.pairs[u64(pid)] = Pair(
@@ -856,7 +1075,7 @@ class BackedByRegistry(gl.contract.Contract):
             dests_json=_canon(dests), vaults_json=_canon(vaults), anchors_json=_canon(anchors),
             registered_by=self._sender(), registered_at=u64(now),
             open_check=u64(0), latest_check=u64(0), latest_time=u64(0), last_bad_time=u64(0), last_monitor_at=u64(0),
-            checks_csv="", bonds_csv="")
+            checks_csv="", bonds_csv="", hist_n=u64(0))
         self.vault_owner[key] = u64(pid)
         for dk in seen:
             self.dest_owner[str(tol) + "|" + dk] = u64(pid)
@@ -891,8 +1110,10 @@ class BackedByRegistry(gl.contract.Contract):
         if anchors is None:
             raise gl.vm.UserError("REFUSED: TOO_MANY_ANCHORS")
         dests.append(self._dest_of(a, now))
+        self._list_remote(vaults, a["vault"], a["kind"], a["dest_chain"])
         # --- writes
         p.dests_json = _canon(dests)
+        p.vaults_json = _canon(vaults)
         p.anchors_json = _canon(anchors)
         p.max_gap_s = u64(self._gap(vaults, dests))
         self.dest_owner[dk] = p.pair_id
@@ -1282,7 +1503,7 @@ class BackedByRegistry(gl.contract.Contract):
                 "dests": self._dests(p), "anchors": json.loads(p.anchors_json), "registered_by": p.registered_by,
                 "registered_at": int(p.registered_at), "last_bad_time": int(p.last_bad_time),
                 "open_check": int(p.open_check), "latest_check": int(p.latest_check), "latest_time": int(p.latest_time),
-                "last_monitor_at": int(p.last_monitor_at),
+                "last_monitor_at": int(p.last_monitor_at), "history_points": int(p.hist_n),
                 "checks": [int(x) for x in p.checks_csv.split(",")] if p.checks_csv != "" else [],
                 "bonds": [int(x) for x in p.bonds_csv.split(",")] if p.bonds_csv != "" else []}
 
@@ -1344,12 +1565,40 @@ class BackedByRegistry(gl.contract.Contract):
         lc = int(p.latest_check)
         if lc == 0:
             return {"found": False, "pair": True, "tolerance_bps": int(p.tolerance_bps),
-                    "last_bad_time": int(p.last_bad_time)}
+                    "last_bad_time": int(p.last_bad_time), "open_check": int(p.open_check),
+                    "source_token": p.source_token,
+                    "dests": [{"chain": d["chain"], "token": d["token"]} for d in self._dests(p)]}
         c = self.checks[u64(lc)]
         r = json.loads(c.ruling1_json) if c.ruling1_json != "" else {}
+        cov = r.get("coverage") or {}
+        por = r.get("por") or {}
         return {"found": True, "pair": True, "check_id": lc, "verdict": c.verdict, "status": c.status,
                 "source_time": int(c.source_time), "final_at": int(c.final_at), "ratio_bps": r.get("ratio_bps", -1),
-                "reason": c.reason, "tolerance_bps": int(p.tolerance_bps), "last_bad_time": int(p.last_bad_time)}
+                "reason": c.reason, "tolerance_bps": int(p.tolerance_bps), "last_bad_time": int(p.last_bad_time),
+                "alert": alert_state(c.verdict, int(r.get("ratio_bps", -1)), int(p.tolerance_bps)),
+                "coverage": cov.get("state", "UNREAD"), "unlisted": cov.get("unlisted") or [],
+                "por": por.get("status", ""), "por_ratio_bps": por.get("por_ratio_bps", -1),
+                "por_delta_bps": por.get("delta_bps", 0), "open_check": int(p.open_check),
+                "source_token": p.source_token,
+                "dests": [{"chain": d["chain"], "token": d["token"]} for d in self._dests(p)]}
+
+    @gl.public.view
+    def get_history(self, pair_id: int, offset: int, limit: int) -> typing.Any:
+        """The pair's FINAL rulings in the order they became final (oldest
+        first), one page; next_offset is -1 after the last page."""
+        p = self.pairs.get(u64(max(_as_int(pair_id, 0), 0)))
+        if p is None:
+            return {"found": False, "total": 0, "points": [], "next_offset": -1}
+        n = int(p.hist_n)
+        o = max(_as_int(offset, 0), 0)
+        lim = min(max(_as_int(limit, 50), 1), MAX_HISTORY_PAGE)
+        out = []
+        i = o
+        while i < n and len(out) < lim:
+            out.append(json.loads(self.history[str(int(p.pair_id)) + "|" + str(i)]))
+            i += 1
+        return {"found": True, "pair_id": int(p.pair_id), "total": n, "offset": o, "points": out,
+                "next_offset": i if i < n else -1}
 
     @gl.public.view
     def get_bond(self, bond_id: int) -> typing.Any:
@@ -1443,4 +1692,6 @@ class BackedByRegistry(gl.contract.Contract):
                 "min_stake": str(int(self.min_stake)), "min_bond": str(int(self.min_bond)),
                 "auth_max_age_s": int(self.auth_max_age_s), "max_gap_s": MAX_GAP_S, "fast_gap_s": FAST_GAP_S, "kind_max_gap_s": KIND_MAX_GAP_S,
                 "max_tolerance_bps": MAX_TOLERANCE_BPS, "bounty_bps": BOUNTY_BPS, "kinds": KINDS,
-                "deposit_kinds": list(DEPOSIT_KINDS), "data_reasons": list(DATA_REASONS)}
+                "deposit_kinds": list(DEPOSIT_KINDS), "data_reasons": list(DATA_REASONS),
+                "alert_margin_bps": ALERT_MARGIN_BPS, "por_max_age_s": POR_MAX_AGE_S, "por_match_bps": POR_MATCH_BPS,
+                "families": {k: family(k) for k in KINDS}}
