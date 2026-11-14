@@ -30,7 +30,28 @@
       "auth_id": 5,
       "auth_tx": "0xe63c15db9d7ca290669e39ff7ae41c4b6417039bc0c630ec63c8b990579b0019",
       "pair_id": 2,
-      "register_tx": "0x2072b2a9da11b25161b060ec23f11c46cce01e4159b897cd07d82eac369521d7"
+      "register_tx": "0x2072b2a9da11b25161b060ec23f11c46cce01e4159b897cd07d82eac369521d7",
+      "blocks": {
+        "ethereum": 26411795,
+        "arbitrum": 524097539
+      },
+      "check_id": 2,
+      "status": "PROVISIONAL",
+      "verdict1": "BACKED",
+      "ratio_bps": 10141,
+      "contest_deadline": 1794664758,
+      "reason": "LOCKED_COVERS_SUPPLY"
+    },
+    "DAI on Arbitrum": {
+      "kind": "arbitrum",
+      "sym": "DAI",
+      "l1": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "l2": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+      "label": "DAI on Arbitrum",
+      "auth_id": 7,
+      "auth_tx": "0xfb5f06c12a00e9d77d3ec9d2cafdae60d71ad0e2d5cbd1ec30280fae4f2f89f1",
+      "pair_id": 3,
+      "register_tx": "0x2db53c13bdbdd1fde37ef24ad3c3f2da4c232d305c527cf3f2a29096d2cb74cc"
     }
   }
 }

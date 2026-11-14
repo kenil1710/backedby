@@ -25,3 +25,12 @@ GenLayer RPC error (sim_estimateTransactionFees): execution failed
 Double check you have provided the correct parameters.
 
 Details: exec)
+  authenticate(["optimism","0x59d1e836f7b7210a978b25a855085cc46fd090b5","0x16d375422a1d6b069c1958848746b97cc053c69e"]) -> FAILED ACCEPTED 11s tx 0x0b6549053a013333eb3e7b9eb42152596e78c4a1652239cdd1515b022c59897a revert: REFUSED: RPC_UNREADABLE
+  ... authenticate optimism: RPC throttled from GenVM (attempt 1), retrying in 105s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["optimism","0x59d1e836f7b7210a978b25a855085cc46fd090b5","0x16d375422a1d6b069c1958848746b97cc053c69e"]) -> FAILED ACCEPTED 18s tx 0xc96abb2fadad1f31a8bb9c0565a66e127c082ed4743d7aa2c492545a13c3f8b3 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate optimism: RPC throttled from GenVM (attempt 2), retrying in 150s

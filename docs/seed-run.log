@@ -14,3 +14,13 @@ RESULT USDC.e on Arbitrum: check 1 PROVISIONAL BACKED ratio_bps 10007
 == WBTC on Arbitrum
   authenticate(["arbitrum","0x2260fac5e5542a773aa44fbcfedf7c193bc2c599","0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"]) -> ok ACCEPTED 24s tx 0xe63c15db9d7ca290669e39ff7ae41c4b6417039bc0c630ec63c8b990579b0019 {"auth_id":5,"dest_decimals":8,"dest_token":"0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":8,"vault":"0xa3a7b6f88361f48403514059f1f16c8e78d60eec"}
   register_pair(["5",0,"WBTC on Arbitrum"]) -> ok ACCEPTED 14s tx 0x2072b2a9da11b25161b060ec23f11c46cce01e4159b897cd07d82eac369521d7 {"destinations":1,"ok":true,"pair_id":2,"vaults":1}
+  monitor([2,"{\"ethereum\":26411795,\"arbitrum\":524097539}"]) -> ok ACCEPTED 14s tx 0xffb16000f02c4b1aea2a3adb16dd2e49678f56e1b59b188a8d525c2d0dd38b44 {"check_id":2,"ok":true}
+  read_check(["0x40dDb09B6bB789562127A829c87Cf361D8012557",2,1]) -> ok ACCEPTED 14s tx 0x7f305d052f455cada862e1c14bd0f59bcfce21826f1c4bd76f9645e05298dd4d {"key":"0x40ddb09b6bb789562127a829c87cf361d8012557|2|1","retry_until":1794650284,"status":"PENDING"}
+  ... read attempt 1 did not record, retrying in 20s
+  read_check(["0x40dDb09B6bB789562127A829c87Cf361D8012557",2,1]) -> ok ACCEPTED 23s tx 0x4eca9665ce755fd59dec070bb5376fd1153810de2ed4103a755bccbf02c4fa61 {"key":"0x40ddb09b6bb789562127a829c87cf361d8012557|2|1","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 14s tx 0x13481f5a1d020681dfc4cd69ebf5521a23a5abe794ec96b30e7d51e4272819b7 {"check_id":2,"contestable_until":1794664758,"ok":true,"ratio_bps":10141,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT WBTC on Arbitrum: check 2 PROVISIONAL BACKED ratio_bps 10141 
+
+== DAI on Arbitrum
+  authenticate(["arbitrum","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> ok ACCEPTED 16s tx 0xfb5f06c12a00e9d77d3ec9d2cafdae60d71ad0e2d5cbd1ec30280fae4f2f89f1 {"auth_id":7,"dest_decimals":18,"dest_token":"0xda10009cbd5d07dd0cecc66161fc93d7c9000da1","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":18,"vault":"0xa10c7ce4b876998858b1a9e12b10092229539400"}
+  register_pair(["7",0,"DAI on Arbitrum"]) -> ok ACCEPTED 14s tx 0x2db53c13bdbdd1fde37ef24ad3c3f2da4c232d305c527cf3f2a29096d2cb74cc {"destinations":1,"ok":true,"pair_id":3,"vaults":1}
