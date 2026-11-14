@@ -44,3 +44,295 @@ Details: exec)
    -> pair 6: WBTC on Arbitrum, with Chainlink PoR (demo)
   authenticate(["wh_arbitrum","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18"]) -> FAILED ACCEPTED 15s tx 0x00de4ffa9b69fe69596c59072c5de765be35eb6e12b9da7b4edcd721379cc4bf revert: REFUSED: RPC_UNREADABLE
   ... authenticate wh_arbitrum: RPC throttled from GenVM (attempt 1), retrying in 105s
+  authenticate(["wh_arbitrum","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18"]) -> ok ACCEPTED 76s tx 0xd0eb0f69c606a2b4f8aa44c7b18999215281da009cee5a31a5e420a24697dc91 {"auth_id":12,"dest_decimals":6,"dest_token":"0xc96f2715e2a242d50d1b0bc923dbe1740b8ecf18","family":"LEDGER","remote":"wh:23","source_decimals":6,"vault":"0x3ee18b2214aff97000d974cf647e7c347e8fa585"}
+  register_pair(["12",0,"USDC through Wormhole (demo)"]) -> ok ACCEPTED 19s tx 0xf46e3f38627a104f889586bf91eddc2bf8d72825cbe18b9c9e2a3519c873dd52 {"destinations":1,"ok":true,"pair_id":7,"vaults":1}
+   -> pair 7: USDC through Wormhole (demo)
+  authenticate(["ccip_base","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee"]) -> FAILED ACCEPTED 28s tx 0x0bc77d8cf46eb506c119f89a8e0120acddf92ffdfd4d07b3e415c83c20d38c06 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate ccip_base: RPC throttled from GenVM (attempt 1), retrying in 105s
+  authenticate(["ccip_base","0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f","0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee"]) -> ok ACCEPTED 22s tx 0xa26259f7eacc05af3294dd56b5579fe45fe6c4140a9a0d969c73a00274934901 {"auth_id":15,"dest_decimals":18,"dest_token":"0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee","family":"CCIP","remote":"ccip:15971525489660198786","source_decimals":18,"vault":"0x06179f7c1be40863405f374e7f5f8806c728660a"}
+GenLayer RPC error (eth_estimateGas): fetch failed
+Gas estimation failed, using default 200_000: UnknownRpcError: An unknown RPC error occurred.
+
+Details: fetch failed
+Version: viem@2.57.7
+    at withRetry.delay.count.count (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/buildRequest.js:127:31)
+    at async attemptRetry (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/promise/withRetry.js:24:30) {
+  details: 'fetch failed',
+  docsPath: undefined,
+  metaMessages: undefined,
+  shortMessage: 'An unknown RPC error occurred.',
+  version: '2.57.7',
+  code: -1,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:14976:13
+      at async Object.request (file:///Users/kenilvakariya/dev/backedby/test/node_modules/genlayer-js/dist/index.js:5724:26)
+      at async withRetry.delay.count.count (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/buildRequest.js:30:24)
+      at async attemptRetry (file:///Users/kenilvakariya/dev/backedby/test/node_modules/viem/_esm/utils/promise/withRetry.js:24:30) {
+    [cause]: Error: read ETIMEDOUT
+        at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
+      errno: -60,
+      code: 'ETIMEDOUT',
+      syscall: 'read'
+    }
+  }
+}
+  register_pair(["15",0,"GHO through CCIP, one destination listed (demo)"]) -> ok ACCEPTED 61s tx 0xac94b8ceadce0ebb54910f82fa922dc8dd3ad9c2678b54ba05283eda02cbb3ec {"destinations":1,"ok":true,"pair_id":8,"vaults":1}
+   -> pair 8: GHO through CCIP, one destination listed (demo)
+
+## 2. A fake pair is refused: Circle's native USDC on OP passed off as the bridge's token  (2026-11-14T08:13:14.891Z)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x0b2c639c533813f4aa9d7837caf62653d097ff85"]) -> FAILED ACCEPTED 41s tx 0x106efaf2ad160853db60a36d461a2d07a21f6ee08b4bdaa59a1e014ea1063892 revert: REFUSED: NOT_AUTHENTICATED: REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN
+   -> refused: REFUSED: NOT_AUTHENTICATED: REMOTE_TOKEN_IS_NOT_THE_SOURCE_TOKEN
+
+## 3. Anyone adds a destination the pair is missing (a second Standard Bridge USDC on OP), with the same proof  (2026-11-14T08:13:57.092Z)
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x130c1dcc9fd997fa02f555dad54edaf553f2555a"]) -> ok ACCEPTED 21s tx 0x92b745e68542a3f178895b81de989f38abea32df7d8e8ad368dbb0564aa0b347 {"auth_id":17,"dest_decimals":18,"dest_token":"0x130c1dcc9fd997fa02f555dad54edaf553f2555a","family":"OPEN","remote":"optimism:optimism","source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+  add_destination([4,17]) -> ok ACCEPTED 14s tx 0xd590692bb01b530ead118951193445ea2cbd9fc4ade731a935508ef252a57302 {"destinations":2,"ok":true,"pair_id":4}
+   -> pair 4 destinations: 0x7f5c764cbc14f9669b88837ca1490cca17c31607/6, 0x130c1dcc9fd997fa02f555dad54edaf553f2555a/18
+   adding the same destination again:
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x130c1dcc9fd997fa02f555dad54edaf553f2555a"]) -> FAILED ACCEPTED 27s tx 0x4ed607ec8ff512784b25e160c9009d5a686f2b7c892b65507a22954880d4ebeb revert: REFUSED: RPC_UNREADABLE
+  ... authenticate optimism: RPC throttled from GenVM (attempt 1), retrying in 105s
+GenLayer RPC error (gen_call): fetch failed
+  … get_config attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (gen_call): fetch failed
+  … get_config attempt 2 hit transient RPC noise, waiting 8s
+  authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x130c1dcc9fd997fa02f555dad54edaf553f2555a"]) -> ok ACCEPTED 23s tx 0xed68de753d67d23cbc713faf1baba68c16532532b64c737f9ba7cbce4ea503ff {"auth_id":18,"dest_decimals":18,"dest_token":"0x130c1dcc9fd997fa02f555dad54edaf553f2555a","family":"OPEN","remote":"optimism:optimism","source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for add_destination (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  add_destination([4,18]) -> FAILED ACCEPTED 12s tx 0x73a93abc286028ca9d26b91aa1144cea11716e061ef796547acc393cf6162436 revert: REFUSED: DESTINATION_ALREADY_IN_PAIR_4
+   -> refused: REFUSED: DESTINATION_ALREADY_IN_PAIR_4
+
+## 4. The operator bonds two pairs as registered  (2026-11-14T08:19:30.344Z)
+  bond([1]) value=50000000000000000 -> ok ACCEPTED 12s tx 0xfa0f54c9b061f440ffea7251b1a4eb0dfa012cb179a245a759a4524e61a0fe83 {"amount":"50000000000000000","bond_id":1,"ok":true,"since":1794644374}
+  bond([2]) value=50000000000000000 -> ok ACCEPTED 12s tx 0xe64b7f2d5e488406ccb199578c87889ac8e567a87f41bdf2c29b2c380fe39676 {"amount":"50000000000000000","bond_id":2,"ok":true,"since":1794644387}
+   -> bond 1 on pair 1, bond 2 on pair 2 (one vault)
+
+## 5. INCONCLUSIVE: a challenge pinned before the bond started is refunded  (2026-11-14T08:19:56.000Z)
+  challenge([1,"{\"ethereum\":26411891,\"arbitrum\":524101195}"]) value=10000000000000000 -> ok ACCEPTED 13s tx 0x82a3f10b955164fd42603824fa809a768a971b47ab78be6606846d79d35829ef {"check_id":1,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",1,1]) -> ok ACCEPTED 21s tx 0xf0a08c0a7728b238ccda4c3ea5792f7acd161d7b77a2ea4402d82857c003bf74 {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|1|1","reason":"","status":"OK"}
+  rule([1]) -> ok ACCEPTED 12s tx 0x2aa2939f63cf91d04f6e00e5970cda233478ed748180d79a070e2afbaa4f2c3f {"check_id":1,"ok":true,"payouts":{"contest_refund":"0","stake_refund":"10000000000000000"},"reason":"SOURCE_BLOCK_BEFORE_THE_BOND_STARTED","status":"INCONCLUSIVE"}
+   -> check 1: INCONCLUSIVE INCONCLUSIVE ratio_bps -1 SOURCE_BLOCK_BEFORE_THE_BOND_STARTED READ_PIN
+
+## 6. Waiting until finalized blocks exist after the bond started (Ethereum finality is ~15-20 min)  (2026-11-14T08:21:15.980Z)
+   ... finalized Ethereum block at 2026-11-14T08:02:35.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:09:35.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:09:35.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:09:35.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:12:59.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:12:59.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:12:59.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:19:47.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:19:47.000Z, bond started 2026-11-14T08:19:55.000Z
+   ... finalized Ethereum block at 2026-11-14T08:19:47.000Z, bond started 2026-11-14T08:19:55.000Z
+
+## 7. Challenge -> BACKED, contested, re-read, upheld: the stakes go into the bond  (2026-11-14T08:42:36.224Z)
+  challenge([1,"{\"ethereum\":26412020,\"arbitrum\":524106193}"]) value=10000000000000000 -> ok ACCEPTED 11s tx 0x369b6c749d0af5e38d774ff1548c9cf475edd72fe145b9ba8a2e3613492ef9d5 {"check_id":2,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",2,1]) -> ok ACCEPTED 22s tx 0x6194b5837f17dc1b6ddc7cb766fa3c346937c263115fc9eb3a5fb6236389f04f {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|2|1","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 20s tx 0x469fecca620eb440154a1c4e6a3a37830896558bdad9535b66359dad80586bf3 {"check_id":2,"contestable_until":1794645892,"ok":true,"ratio_bps":10020,"status":"PROVISIONAL","verdict":"BACKED"}
+   -> check 2: PROVISIONAL BACKED ratio_bps 10020  
+  contest([2]) value=10000000000000000 -> ok ACCEPTED 13s tx 0xbc8b26a1964f618a57465298a41a0997609045aeb27036bc387c689e350c2bfd {"check_id":2,"ok":true,"reread_by":1794646121}
+   -> check 2: CONTESTED BACKED ratio_bps 10020  
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",2,2]) -> ok ACCEPTED 14s tx 0x0e88068614b4638100e8e883fb6c0f06ca9437b9553738db764285443c3ac9bb {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|2|2","reason":"","status":"OK"}
+  rule([2]) -> ok ACCEPTED 14s tx 0xe024d43289f416b490d056094813fb111cd072ab0207661791f95065fb7e513e {"check_id":2,"ok":true,"payouts":{"bond_in":"20000000000000000","bounty":"0","challenger":"0","contest_lost":"10000000000000000","contest_refund":"0","slash":"0","treasury":"0"},"status":"FINAL","verdict":"BACKED"}
+   -> check 2: FINAL BACKED ratio_bps 10020 LOCKED_COVERS_SUPPLY CONTEST_UPHELD_RULING
+   bond 1: {"amount":"70000000000000000","bond_id":1,"closed_at":0,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":1,"since":1794644374,"slashed":"0","status":"ACTIVE","unbond_at":0,"withdrawable_at":0,"won":"20000000000000000"}
+
+## 8. Challenge -> UNDER_BACKED: the USDT pair as registered (PoS predicate only) holds 0.64%; window passes, bond slashed, bounty paid  (2026-11-14T08:44:23.719Z)
+  challenge([2,"{\"ethereum\":26412030,\"polygon\":97292988}"]) value=10000000000000000 -> ok ACCEPTED 12s tx 0x79d42112dbf79c64ebde4fff4ac4e1732f39ced3dbc4eb28d0956a917a821adf {"check_id":3,"ok":true,"stake":"10000000000000000","superseded":0}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",3,1]) -> ok ACCEPTED 23s tx 0x1a2f422fd845eba2c9e6fbbed7c418dff41fb86ae4c4b612f96122e0aad440ff {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|3|1","reason":"","status":"OK"}
+  rule([3]) -> ok ACCEPTED 13s tx 0x5fd89f33234a76b354914756c1dc5c781d534d3377d34691191c4611160dfff0 {"check_id":3,"contestable_until":1794646004,"ok":true,"ratio_bps":0,"status":"PROVISIONAL","verdict":"UNDER_BACKED"}
+   -> check 3: PROVISIONAL UNDER_BACKED ratio_bps 0  
+   ... waiting 89s (contest window)
+  finalize([3]) -> ok ACCEPTED 12s tx 0x06ee232638f95db5f10dd3212194b31d1630e41450e8f49ff731224b54333936 {"check_id":3,"ok":true,"payouts":{"bond_in":"0","bounty":"25000000000000000","challenger":"35000000000000000","contest_lost":"0","contest_refund":"0","slash":"50000000000000000","treasury":"25000000000000000"},"status":
+   -> check 3: FINAL UNDER_BACKED ratio_bps 0 LOCKED_BELOW_SUPPLY WINDOW_PASSED
+   payouts {"bond_in":"0","bounty":"25000000000000000","challenger":"35000000000000000","contest_lost":"0","contest_refund":"0","slash":"50000000000000000","treasury":"25000000000000000"}
+   bond 2: {"amount":"0","bond_id":2,"closed_at":1794646016,"deposited":"50000000000000000","found":true,"open_check":0,"operator":"0x00bb59efe7cd069df92c711ef80908473a36b814","pair_id":2,"since":1794644387,"slashed":"50000000000000000","status":"SLASHED","unbond_at":0,"withdrawable_at":0,"won":"0"}
+
+## 9. The verdict above was about an incomplete pair: anyone adds the missing vault (USDT0's LayerZero adapter)  (2026-11-14T08:47:18.178Z)
+   an unauthenticated vault is refused (Polygon's USDC.e has no OFT):
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_polygon","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x2791bca1f2de4661ed88a30c99a7a9449aa84174"]) -> FAILED ACCEPTED 20s tx 0xb4983e72f66ffbfb3bca89e8c3007149256637d80db3ee33c97ed714e6c90be0 revert: REFUSED: NOT_AUTHENTICATED: OFT_HAS_NO_ETHEREUM_PEER
+   -> refused: REFUSED: NOT_AUTHENTICATED: OFT_HAS_NO_ETHEREUM_PEER
+  authenticate(["oft_polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 23s tx 0x61438700a73ae6f00df851a22a8578ed7fd316687ff658daa2da41fa4e80ce97 {"auth_id":33,"dest_decimals":6,"dest_token":"0xc2132d05d31c914a87c6611c10748aeb04b58e8f","family":"LZ","remote":"lz:30109","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+   adapter derived from the token: 0x6c96de32cea08842dcc4058c14d3aaad7fa41dee
+  add_vault([2,33]) -> ok ACCEPTED 19s tx 0x91b850008eced489590ddc16a5e9ffbe5b0dc4bed6a813a6614bc280119177b0 {"max_gap_s":120,"ok":true,"pair_id":2,"vaults":2}
+   -> pair 2 vaults: ["0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf polygon","0x6c96de32cea08842dcc4058c14d3aaad7fa41dee oft_polygon"], max gap 120s
+   the same vault again:
+  authenticate(["oft_polygon","0xdac17f958d2ee523a2206206994597c13d831ec7","0xc2132d05d31c914a87c6611c10748aeb04b58e8f"]) -> ok ACCEPTED 22s tx 0xcc55c75e555302afd75d78a51b1438bf8ed923299931d3f34b959d24f632282f {"auth_id":34,"dest_decimals":6,"dest_token":"0xc2132d05d31c914a87c6611c10748aeb04b58e8f","family":"LZ","remote":"lz:30109","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for add_vault (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  add_vault([2,34]) -> FAILED ACCEPTED 12s tx 0xf9fd62d9ec344fb742b43779923e28ff5184cebb1e427d9a1b592620c7b030fd revert: REFUSED: VAULT_ALREADY_IN_THIS_PAIR
+   -> refused: REFUSED: VAULT_ALREADY_IN_THIS_PAIR
+   a vault proved only onto a token this pair does not have (USDT0 on Arbitrum):
+  authenticate(["oft_arbitrum","0xdac17f958d2ee523a2206206994597c13d831ec7","0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"]) -> ok ACCEPTED 22s tx 0x03b714814b1e0a790fcce85bf718f1f1b478139bd9f11691692ed7743956db81 {"auth_id":35,"dest_decimals":6,"dest_token":"0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9","family":"LZ","remote":"lz:30110","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for add_vault (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  add_vault([2,35]) -> FAILED ACCEPTED 12s tx 0x55f3b56453db7893a6b1e442c9f6bc178e6b3952d831256f94ecc81954743e0e revert: REFUSED: VAULT_DOES_NOT_BACK_A_DESTINATION_OF_THIS_PAIR
+   -> refused: REFUSED: VAULT_DOES_NOT_BACK_A_DESTINATION_OF_THIS_PAIR
+   the adapter backs USDT0 on every chain it has a peer on: anyone adds each destination two RPCs can read
+GenLayer RPC error (sim_getFeeConfig): fetch failed
+  … authenticate fee attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (eth_gasPrice): fetch failed
+  … authenticate attempt 1 hit transient RPC noise, waiting 4s
+  authenticate(["oft_arbitrum","0xdac17f958d2ee523a2206206994597c13d831ec7","0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"]) -> ok ACCEPTED 156s tx 0x33c1ae3b4fc900504aeeae72d17d1480b57514753f041f4a25a44e3158a9913f {"auth_id":36,"dest_decimals":6,"dest_token":"0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9","family":"LZ","remote":"lz:30110","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,36]) -> ok ACCEPTED 13s tx 0xe0646000c9a60fe42c9feb1f06f24d80012419fbe3e25bf0199c4fbf7b05e680 {"destinations":2,"ok":true,"pair_id":2}
+  authenticate(["oft_optimism","0xdac17f958d2ee523a2206206994597c13d831ec7","0x01bff41798a0bcf287b996046ca68b395dbc1071"]) -> ok ACCEPTED 22s tx 0xcc6f1f50efc546be14988e3ddc8ecf414ca0c78ab30a147c818073893eb2a130 {"auth_id":37,"dest_decimals":6,"dest_token":"0x01bff41798a0bcf287b996046ca68b395dbc1071","family":"LZ","remote":"lz:30111","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,37]) -> ok ACCEPTED 19s tx 0x1012e5a61f099d53934bc0da5e1ef7178ea5969df35fd6aeef17f809b78e1948 {"destinations":3,"ok":true,"pair_id":2}
+  authenticate(["oft_mantle","0xdac17f958d2ee523a2206206994597c13d831ec7","0x779ded0c9e1022225f8e0630b35a9b54be713736"]) -> ok ACCEPTED 35s tx 0x45097fcedc3865954e2cad805476ab4d7c705bdf24f88544014c8499d7cb0409 {"auth_id":38,"dest_decimals":6,"dest_token":"0x779ded0c9e1022225f8e0630b35a9b54be713736","family":"LZ","remote":"lz:30181","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,38]) -> ok ACCEPTED 20s tx 0x228e44369c6e024e731998e23a17a857c9dfae2b6771ef939841f94ef040d3c7 {"destinations":4,"ok":true,"pair_id":2}
+  authenticate(["oft_xlayer","0xdac17f958d2ee523a2206206994597c13d831ec7","0x779ded0c9e1022225f8e0630b35a9b54be713736"]) -> ok ACCEPTED 26s tx 0x13707be1fbb9520c87cf9b9fd28c3579c6b88c4c593baaa8db0837c44dcdcfdb {"auth_id":39,"dest_decimals":6,"dest_token":"0x779ded0c9e1022225f8e0630b35a9b54be713736","family":"LZ","remote":"lz:30274","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,39]) -> ok ACCEPTED 12s tx 0x414feaa5b86c9d6cb6b9ed57e2b20996feded4ec8f700f707b21c0cf0c1b7982 {"destinations":5,"ok":true,"pair_id":2}
+  authenticate(["oft_sei","0xdac17f958d2ee523a2206206994597c13d831ec7","0x9151434b16b9763660705744891fa906f660ecc5"]) -> ok ACCEPTED 31s tx 0x856a6f39f71ddd952db037d04780518c0a96dfc5b728497fa63808b844600bc7 {"auth_id":40,"dest_decimals":6,"dest_token":"0x9151434b16b9763660705744891fa906f660ecc5","family":"LZ","remote":"lz:30280","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,40]) -> ok ACCEPTED 12s tx 0x822f9c1632b2e99b41d0ccd14822377b520cf13372bf1a139f237b5a74cef41c {"destinations":6,"ok":true,"pair_id":2}
+  authenticate(["oft_flare","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> ok ACCEPTED 21s tx 0x58f13d06a776e571fbfe4ec9c0005f5cf84332e8b6da3216f020f8f7edc88120 {"auth_id":41,"dest_decimals":6,"dest_token":"0xe7cd86e13ac4309349f30b3435a9d337750fc82d","family":"LZ","remote":"lz:30295","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,41]) -> ok ACCEPTED 13s tx 0x2ce4903a30826034fd70c6a8559f9f920ac508ec7a142891c812139ab0d4bdf4 {"destinations":7,"ok":true,"pair_id":2}
+  authenticate(["oft_hedera","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe3119e23fc2371d1e6b01775ba312035425a53d6"]) -> ok ACCEPTED 146s tx 0x31db0c14710de3afc866f15017f10e10e1796fa6d27da7eede0dd5c9af3a88f7 {"auth_id":42,"dest_decimals":6,"dest_token":"0x00000000000000000000000000000000009ce723","family":"LZ","remote":"lz:30316","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,42]) -> ok ACCEPTED 13s tx 0x2ba14ae10a001a8701cdaa1dac76bcfbaffde7efda94fcc3c6ae538d7cd7dbc7 {"destinations":8,"ok":true,"pair_id":2}
+  authenticate(["oft_unichain","0xdac17f958d2ee523a2206206994597c13d831ec7","0x9151434b16b9763660705744891fa906f660ecc5"]) -> ok ACCEPTED 98s tx 0x3500c529a83780366abaa387339f12c763c5d83588385184150835e3770550c5 {"auth_id":43,"dest_decimals":6,"dest_token":"0x9151434b16b9763660705744891fa906f660ecc5","family":"LZ","remote":"lz:30320","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,43]) -> ok ACCEPTED 14s tx 0xd1ed6491a7f01410b5d48a3926fe6070fe639913ad5b7d4d94f2da572e8da7aa {"destinations":9,"ok":true,"pair_id":2}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 21s tx 0xa073402acaa13df36b7b75ddff17ac9b9ee9bf23aaf2663b9cf8d0957945d996 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 1), retrying in 105s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 21s tx 0x1f88f7cfb685dc47496eceebc73b03848c4a31954ec23ad2d10bf656d30e8a44 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 2), retrying in 150s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 35s tx 0x0efd813aae2b90b04e343a2341f0d3913c168160573c558d7ea50ab0194cdcc6 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 3), retrying in 195s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 21s tx 0xbfdeeeda83279d8aff57efb10432d498bb29399e92112478fc0321396ee96b6a revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 4), retrying in 240s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 21s tx 0xabc62b810f60f2bb10d1eb00ff842522c48bd0903b293a8616320159049a6aa5 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 5), retrying in 285s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 21s tx 0x07e7d5dc3fc29b38a93c1d94e5b9f569a2b6af25f53ae188d29ca4d109ae915d revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 6), retrying in 330s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 21s tx 0x516604171ba7a1ae8fac5ddef192c2d155d5360833418e36f6bf25bc84a5a403 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 7), retrying in 375s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 15s tx 0xe211b051c0b8c59205e3601be9f6c591af3125f6350678fadcb083c413e9aa70 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 8), retrying in 420s
+GenLayer RPC error (sim_estimateTransactionFees): terminated
+  … write fee simulation failed for authenticate (An unknown RPC error occurred.
+
+Details: terminated
+Version: viem@2.57.7)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 322s tx 0x76c4e1923bf12252b96577833995deb048dcbe609e05dc50ef8307c2005c3591 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 9), retrying in 465s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 22s tx 0x0141a5ba0dc3fb82ba6408145781a4f2704d44a7fd6d7f7ae75c00d93f3c9fc1 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 10), retrying in 480s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 21s tx 0xac17caa6ed795de65ddfed6bebb88d65f355bdf9bd4fd656370058ed4dbeae22 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 11), retrying in 480s
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for authenticate (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  authenticate(["oft_morph","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> FAILED ACCEPTED 26s tx 0x5e5657d5dda7d54e63b3ed49ac3502d681bcefa13cbb888ed2846ee23e82f0c7 revert: REFUSED: RPC_UNREADABLE
+  ... authenticate oft_morph: RPC throttled from GenVM (attempt 12), retrying in 480s
+  authenticate(["oft_ink","0xdac17f958d2ee523a2206206994597c13d831ec7","0x0200c29006150606b650577bbe7b6248f58470c1"]) -> ok ACCEPTED 22s tx 0x5bbd93157bdd50815104d713f3b394b889e25dfe5497992fdf2850d5962c2c48 {"auth_id":61,"dest_decimals":6,"dest_token":"0x0200c29006150606b650577bbe7b6248f58470c1","family":"LZ","remote":"lz:30339","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,61]) -> ok ACCEPTED 14s tx 0x5f03ca210e9ef8332085a396034483f1fdc55010402db46228d97364d3156fbe {"destinations":10,"ok":true,"pair_id":2}
+  authenticate(["oft_berachain","0xdac17f958d2ee523a2206206994597c13d831ec7","0x779ded0c9e1022225f8e0630b35a9b54be713736"]) -> ok ACCEPTED 32s tx 0x20637d14b8214e76150fd938df0c89eaee10c52539dbec757ba6d333c2fa265d {"auth_id":63,"dest_decimals":6,"dest_token":"0x779ded0c9e1022225f8e0630b35a9b54be713736","family":"LZ","remote":"lz:30362","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,63]) -> ok ACCEPTED 19s tx 0x713e739ce4b73abd786a13939529a1642989ae94bcabcc0852286a1bd8b678af {"destinations":11,"ok":true,"pair_id":2}
+  authenticate(["oft_hyperevm","0xdac17f958d2ee523a2206206994597c13d831ec7","0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb"]) -> ok ACCEPTED 30s tx 0x2064a22647063c5832582bb26dafe3da36f40c9d51bdd25602105316e13aab28 {"auth_id":65,"dest_decimals":6,"dest_token":"0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb","family":"LZ","remote":"lz:30367","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,65]) -> ok ACCEPTED 13s tx 0xecd1422d41f8f6571d0bf8a0781028d060083be361cb64bef3ccf1864c17f737 {"destinations":12,"ok":true,"pair_id":2}
+  authenticate(["oft_monad","0xdac17f958d2ee523a2206206994597c13d831ec7","0xe7cd86e13ac4309349f30b3435a9d337750fc82d"]) -> ok ACCEPTED 23s tx 0xb5a78c4867b42f8136adb8d7a3ba797cd13aa2814d9bfc6b1d6e777b40e433b1 {"auth_id":67,"dest_decimals":6,"dest_token":"0xe7cd86e13ac4309349f30b3435a9d337750fc82d","family":"LZ","remote":"lz:30390","source_decimals":6,"vault":"0x6c96de32cea08842dcc4058c14d3aaad7fa41dee"}
+  add_destination([2,67]) -> ok ACCEPTED 20s tx 0xfa65a8c7efb7690cf77d5dd5e65a150ddcecb771aaa69947dd9025b182e14885 {"destinations":13,"ok":true,"pair_id":2}
+   -> pair 2 destinations: polygon, arbitrum, optimism, mantle, xlayer, sei, flare, hedera, unichain, ink, berachain, hyperevm, monad
+  monitor([2,"{\"ethereum\":26412442,\"polygon\":97296292,\"arbitrum\":524122678,\"optimism\":159525565,\"mantle\":103259794,\"xlayer\":75880871,\"sei) -> ok ACCEPTED 23s tx 0x36aa344c84173e9df5f1cf94c66fa68529a2e7f7397cb379700417259d05ca19 {"check_id":4,"ok":true}
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",4,1]) -> ok ACCEPTED 68s tx 0x9c8a8a6bb9bd7cb273eac6b481970ea864606015e6b6bd7fcb3b223209c4baa4 {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|4|1","retry_until":1794652087,"status":"PENDING"}
+  ... read attempt 1: PENDING (1 so far), retrying in 60s
+  read_check(["0xACf1d85bF09a50078ac422A3af69eAe8B10AB384",4,1]) -> ok ACCEPTED 169s tx 0xc899984a9597f7faee944e49c922e5453d4651262d35b9b5f217689c7a1a843c {"key":"0xacf1d85bf09a50078ac422a3af69eae8b10ab384|4|1","reason":"","status":"OK"}
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for rule (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+GenLayer RPC error (eth_getTransactionByHash): fetch failed
+  … rule poll attempt 1 hit transient RPC noise, waiting 2s
+GenLayer RPC error (eth_getTransactionByHash): fetch failed
+  … rule poll attempt 2 hit transient RPC noise, waiting 4s
+GenLayer RPC error (eth_getTransactionByHash): fetch failed
+  … rule poll attempt 3 hit transient RPC noise, waiting 6s
+GenLayer RPC error (eth_getTransactionByHash): fetch failed
+  rule([4]) -> FAILED UNSETTLED 2976s tx 0x94f67fabc151c5f8ca63697eddd103601ad83eb7e256a648877c282f386d08ef revert: never settled in 900s — RPC unreadable for the last 0s, tx may still be in flight
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 1 hit transient RPC noise, waiting 4s
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 2 hit transient RPC noise, waiting 8s
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 3 hit transient RPC noise, waiting 12s
+GenLayer RPC error (gen_call): fetch failed
+  … get_check attempt 4 hit transient RPC noise, waiting 16s
+   -> check 4: OPEN    
+   locked per vault ["66555554711","3569099057402972"]
+   ... waiting 8s (contest window)
+GenLayer RPC error (sim_estimateTransactionFees): execution failed
+  … write fee simulation failed for finalize (Missing or invalid parameters.
+Double check you have provided the correct parameters.
+
+Details: exec)
+  finalize([4]) -> FAILED ACCEPTED 12s tx 0x782d9e40da2c3fcecbc4c90c0cdb40ecfa9e526ab3af4f40bdcc45f1de94cdd5 revert: REFUSED: NOT_PROVISIONAL_OPEN
+   -> check 4: OPEN    
+
+## 10. Monitoring INCONCLUSIVE: pins that break the 10-minute gap rule  (2026-11-14T12:01:19.194Z)
