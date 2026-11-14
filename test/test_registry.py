@@ -1002,7 +1002,7 @@ class StuckStates(Base):
 
 class Gate(Base):
     def gate(self, pid):
-        return self.s.view(self.s.gate, "is_backed", pid, self.s.w.now())
+        return self.s.gate_ask(pid)
 
     def final_monitor(self, pid):
         self.s.w.advance(MON)
@@ -1023,14 +1023,15 @@ class Gate(Base):
         g = self.gate(pid)
         self.assertTrue(g["backed"], g)
         self.s.w.advance(3600)
-        self.assertTrue(self.gate(pid)["reason"].startswith("STALE_"))
+        self.assertTrue(self.gate(pid)["reason"]== "STALE")
 
     def test_provisional_does_not_count(self):
         pid = self.s.pair()
         self.s.after_bond()
         cid = self.s.monitor(pid, self.s.blocks(pid))["check_id"]
         self.provisional(cid)
-        self.assertEqual(self.gate(pid)["reason"], "NEVER_CHECKED")
+        # a PROVISIONAL ruling is not a ruling the gate reads; the open check makes it PENDING
+        self.assertEqual(self.gate(pid)["reason"], "PENDING")
 
     def test_under(self):
         pid = self.s.pair("nomad_usdc")
@@ -1060,8 +1061,8 @@ class Gate(Base):
         bad = self.s.pair("nomad_usdc")
         self.final_monitor(good)
         self.final_monitor(bad)
-        a = self.s.call(self.s.gate, "borrow", good, "1000", "test", sender=F.addr(77))
-        b = self.s.call(self.s.gate, "borrow", bad, "1000", "test", sender=F.addr(77))
+        a = self.s.borrow(good, "1000", "test")
+        b = self.s.borrow(bad, "1000", "test")
         self.assertEqual((a["allowed"], b["allowed"], b["reason"]), (True, False, "UNDER_BACKED"))
         at = self.s.view(self.s.gate, "get_attempts", 0, 10)
         self.assertEqual((at["total"], at["allowed"], at["refused"]), (2, 1, 1))
@@ -1069,10 +1070,10 @@ class Gate(Base):
     def test_borrow_bad_amount(self):
         pid = self.s.pair()
         self.final_monitor(pid)
-        self.assertEqual(self.s.call(self.s.gate, "borrow", pid, "-5", "")["reason"], "BAD_AMOUNT")
+        self.assertEqual(self.s.borrow(pid, "-5", "")["reason"], "BAD_AMOUNT")
 
     def test_borrow_no_pair(self):
-        self.assertEqual(self.s.call(self.s.gate, "borrow", 77, "5", "")["reason"], "NO_SUCH_PAIR")
+        self.assertEqual(self.s.borrow(77, "5", "")["reason"], "NO_SUCH_PAIR")
 
     def test_gate_constructor_bounds(self):
         with self.assertRaises(Exception):

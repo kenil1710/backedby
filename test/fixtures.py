@@ -420,6 +420,21 @@ class Setup:
     def check(self, cid):
         return self.view(self.reg, "get_check", cid)
 
+    def bound(self, pid):
+        """(source token, dest chain, dest token) of the pair's first destination."""
+        p = self.view(self.reg, "get_pair", pid)
+        if not p.get("found"):
+            return (USDC, "arbitrum", ARB_USDC)
+        return (p["source_token"], p["dests"][0]["chain"], p["dests"][0]["token"])
+
+    def gate_ask(self, pid, now=None, gate=None):
+        st, dc, dt = self.bound(pid)
+        return self.view(gate or self.gate, "is_backed", pid, st, dc, dt, self.w.now() if now is None else now)
+
+    def borrow(self, pid, amount="1000", note="test", sender=None):
+        st, dc, dt = self.bound(pid)
+        return self.call(self.gate, "borrow", pid, st, dc, dt, amount, note, sender=sender or addr(77))
+
     def cfg(self):
         return self.view(self.reg, "get_config")
 

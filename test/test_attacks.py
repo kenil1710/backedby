@@ -145,8 +145,8 @@ class H3PairSquatting(Base):
         self.provisional(cid)
         self.s.finalize_after_window(cid)
         self.assertEqual(self.s.check(cid)["verdict"], "BACKED")
-        g = self.s.view(self.s.gate, "is_backed", pid, self.s.w.now())
-        self.assertEqual((g["backed"], g["reason"]), (False, "TOLERANCE_1000BPS_OVER_50BPS"))
+        g = self.s.gate_ask(pid)
+        self.assertEqual((g["backed"], g["reason"]), (False, "TOLERANCE_TOO_WIDE"))
 
     def test_destination_added_per_variant(self):
         a = self.s.auth("optimism", USDC, F.OP_USDC)["auth_id"]
@@ -201,9 +201,9 @@ class M3InFlightDepositFlash(Base):
         self.s.net.balance("ethereum", USDC, F.ARB_GW, 1_100_000 * 10 ** 6)
         c2 = self.final_monitor(pid)
         self.assertEqual(self.s.check(c2)["verdict"], "BACKED")
-        g = self.s.view(self.s.gate, "is_backed", pid, self.s.w.now())
+        g = self.s.gate_ask(pid)
         self.assertFalse(g["backed"])
-        self.assertTrue(g["reason"].startswith("A_RULING_"), g)
+        self.assertTrue(g["reason"] == "RECENT_NOT_BACKED", g)
 
     def test_recovers_once_the_bad_ruling_ages_out(self):
         pid = self.s.pair("arb_usdc")
@@ -212,7 +212,7 @@ class M3InFlightDepositFlash(Base):
         self.s.net.balance("ethereum", USDC, F.ARB_GW, 1_000_000 * 10 ** 6)
         self.s.w.advance(3600)
         self.final_monitor(pid)
-        self.assertTrue(self.s.view(self.s.gate, "is_backed", pid, self.s.w.now())["backed"])
+        self.assertTrue(self.s.gate_ask(pid)["backed"])
 
     def test_data_inconclusive_counts_as_not_backed(self):
         pid = self.s.pair("arb_usdc")
@@ -220,7 +220,7 @@ class M3InFlightDepositFlash(Base):
         self.final_monitor(pid)
         F.data_fault("arbitrum", False)
         self.final_monitor(pid)
-        self.assertTrue(self.s.view(self.s.gate, "is_backed", pid, self.s.w.now())["reason"].startswith("A_RULING_"))
+        self.assertTrue(self.s.gate_ask(pid)["reason"] == "RECENT_NOT_BACKED")
 
     def test_pin_inconclusive_does_not_count(self):
         pid = self.s.pair("arb_usdc")
