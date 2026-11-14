@@ -34,3 +34,6 @@ Double check you have provided the correct parameters.
 Details: exec)
   authenticate(["optimism","0x59d1e836f7b7210a978b25a855085cc46fd090b5","0x16d375422a1d6b069c1958848746b97cc053c69e"]) -> FAILED ACCEPTED 18s tx 0xc96abb2fadad1f31a8bb9c0565a66e127c082ed4743d7aa2c492545a13c3f8b3 revert: REFUSED: RPC_UNREADABLE
   ... authenticate optimism: RPC throttled from GenVM (attempt 2), retrying in 150s
+  authenticate(["optimism","0x59d1e836f7b7210a978b25a855085cc46fd090b5","0x16d375422a1d6b069c1958848746b97cc053c69e"]) -> ok ACCEPTED 15s tx 0xdcac38b28a8a1875b97464ddf33d1a50572b9cb34d080f715571c8f17f95fd6c {"auth_id":9,"dest_decimals":18,"dest_token":"0x16d375422a1d6b069c1958848746b97cc053c69e","family":"OPEN","remote":"optimism:optimism","source_decimals":18,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
+  register_pair(["9",0,"A token bridged to OP on 2026-09-01 (demo)"]) -> ok ACCEPTED 12s tx 0xa8b497ef1081661ad3160621348bd0897f4175e55d1f8dc6db93572f53d058a0 {"destinations":1,"ok":true,"pair_id":5,"vaults":1}
+   -> pair 5: A token bridged to OP on 2026-09-01 (demo)

@@ -24,3 +24,14 @@ RESULT WBTC on Arbitrum: check 2 PROVISIONAL BACKED ratio_bps 10141
 == DAI on Arbitrum
   authenticate(["arbitrum","0x6b175474e89094c44da98b954eedeac495271d0f","0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]) -> ok ACCEPTED 16s tx 0xfb5f06c12a00e9d77d3ec9d2cafdae60d71ad0e2d5cbd1ec30280fae4f2f89f1 {"auth_id":7,"dest_decimals":18,"dest_token":"0xda10009cbd5d07dd0cecc66161fc93d7c9000da1","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":18,"vault":"0xa10c7ce4b876998858b1a9e12b10092229539400"}
   register_pair(["7",0,"DAI on Arbitrum"]) -> ok ACCEPTED 14s tx 0x2db53c13bdbdd1fde37ef24ad3c3f2da4c232d305c527cf3f2a29096d2cb74cc {"destinations":1,"ok":true,"pair_id":3,"vaults":1}
+  monitor([3,"{\"ethereum\":26411795,\"arbitrum\":524097539}"]) -> ok ACCEPTED 14s tx 0xe20c72cf5cd9199a372bff06d1882f90eed3dff4be95023bfc0e3ce55ce19c0b {"check_id":3,"ok":true}
+  read_check(["0x40dDb09B6bB789562127A829c87Cf361D8012557",3,1]) -> ok ACCEPTED 24s tx 0x7bac690df80504422d3dde834c44c7bcfa6f9d5622369946bc304cefae7687ee {"key":"0x40ddb09b6bb789562127a829c87cf361d8012557|3|1","retry_until":1794650417,"status":"PENDING"}
+  ... read attempt 1 did not record, retrying in 20s
+  read_check(["0x40dDb09B6bB789562127A829c87Cf361D8012557",3,1]) -> ok ACCEPTED 27s tx 0x1dd8e00da6e7e765316bb7daa599aa0656f76af12b821e1377a7acf1d329c210 {"key":"0x40ddb09b6bb789562127a829c87cf361d8012557|3|1","reason":"","status":"OK"}
+  rule([3]) -> ok ACCEPTED 13s tx 0x327c1927a5d7fc41e53fc96fc44b7b87d402d9558afb24a9af553ecaf8bef5ea {"check_id":3,"contestable_until":1794664904,"ok":true,"ratio_bps":10000,"status":"PROVISIONAL","verdict":"BACKED"}
+RESULT DAI on Arbitrum: check 3 PROVISIONAL BACKED ratio_bps 10000 
+
+== wstETH on Arbitrum
+  authenticate(["arbitrum","0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0","0x5979d7b546e38e414f7e9822514be443a4800529"]) -> ok ACCEPTED 15s tx 0x9549b60c8a0d723cde9a73569b14470a57fb5fead698f9df47474a401301157c {"auth_id":8,"dest_decimals":18,"dest_token":"0x5979d7b546e38e414f7e9822514be443a4800529","family":"MAPPING","remote":"arbitrum:arbitrum","source_decimals":18,"vault":"0x0f25c1dc2a9922304f2eac71dca9b07e310e8e5a"}
+  register_pair(["8",0,"wstETH on Arbitrum"]) -> ok ACCEPTED 15s tx 0x19c2cfa71fb3ec005e1c61974cbdadcbdd7c13d58f9b97b238104319548537b4 {"destinations":1,"ok":true,"pair_id":4,"vaults":1}
+  monitor([4,"{\"ethereum\":26411795,\"arbitrum\":524097539}"]) -> ok ACCEPTED 15s tx 0x12f174209a1e1f2b5f805ee9a3b7a0842eec8f263a6b6a7ffc42e9267e3b7cb1 {"check_id":4,"ok":true}
