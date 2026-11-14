@@ -116,7 +116,7 @@ Ethereum **1010 to 1414 s** (15). So for a pair with an OFT vault:
   longer than the gap);
 - that amount moves the ratio by `volume_24s / supply`. A pair whose tolerance is at least that share cannot be pushed
   under it by in-flight messages; a pair registered at 0 bps can be, by at most that amount, only when its true ratio
-  is already within that share of 100%. The canonical USDT pair sits near 200%, so it cannot flip, and the patrol pins
+  is already within that share of 100%. The canonical USDT pair sits near 200%, so it cannot flip, and the keeper pins
   blocks seconds apart (gap 0 to 12 s), where no OFT transfer can complete in between.
 
 So with `S >= D` and `S - D <= gap`, transfers in flight through escrow bridges can only make a pair look

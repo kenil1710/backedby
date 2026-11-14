@@ -7,7 +7,7 @@
  *   operator   bonds pairs (seeds and demo)
  *   challenger challenges bonds
  *   contester  contests rulings
- *   patrol     the patrol bot signer (monitoring checks, reads, finalize)
+ *   patrol     drives checks in the demo run (reads, rules, finalize)
  *   seeder     authenticates and registers the canonical pairs
  *   borrower   CollateralGate demo borrower
  *   probe      throwaway GenVM probes

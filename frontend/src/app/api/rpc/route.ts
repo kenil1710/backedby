@@ -101,7 +101,7 @@ const EXTRA_ORIGINS = (process.env.RPC_PROXY_ALLOWED_ORIGINS ?? "")
  *     drain and the runaway client loop, which are what actually happen.
  *
  * The app's own traffic sits far below this: a page load is a handful of reads
- * and the patrol bot does not come through here at all.
+ * and the keeper does not come through here at all.
  * ───────────────────────────────────────────────────────────────────────── */
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX_PER_WINDOW = Number(process.env.RPC_PROXY_RATE_LIMIT ?? 120) || 120;

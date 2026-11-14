@@ -49,3 +49,4 @@ Details: exec)
   ... authenticate optimism: RPC throttled from GenVM (attempt 1), retrying in 105s
   authenticate(["optimism","0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","0x7f5c764cbc14f9669b88837ca1490cca17c31607"]) -> ok ACCEPTED 26s tx 0x7ac8fbc3402dc82cde455e5ae625ad740d3a4773ab8adecab57db0f176a5b7be {"auth_id":11,"dest_decimals":6,"dest_token":"0x7f5c764cbc14f9669b88837ca1490cca17c31607","family":"OPEN","remote":"optimism:optimism","source_decimals":6,"vault":"0x99c9fc46f92e8a1c0dec1b1747d010903e884be1"}
   register_pair(["11",0,"USDC.e on OP Mainnet"]) -> ok ACCEPTED 14s tx 0x052e26f28e9af70ca281e0d941536bb81027ac2553cc6fa3cae24615aa12cfd0 {"destinations":1,"ok":true,"pair_id":5,"vaults":1}
+  monitor([5,"{\"ethereum\":26411790,\"optimism\":159521641}"]) -> ok ACCEPTED 14s tx 0x9d8bc7e2a49122be9fdd09c2b71a47ba493c46a0d597bfb0141bb2af954371da {"check_id":5,"ok":true}

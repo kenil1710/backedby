@@ -1,4 +1,4 @@
-// Minimal JSON-RPC helpers for off-chain scripts (feasibility, patrol, seeds).
+// Minimal JSON-RPC helpers for off-chain scripts (feasibility, keeper, seeds).
 export async function rpc(url, method, params = [], timeout = 20000) {
   const res = await fetch(url, {
     method: "POST", headers: { "content-type": "application/json" },
