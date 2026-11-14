@@ -53,10 +53,12 @@ export function manualAllocation(payee, maxGasPrice) {
 /** Fees for `functionName` on `address` that fund a payout to `payee`. Throws rather than return fees that do not. */
 export async function payoutFees(wallet, { address, functionName = "claim", args = [], payee }) {
   const pick = (e) => ({ distribution: e.distribution, ...(e.messageAllocations ? { messageAllocations: e.messageAllocations } : {}), feeValue: e.feeValue });
-  let est = await wallet.estimateTransactionFeesForWrite({ address, functionName, args, value: 0n });
-  let fees = pick(est);
-  if (payoutFeesProblem(fees, payee)) {
-    const price = big(est.policy?.receiptGasPrice) * 12n / 10n || 300_000_000n;
+  // Studio's write simulation can fail outright for a payout ("execution failed"): then the allocation is built by hand
+  let est = null;
+  try { est = await wallet.estimateTransactionFeesForWrite({ address, functionName, args, value: 0n }); } catch { est = null; }
+  let fees = est ? pick(est) : null;
+  if (!est || payoutFeesProblem(fees, payee)) {
+    const price = big(est?.policy?.receiptGasPrice) * 12n / 10n || 360_000_000n;
     est = await wallet.estimateTransactionFees({ messageAllocations: [manualAllocation(payee, price)] });
     fees = pick(est);
   }
