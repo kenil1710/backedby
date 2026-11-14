@@ -12,5 +12,12 @@ const out = {
   gate: c.CollateralGate.address, gateDemo: c.CollateralGateDemo.address,
   contracts: Object.fromEntries(Object.entries(c).map(([k, v]) => [k, { address: v.address, file: v.file, sha256: v.sha256, bytes: v.bytes, commit: v.commit, deploy_tx: v.deploy_tx, constructor_args: v.constructor_args }])),
 };
-writeFileSync(new URL("../frontend/src/lib/deployments.json", import.meta.url), JSON.stringify(out, null, 2) + "\n");
-console.log("synced", Object.keys(out.contracts).join(", "));
+const target = new URL("../frontend/src/lib/deployments.json", import.meta.url);
+const text = JSON.stringify(out, null, 2) + "\n";
+if (process.argv.includes("--check")) {
+  if (readFileSync(target, "utf8") !== text) { console.error("frontend/src/lib/deployments.json is stale: node tools/sync_addresses.mjs"); process.exit(1); }
+  console.log("frontend addresses match deployments.json");
+} else {
+  writeFileSync(target, text);
+  console.log("synced", Object.keys(out.contracts).join(", "));
+}
